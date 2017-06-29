@@ -1,32 +1,5 @@
-# libuast
-
-## Installation
-
-### 1. Build/Install C++ API
-
-```
-cmake .
-make
-make install
-```
-
-### 2.Install python bindings
-
-```
-## move to bindings
-cd bindings
-cmake .
-make
-make install-python
-```
-
-## Usage
-
-### C++
-
-```c++
 #include <iostream>
-#include <libuast/node.h>
+#include "node.h"
 
 void example()
 {
@@ -76,4 +49,3 @@ int main(int argc, char **argv)
 
   return 0;
 }
-```
