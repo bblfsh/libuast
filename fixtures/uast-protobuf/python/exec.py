@@ -1,0 +1,1 @@
+exec("print 1")
