@@ -1,0 +1,9 @@
+a = 3 # int
+b = 3.14 # float
+c = "somestring" # string
+d = None # None
+e = [1, 2, 3] # list literal
+f = (1, 2, 3) # tuple literal
+g = {1, 2, 3} # set literal
+h = {'a': 1, 'b': 2} # dict literal
+i = a + b - int(d) # expression assignment
