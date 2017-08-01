@@ -8,10 +8,10 @@ set (CMAKE_CXX_STANDARD 11)
 find_package(LibXml2 REQUIRED)
 
 # Source files
-set(libsrc node.cpp roles.cpp)
+set(libsrc uast.cpp roles.cpp)
 
 # Header files
-set(libinclude node.h roles.h)
+set(libinclude uast.h roles.h node_impl.h)
 
 # Include header
 include_directories(
@@ -21,6 +21,7 @@ include_directories(
 # Generate libuast.a static library
 add_library(uast STATIC ${libsrc})
 
+target_link_libraries(uast ${LIBXML2_LIBRARIES})
 set_target_properties(uast PROPERTIES PUBLIC_HEADER "${libinclude}")
 
 # Install static library
@@ -35,8 +36,4 @@ install(
 # Generate executable to test static lib
 ############################################
 
-add_executable(example1.out test.cpp)
-
-target_link_libraries(example1.out
-  uast
-  ${LIBXML2_LIBRARIES})
+add_subdirectory(tests)

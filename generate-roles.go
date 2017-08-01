@@ -18,7 +18,7 @@ static const char *id_to_roles[] = {`)
 
 	for i := 0; i < int(lastRole); i++ {
 		roleID := uast.Role(i)
-		name := "role." + roleID.String()
+		name := "role" + roleID.String()
 		fmt.Printf("    \"%s\",\n", name)
 	}
 	fmt.Println("};")
