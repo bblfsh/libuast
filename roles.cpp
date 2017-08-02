@@ -4,10 +4,9 @@
 
 #include "roles.h"
 
-static const char *no_rule = "role.empty";
-static const char *unknown_rule = "role.unknown";
+static const char *unknown_rule = "roleUnknown";
 static const char *id_to_roles[] = {
-    "roleRole(0)",
+    "roleInvalid",
     "roleSimpleIdentifier",
     "roleQualifiedIdentifier",
     "roleBinaryExpression",
@@ -149,15 +148,11 @@ static const char *id_to_roles[] = {
     "roleDocumentation",
     "roleWhitespace",
 };
-#define TOTAL_ROLES  141
+#define TOTAL_ROLES 141
 
 const char *role_name_for_id(uint16_t id) {
-	if(id == 0) {
-		return no_rule;
-	}
-	if(id >= TOTAL_ROLES) {
-		return unknown_rule;
-	}
-	return id_to_roles[id];
+  if (id >= TOTAL_ROLES) {
+    return unknown_rule;
+  }
+  return id_to_roles[id];
 }
-

@@ -4,12 +4,14 @@
 class Node
 {
 public:
-  Node(std::string i) : internal_type(i) {}
   std::string internal_type;
   std::string token;
 
   std::vector<Node *> children;
   std::vector<uint16_t> roles;
+  std::vector<std::string> properties;
+
+  Node(std::string i) : internal_type(i) {}
 
   void add_child(Node *node)
   {
@@ -20,54 +22,59 @@ public:
   {
     roles.push_back(role);
   }
-
-  std::string as_string()
-  {
-    return internal_type;
-  }
 };
 
-const char *
-get_internal_type(const void *node)
+static const char *get_internal_type(const void *node)
 {
   return ((Node *)node)->internal_type.data();
 }
 
-const char *
-get_token(const void *node)
+static const char *get_token(const void *node)
 {
   return ((Node *)node)->token.data();
 }
 
-int get_children_size(const void *node)
+static int get_children_size(const void *node)
 {
   return ((Node *)node)->children.size();
 }
 
-void *get_child(const void *node, int index)
+static void *get_child(const void *node, int index)
 {
   return ((Node *)node)->children.at(index);
 }
 
-int get_roles_size(const void *node)
+static int get_roles_size(const void *node)
 {
   return ((Node *)node)->roles.size();
 }
 
-uint16_t get_role(const void *node, int index)
+static uint16_t get_role(const void *node, int index)
 {
   return ((Node *)node)->roles.at(index);
 }
 
-UAST get_c_api()
+static int get_properties_size(const void *node)
 {
-  return UAST(NodeImpl{
+  return ((Node *)node)->properties.size();
+}
+
+static const char *get_property(const void *node, int index)
+{
+  return ((Node *)node)->properties.at(index).data();
+}
+
+static NodeAPI get_c_api()
+{
+  return NodeAPI(NodeImpl{
       .internal_type = get_internal_type,
       .token = get_token,
       .children_size = get_children_size,
-      .child = get_child,
+      .children = get_child,
       .roles_size = get_roles_size,
-      .role = get_role,
+      .roles = get_role,
+      .properties_size = get_properties_size,
+      .properties = get_property,
   });
 }
 
@@ -106,7 +113,7 @@ int main(int argc, char **argv)
   auto results = api.find(&root, "/compilation_unit//identifier");
   for (auto node : results)
   {
-    std::cout << ((Node *)node)->as_string() << std::endl;
+    std::cout << ((Node *)node)->internal_type << std::endl;
   }
 
   return 0;

@@ -36,4 +36,4 @@ install(
 # Generate executable to test static lib
 ############################################
 
-add_subdirectory(tests)
+add_subdirectory(examples)
