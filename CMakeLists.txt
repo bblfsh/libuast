@@ -1,17 +1,14 @@
 cmake_minimum_required (VERSION 2.6)
-project (LIBUAST C CXX)
-
-# C++ 11 required
-set (CMAKE_CXX_STANDARD 11)
+project (LIBUAST C)
 
 # Required dependencies
 find_package(LibXml2 REQUIRED)
 
 # Source files
-set(libsrc uast.cpp roles.cpp)
+set(libsrc src/uast.c src/roles.c)
 
 # Header files
-set(libinclude uast.h roles.h node_impl.h)
+set(libinclude src/uast.h src/roles.h src/node-iface.h)
 
 # Include header
 include_directories(

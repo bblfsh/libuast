@@ -1,13 +1,11 @@
 #ifndef _NODE_IMPL
 #define _NODE_IMPL
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdint.h>
 
-typedef struct _nodeImpl {
+// It must be intialized by providing implementations to each of the function
+// pointers, in order to create an node_api.
+typedef struct _node_iface {
   const char *(*internal_type)(const void *);
   const char *(*token)(const void *);
 
@@ -22,10 +20,6 @@ typedef struct _nodeImpl {
   // Properties
   int (*properties_size)(const void *);
   const char *(*properties)(const void *, int);
-} NodeImpl;
-
-#ifdef __cplusplus
-}
-#endif
+} node_iface;
 
 #endif

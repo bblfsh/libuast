@@ -1,9 +1,13 @@
 #include <iostream>
-#include "uast.h"
+#include <string>
+#include <vector>
 
-class Node
-{
-public:
+extern "C" {
+#include "src/uast.h"
+}
+
+class Node {
+ public:
   std::string internal_type;
   std::string token;
 
@@ -13,73 +17,44 @@ public:
 
   Node(std::string i) : internal_type(i) {}
 
-  void add_child(Node *node)
-  {
-    children.push_back(node);
-  }
+  void add_child(Node *node) { children.push_back(node); }
 
-  void add_role(uint16_t role)
-  {
-    roles.push_back(role);
-  }
+  void add_role(uint16_t role) { roles.push_back(role); }
 };
 
-static const char *get_internal_type(const void *node)
-{
+static const char *get_internal_type(const void *node) {
   return ((Node *)node)->internal_type.data();
 }
 
-static const char *get_token(const void *node)
-{
+static const char *get_token(const void *node) {
   return ((Node *)node)->token.data();
 }
 
-static int get_children_size(const void *node)
-{
+static int get_children_size(const void *node) {
   return ((Node *)node)->children.size();
 }
 
-static void *get_child(const void *node, int index)
-{
+static void *get_child(const void *node, int index) {
   return ((Node *)node)->children.at(index);
 }
 
-static int get_roles_size(const void *node)
-{
+static int get_roles_size(const void *node) {
   return ((Node *)node)->roles.size();
 }
 
-static uint16_t get_role(const void *node, int index)
-{
+static uint16_t get_role(const void *node, int index) {
   return ((Node *)node)->roles.at(index);
 }
 
-static int get_properties_size(const void *node)
-{
+static int get_properties_size(const void *node) {
   return ((Node *)node)->properties.size();
 }
 
-static const char *get_property(const void *node, int index)
-{
+static const char *get_property(const void *node, int index) {
   return ((Node *)node)->properties.at(index).data();
 }
 
-static NodeAPI get_c_api()
-{
-  return NodeAPI(NodeImpl{
-      .internal_type = get_internal_type,
-      .token = get_token,
-      .children_size = get_children_size,
-      .children = get_child,
-      .roles_size = get_roles_size,
-      .roles = get_role,
-      .properties_size = get_properties_size,
-      .properties = get_property,
-  });
-}
-
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   auto root = Node("compilation_unit");
   root.add_role(2);
 
@@ -109,12 +84,27 @@ int main(int argc, char **argv)
   // block { loop }
   node6.add_child(&node8);
 
-  auto api = get_c_api();
-  auto results = api.find(&root, "/compilation_unit//identifier");
-  for (auto node : results)
-  {
-    std::cout << ((Node *)node)->internal_type << std::endl;
+  auto api = new_node_api(node_iface{
+      .internal_type = get_internal_type,
+      .token = get_token,
+      .children_size = get_children_size,
+      .children = get_child,
+      .roles_size = get_roles_size,
+      .roles = get_role,
+      .properties_size = get_properties_size,
+      .properties = get_property,
+  });
+
+  find_ctx *ctx = new_find_ctx();
+
+  node_find(api, ctx, &root, "/compilation_unit//identifier");
+  for (int i = 0; i < ctx->len; i++) {
+    Node *node = (Node *)ctx->results[i];
+    std::cout << node->internal_type << std::endl;
   }
+
+  free_find_ctx(ctx);
+  free_node_api(api);
 
   return 0;
 }
