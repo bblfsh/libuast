@@ -4,7 +4,6 @@
 
 #include "roles.h"
 
-static const char *unknown_rule = "roleUnknown";
 static const char *id_to_roles[] = {
     "roleInvalid",
     "roleSimpleIdentifier",
@@ -152,7 +151,7 @@ static const char *id_to_roles[] = {
 
 const char *role_name_for_id(uint16_t id) {
   if (id >= TOTAL_ROLES) {
-    return unknown_rule;
+    return 0;
   }
   return id_to_roles[id];
 }

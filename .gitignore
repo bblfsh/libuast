@@ -39,3 +39,7 @@ Makefile
 install_manifest.txt
 *.pyc
 .vscode
+Testing
+CTestTestfile.cmake
+testing_exec
+example1

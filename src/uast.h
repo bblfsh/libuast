@@ -40,6 +40,8 @@ void free_node_api(node_api *api);
 // `free_find_ctx()`
 find_ctx *new_find_ctx();
 
+int find_ctx_set_len(find_ctx *ctx, int len);
+
 // Releases all the memory used by a find_ctx
 void free_find_ctx(find_ctx *ctx);
 

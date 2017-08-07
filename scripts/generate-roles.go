@@ -12,7 +12,6 @@ func main() {
 
 #include "roles.h"
 
-static const char *unknown_rule = "roleUnknown";
 static const char *id_to_roles[] = {`)
 
 	for i := 0; i < int(lastRole); i++ {
@@ -32,7 +31,7 @@ static const char *id_to_roles[] = {`)
 	fmt.Println(`
 const char *role_name_for_id(uint16_t id) {
   if (id >= TOTAL_ROLES) {
-    return unknown_rule;
+    return 0;
   }
   return id_to_roles[id];
 }`)

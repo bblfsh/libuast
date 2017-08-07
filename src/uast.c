@@ -16,7 +16,7 @@ static xmlNodePtr create_xml_node(node_api *api, void *node,
 
   // Token
   const char *token = GET(node, token);
-  if (!token) {
+  if (token) {
     xmlNewProp(xmlNode, BAD_CAST("token"), BAD_CAST(token));
   }
 
@@ -24,7 +24,10 @@ static xmlNodePtr create_xml_node(node_api *api, void *node,
   int roles_size = GET(node, roles_size);
   for (int i = 0; i < roles_size; i++) {
     uint16_t role = GET(node, roles, i);
-    xmlNewProp(xmlNode, BAD_CAST(role_name_for_id(role)), NULL);
+    const char *role_name = role_name_for_id(role);
+    if (role_name != NULL) {
+      xmlNewProp(xmlNode, BAD_CAST(role_name), NULL);
+    }
   }
 
   // Recursivelly visit all children
@@ -66,9 +69,9 @@ void free_find_ctx(find_ctx *ctx) {
   free(ctx);
 }
 
-int find_ctx_resize(find_ctx *ctx, int len) {
+int find_ctx_set_len(find_ctx *ctx, int len) {
   if (len > ctx->cap) {
-    ctx->results = realloc(ctx->results, len);
+    ctx->results = realloc(ctx->results, len * sizeof(void *));
     if (ctx->results == NULL) {
       ctx->cap = ctx->len = 0;
       return -1;
@@ -96,7 +99,7 @@ int node_find(node_api *api, find_ctx *ctx, void *node, const char *query) {
   xmlNodePtr *nodes = result->nodeTab;
   int size = (result) ? result->nodeNr : 0;
 
-  find_ctx_resize(ctx, size);
+  find_ctx_set_len(ctx, size);
 
   // Populate array of results
   for (int i = 0; i < size; i++) {

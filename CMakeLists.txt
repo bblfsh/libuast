@@ -30,7 +30,15 @@ install(
 )
 
 ############################################
-# Generate executable to test static lib
+# Generate executable to example the static lib
 ############################################
 
 add_subdirectory(examples)
+
+
+############################################
+# Generate executable to test libuast
+############################################
+
+enable_testing()
+add_subdirectory(tests)
