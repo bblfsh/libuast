@@ -20,7 +20,7 @@ static xmlNodePtr create_xml_node(node_api *api, void *node,
     xmlNewProp(xmlNode, BAD_CAST("token"), BAD_CAST(token));
   }
 
-  // Token
+  // Roles
   int roles_size = GET(node, roles_size);
   for (int i = 0; i < roles_size; i++) {
     uint16_t role = GET(node, roles, i);
