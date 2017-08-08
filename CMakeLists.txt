@@ -7,10 +7,18 @@ set(CMAKE_C_STANDARD 99)
 find_package(LibXml2 REQUIRED)
 
 # Source files
-set(libsrc src/uast.c src/roles.c)
+set(libsrc
+  ${CMAKE_CURRENT_BINARY_DIR}/src/uast.c
+  ${CMAKE_CURRENT_BINARY_DIR}/src/roles.c)
 
 # Header files
-set(libinclude src/uast.h src/roles.h src/node-iface.h)
+set(libinclude
+  ${CMAKE_CURRENT_BINARY_DIR}/src/uast.h
+  ${CMAKE_CURRENT_BINARY_DIR}/src/roles.h
+  ${CMAKE_CURRENT_BINARY_DIR}/src/node-iface.h)
+
+# Dependencies
+set(libdep ${LIBXML2_LIBRARIES})
 
 # Include headers
 include_directories(
@@ -19,7 +27,7 @@ include_directories(
 
 # Generate libuast.a static library
 add_library(uast STATIC ${libsrc})
-target_link_libraries(uast ${LIBXML2_LIBRARIES})
+target_link_libraries(uast ${libdep})
 set_target_properties(uast PROPERTIES PUBLIC_HEADER "${libinclude}")
 
 # Install static library

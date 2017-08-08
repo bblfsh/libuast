@@ -5,9 +5,8 @@ enable_testing()
 
 include_directories(. ../src ${CHECK_INCLUDE_DIRS})
 
-add_executable(testing_exec main.cpp)
-target_link_libraries(testing_exec
-  uast
-  cunit
-)
+add_definitions(-DTESTING)
+add_executable(testing_exec main.cpp ../src/testing-tools.c ${libsrc})
+target_link_libraries(testing_exec cunit ${libdep})
+
 add_test(testing_exec ${CMAKE_CURRENT_BINARY_DIR}/testing_exec)

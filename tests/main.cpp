@@ -33,8 +33,28 @@ int main() {
   ADD_TEST(pSuite, "test of node_find() counting", testNodeFindCount);
   ADD_TEST(pSuite, "test of node_find() with tokens", testNodeFindToken);
 
+  ADD_TEST(pSuite, "test wrong xpath in new_node_api()", testWrongXpath);
+
+  ADD_TEST(pSuite, "test failing new_node_api() (bad calloc)",
+           testFailingNewNodeApi);
+  ADD_TEST(pSuite, "test failing new_find_ctx() (bad calloc)",
+           testFailingNewFindContext);
+  ADD_TEST(pSuite, "test failing node_find() (bad xmlNewDoc)",
+           testFailingNewXMLDoc);
+  ADD_TEST(pSuite, "test failing node_find() (bad xmlNewNode)",
+           testFailingNewXMLNode);
+  ADD_TEST(pSuite, "test failing node_find() (bad xmlNewProc)",
+           testFailingNewXMLProc);
+  ADD_TEST(pSuite, "test failing node_find() (bad xmlAddChild)",
+           testFailingXMLAddChild);
+  ADD_TEST(pSuite, "test failing node_find() (bad xmlNewContext)",
+           testFailingNewXMLContext);
+  ADD_TEST(pSuite, "test failing node_find() (bad find_ctx_set_len)",
+           testFailingCtxSetLen);
+
   /* Run all tests using the CUnit Basic interface */
   CU_basic_set_mode(CU_BRM_VERBOSE);
+  CU_set_error_action(CUEA_ABORT);
   CU_basic_run_tests();
   CU_pRunSummary summary = CU_get_run_summary();
   unsigned int exitValue = summary->nTestsFailed + summary->nAssertsFailed;

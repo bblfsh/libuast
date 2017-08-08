@@ -2,10 +2,16 @@
 
 ## Installation
 
-### 1. Build/Install C++ API
+### Build/Install C API
 
 ```
 cmake .
 make
 make install
+```
+
+### Run the tests
+
+```
+make test
 ```

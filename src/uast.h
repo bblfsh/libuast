@@ -28,8 +28,7 @@ typedef struct _node_api { node_iface impl; } node_api;
 // This architecture allows libuast to run his algoritms on top of nodes
 // implemented in other languages (like Python or Go).
 //
-// Checkout examples/example1.cpp for a C++ example of a valid node
-// implementation or the client-python bindings for python:
+// // It returns NULL if the find_ctx could not be allocated sucessfully.
 node_api *new_node_api(node_iface impl);
 
 // Releases all the memory used by the node_api
@@ -38,10 +37,13 @@ void free_node_api(node_api *api);
 // Creates a new find context that might be used by `node_find()` to store the
 // results. Once you are done using it, it should be released by using
 // `free_find_ctx()`
+//
+// It returns NULL if the find_ctx could not be allocated sucessfully.
 find_ctx *new_find_ctx();
 
 // Mostly used internally by the library it sets the lengths of an find_ctx and
 // allocated the needed memory in the results array if needed.
+// It returns 0 if the length was changed correctly.
 int find_ctx_set_len(find_ctx *ctx, int len);
 
 // Releases all the memory used by a find_ctx
@@ -70,6 +72,9 @@ void free_find_ctx(find_ctx *ctx);
 // ```
 // <NumLiteral token="2" roleLiteral roleSimpleIdentifier></NumLiteral>
 // ```
+//
+// It returns 0 if the find query worked correctly, even if it returns 0
+// results.
 int node_find(node_api *api, find_ctx *ctx, void *node, const char *query);
 
 #endif
