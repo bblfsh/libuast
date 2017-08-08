@@ -97,14 +97,14 @@ int main(int argc, char **argv) {
 
   find_ctx *ctx = new_find_ctx();
 
-  if (node_find(api, ctx, &root, "/compilation_unit//identifier") != 0) {
+  if (node_api_find(api, ctx, &root, "/compilation_unit//identifier") != 0) {
     std::cerr << "libuast.find() failed" << std::endl;
     return -1;
   }
 
   // Iterate over results and print them to stdout
-  for (int i = 0; i < ctx->len; i++) {
-    Node *node = (Node *)ctx->results[i];
+  for (int i = 0; i < find_ctx_get_len(ctx); i++) {
+    Node *node = (Node *)find_ctx_get(ctx, i);
     std::cout << node->internal_type << std::endl;
   }
 

@@ -7,7 +7,17 @@
 #include "testing-tools.h"
 
 #define GET(__NODE__, __PROP__, ...) \
-  (api->impl.__PROP__(__NODE__, ##__VA_ARGS__))
+  (api->iface.__PROP__(__NODE__, ##__VA_ARGS__))
+
+struct _node_api {
+  node_iface iface;
+};
+
+struct _find_ctx {
+  void **results;
+  int len;
+  int cap;
+};
 
 static xmlNodePtr create_xml_node(node_api *api, void *node,
                                   xmlNodePtr parent) {
@@ -77,21 +87,6 @@ static xmlDocPtr create_document(node_api *api, void *node) {
 //////// PUBLIC API /////////
 //////////////////////////////
 
-node_api *new_node_api(node_iface iface) {
-  node_api *api = calloc(1, sizeof(node_api));
-  if (!api) {
-    return NULL;
-  }
-  xmlInitParser();
-  api->impl = iface;
-  return api;
-}
-
-void free_node_api(node_api *api) {
-  free(api);
-  xmlCleanupParser();
-}
-
 find_ctx *new_find_ctx() { return calloc(1, sizeof(find_ctx)); }
 
 void free_find_ctx(find_ctx *ctx) {
@@ -114,7 +109,35 @@ int find_ctx_set_len(find_ctx *ctx, int len) {
   return 0;
 }
 
-int node_find(node_api *api, find_ctx *ctx, void *node, const char *query) {
+int find_ctx_get_len(const find_ctx *ctx) { return ctx->len; }
+int find_ctx_get_cap(const find_ctx *ctx) { return ctx->cap; }
+void **find_ctx_get_results(const find_ctx *ctx) { return ctx->results; }
+
+void *find_ctx_get(const find_ctx *ctx, unsigned int index) {
+  if (index < ctx->len) {
+    return ctx->results[index];
+  }
+  return NULL;
+}
+
+node_api *new_node_api(node_iface iface) {
+  node_api *api = calloc(1, sizeof(node_api));
+  if (!api) {
+    return NULL;
+  }
+  xmlInitParser();
+  api->iface = iface;
+  return api;
+}
+
+void free_node_api(node_api *api) {
+  free(api);
+  xmlCleanupParser();
+}
+
+node_iface node_api_get_iface(const node_api *api) { return api->iface; }
+
+int node_api_find(node_api *api, find_ctx *ctx, void *node, const char *query) {
   int ret = 0;
   xmlDocPtr doc = NULL;
   xmlXPathContextPtr xpathCtx = NULL;

@@ -6,19 +6,14 @@
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 
+#include "find-ctx.h"
 #include "node-iface.h"
-
-typedef struct _find_ctx {
-  void **results;
-  int len;
-  int cap;
-} find_ctx;
 
 // node_api stores all general context required for calling the libuast's api
 // It must be initialized with `new_node_api(node_iface)` passing a valid
 // implementation of the interface
 // Once it is not used anymore, it shall be released by using `free_node_api()`
-typedef struct _node_api { node_iface impl; } node_api;
+typedef struct _node_api node_api;
 
 // NodeAPI needs a node implementation in other to work. This is needed
 // because the data structure of the node itself is not defined by this
@@ -28,26 +23,14 @@ typedef struct _node_api { node_iface impl; } node_api;
 // This architecture allows libuast to run his algoritms on top of nodes
 // implemented in other languages (like Python or Go).
 //
-// // It returns NULL if the find_ctx could not be allocated sucessfully.
+// It returns NULL if the find_ctx could not be allocated sucessfully.
 node_api *new_node_api(node_iface impl);
 
 // Releases all the memory used by the node_api
 void free_node_api(node_api *api);
 
-// Creates a new find context that might be used by `node_find()` to store the
-// results. Once you are done using it, it should be released by using
-// `free_find_ctx()`
-//
-// It returns NULL if the find_ctx could not be allocated sucessfully.
-find_ctx *new_find_ctx();
-
-// Mostly used internally by the library it sets the lengths of an find_ctx and
-// allocated the needed memory in the results array if needed.
-// It returns 0 if the length was changed correctly.
-int find_ctx_set_len(find_ctx *ctx, int len);
-
-// Releases all the memory used by a find_ctx
-void free_find_ctx(find_ctx *ctx);
+// Returns the node_iface used by the node_api
+node_iface node_api_get_iface(const node_api *api);
 
 // Returns the list of native root nodes that satisfy the xpath query.
 // It will return an empty vector if non node matches the query.
@@ -75,6 +58,6 @@ void free_find_ctx(find_ctx *ctx);
 //
 // It returns 0 if the find query worked correctly, even if it returns 0
 // results.
-int node_find(node_api *api, find_ctx *ctx, void *node, const char *query);
+int node_api_find(node_api *api, find_ctx *ctx, void *node, const char *query);
 
 #endif

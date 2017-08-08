@@ -29,9 +29,9 @@ int main() {
   ADD_TEST(pSuite, "test of role_name_for_id()", testRoles);
   ADD_TEST(pSuite, "test of new_node_api()", testNewNode);
   ADD_TEST(pSuite, "test of new_find_ctx()", testFindContext);
-  ADD_TEST(pSuite, "test of node_find() pointers", testNodeFindPointers);
-  ADD_TEST(pSuite, "test of node_find() counting", testNodeFindCount);
-  ADD_TEST(pSuite, "test of node_find() with tokens", testNodeFindToken);
+  ADD_TEST(pSuite, "test of node_api_find() pointers", testNodeFindPointers);
+  ADD_TEST(pSuite, "test of node_api_find() counting", testNodeFindCount);
+  ADD_TEST(pSuite, "test of node_api_find() with tokens", testNodeFindToken);
 
   ADD_TEST(pSuite, "test wrong xpath in new_node_api()", testWrongXpath);
 
@@ -39,17 +39,17 @@ int main() {
            testFailingNewNodeApi);
   ADD_TEST(pSuite, "test failing new_find_ctx() (bad calloc)",
            testFailingNewFindContext);
-  ADD_TEST(pSuite, "test failing node_find() (bad xmlNewDoc)",
+  ADD_TEST(pSuite, "test failing node_api_find() (bad xmlNewDoc)",
            testFailingNewXMLDoc);
-  ADD_TEST(pSuite, "test failing node_find() (bad xmlNewNode)",
+  ADD_TEST(pSuite, "test failing node_api_find() (bad xmlNewNode)",
            testFailingNewXMLNode);
-  ADD_TEST(pSuite, "test failing node_find() (bad xmlNewProc)",
+  ADD_TEST(pSuite, "test failing node_api_find() (bad xmlNewProc)",
            testFailingNewXMLProc);
-  ADD_TEST(pSuite, "test failing node_find() (bad xmlAddChild)",
+  ADD_TEST(pSuite, "test failing node_api_find() (bad xmlAddChild)",
            testFailingXMLAddChild);
-  ADD_TEST(pSuite, "test failing node_find() (bad xmlNewContext)",
+  ADD_TEST(pSuite, "test failing node_api_find() (bad xmlNewContext)",
            testFailingNewXMLContext);
-  ADD_TEST(pSuite, "test failing node_find() (bad find_ctx_set_len)",
+  ADD_TEST(pSuite, "test failing node_api_find() (bad find_ctx_set_len)",
            testFailingCtxSetLen);
 
   /* Run all tests using the CUnit Basic interface */
