@@ -12,20 +12,19 @@ extern "C" {
   }
 
 int main() {
-  /* initialize the CUnit test registry */
+  // initialize the CUnit test registry
   if (CUE_SUCCESS != CU_initialize_registry()) {
     return CU_get_error();
   }
 
-  /* add a suite to the registry */
+  // add a suite to the registry
   CU_pSuite pSuite = CU_add_suite("Suite_1", NULL, NULL);
   if (pSuite == NULL) {
     CU_cleanup_registry();
     return CU_get_error();
   }
 
-  /* add the tests to the suite */
-  /* NOTE - ORDER IS IMPORTANT */
+  // add the tests to the suite
   ADD_TEST(pSuite, "test of role_name_for_id()", testRoles);
   ADD_TEST(pSuite, "test of new_node_api()", testNewNode);
   ADD_TEST(pSuite, "test of new_find_ctx()", testFindContext);
@@ -52,7 +51,7 @@ int main() {
   ADD_TEST(pSuite, "test failing node_api_find() (bad find_ctx_set_len)",
            testFailingCtxSetLen);
 
-  /* Run all tests using the CUnit Basic interface */
+  // run all tests using the CUnit Basic interface
   CU_basic_set_mode(CU_BRM_VERBOSE);
   CU_set_error_action(CUEA_ABORT);
   CU_basic_run_tests();

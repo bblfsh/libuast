@@ -9,6 +9,8 @@ extern "C" {
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "private.h"
 #include "roles.h"
 #include "testing-tools.h"
 #include "uast.h"

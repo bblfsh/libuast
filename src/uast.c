@@ -19,72 +19,11 @@ struct _find_ctx {
   int cap;
 };
 
-static xmlNodePtr create_xml_node(node_api *api, void *node,
-                                  xmlNodePtr parent) {
-  const char *internal_type = GET(node, internal_type);
-  xmlNodePtr xmlNode = xmlNewNode(NULL, BAD_CAST(internal_type));
-  if (!xmlNode) {
-    goto error;
-  }
-
-  xmlNode->_private = node;
-  if (parent) {
-    if (!xmlAddChild(parent, xmlNode)) {
-      goto error;
-    }
-  }
-
-  // Token
-  const char *token = GET(node, token);
-  if (token) {
-    if (!xmlNewProp(xmlNode, BAD_CAST("token"), BAD_CAST(token))) {
-      goto error;
-    }
-  }
-
-  // Roles
-  int roles_size = GET(node, roles_size);
-  for (int i = 0; i < roles_size; i++) {
-    uint16_t role = GET(node, roles, i);
-    const char *role_name = role_name_for_id(role);
-    if (role_name != NULL) {
-      if (!xmlNewProp(xmlNode, BAD_CAST(role_name), NULL)) {
-        goto error;
-      }
-    }
-  }
-
-  // Recursivelly visit all children
-  int children_size = GET(node, children_size);
-  for (int i = 0; i < children_size; i++) {
-    void *child = GET(node, children, i);
-    if (!create_xml_node(api, child, xmlNode)) {
-      goto error;
-    }
-  }
-  return xmlNode;
-
-error:
-  xmlFreeNode(xmlNode);
-  return NULL;
-}
-
-static xmlDocPtr create_document(node_api *api, void *node) {
-  xmlDocPtr doc = xmlNewDoc(BAD_CAST("1.0"));
-  if (!doc) {
-    return NULL;
-  }
-  xmlNodePtr xmlNode = create_xml_node(api, node, NULL);
-  if (!xmlNode) {
-    xmlFreeDoc(doc);
-    return NULL;
-  }
-  xmlDocSetRootElement(doc, xmlNode);
-  return doc;
-}
+static xmlDocPtr create_document(node_api *api, void *node);
+static xmlNodePtr create_xml_node(node_api *api, void *node, xmlNodePtr parent);
 
 //////////////////////////////
-//////// PUBLIC API /////////
+///////// PUBLIC API /////////
 //////////////////////////////
 
 find_ctx *new_find_ctx() { return calloc(1, sizeof(find_ctx)); }
@@ -110,8 +49,6 @@ int find_ctx_set_len(find_ctx *ctx, int len) {
 }
 
 int find_ctx_get_len(const find_ctx *ctx) { return ctx->len; }
-int find_ctx_get_cap(const find_ctx *ctx) { return ctx->cap; }
-void **find_ctx_get_results(const find_ctx *ctx) { return ctx->results; }
 
 void *find_ctx_get(const find_ctx *ctx, unsigned int index) {
   if (index < ctx->len) {
@@ -185,4 +122,76 @@ end:
     find_ctx_set_len(ctx, 0);
   }
   return ret;
+}
+
+//////////////////////////////
+///////// PRIVATE API ////////
+//////////////////////////////
+
+int find_ctx_get_cap(const find_ctx *ctx) { return ctx->cap; }
+
+void **find_ctx_get_results(const find_ctx *ctx) { return ctx->results; }
+
+static xmlNodePtr create_xml_node(node_api *api, void *node,
+                                  xmlNodePtr parent) {
+  const char *internal_type = GET(node, internal_type);
+  xmlNodePtr xmlNode = xmlNewNode(NULL, BAD_CAST(internal_type));
+  if (!xmlNode) {
+    goto error;
+  }
+
+  xmlNode->_private = node;
+  if (parent) {
+    if (!xmlAddChild(parent, xmlNode)) {
+      goto error;
+    }
+  }
+
+  // Token
+  const char *token = GET(node, token);
+  if (token) {
+    if (!xmlNewProp(xmlNode, BAD_CAST("token"), BAD_CAST(token))) {
+      goto error;
+    }
+  }
+
+  // Roles
+  int roles_size = GET(node, roles_size);
+  for (int i = 0; i < roles_size; i++) {
+    uint16_t role = GET(node, roles, i);
+    const char *role_name = role_name_for_id(role);
+    if (role_name != NULL) {
+      if (!xmlNewProp(xmlNode, BAD_CAST(role_name), NULL)) {
+        goto error;
+      }
+    }
+  }
+
+  // Recursivelly visit all children
+  int children_size = GET(node, children_size);
+  for (int i = 0; i < children_size; i++) {
+    void *child = GET(node, children, i);
+    if (!create_xml_node(api, child, xmlNode)) {
+      goto error;
+    }
+  }
+  return xmlNode;
+
+error:
+  xmlFreeNode(xmlNode);
+  return NULL;
+}
+
+static xmlDocPtr create_document(node_api *api, void *node) {
+  xmlDocPtr doc = xmlNewDoc(BAD_CAST("1.0"));
+  if (!doc) {
+    return NULL;
+  }
+  xmlNodePtr xmlNode = create_xml_node(api, node, NULL);
+  if (!xmlNode) {
+    xmlFreeDoc(doc);
+    return NULL;
+  }
+  xmlDocSetRootElement(doc, xmlNode);
+  return doc;
 }

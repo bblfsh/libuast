@@ -1,5 +1,5 @@
-#ifndef _NODE_API
-#define _NODE_API
+#ifndef LUAST_SRC_NODE_API_H_
+#define LUAST_SRC_NODE_API_H_
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -60,4 +60,4 @@ node_iface node_api_get_iface(const node_api *api);
 // results.
 int node_api_find(node_api *api, find_ctx *ctx, void *node, const char *query);
 
-#endif
+#endif  // LUAST_SRC_NODE_API_H_
