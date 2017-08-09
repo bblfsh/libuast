@@ -30,3 +30,16 @@
 *.exe
 *.out
 *.app
+
+# Auxiliar build files
+CMakeFiles
+cmake_install.cmake
+CMakeCache.txt
+Makefile
+install_manifest.txt
+*.pyc
+.vscode
+Testing
+CTestTestfile.cmake
+testing_exec
+example1
