@@ -1,50 +1,74 @@
 cmake_minimum_required (VERSION 2.6)
 cmake_policy(SET CMP0048 NEW)
 project (LIBUAST
-  VERSION 1.4.0
+  VERSION 0.0.0
   LANGUAGES C)
 
 set(CMAKE_C_STANDARD 99)
 
+set(OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/lib")
+
 # Required dependencies
 find_package(LibXml2 REQUIRED)
 
+# Library name
+set(libname uast)
+
 # Source files
 set(libsrc
-  ${CMAKE_CURRENT_BINARY_DIR}/src/uast.c
-  ${CMAKE_CURRENT_BINARY_DIR}/src/roles.c)
+  ${CMAKE_SOURCE_DIR}/src/uast.c
+  ${CMAKE_SOURCE_DIR}/src/roles.c)
 
 # Header files
 set(libinclude
-  ${CMAKE_CURRENT_BINARY_DIR}/src/uast.h
-  ${CMAKE_CURRENT_BINARY_DIR}/src/roles.h
-  ${CMAKE_CURRENT_BINARY_DIR}/src/node-iface.h
-  ${CMAKE_CURRENT_BINARY_DIR}/src/find-ctx.h)
+  ${CMAKE_SOURCE_DIR}/src/uast.h
+  ${CMAKE_SOURCE_DIR}/src/roles.h
+  ${CMAKE_SOURCE_DIR}/src/node-iface.h
+  ${CMAKE_SOURCE_DIR}/src/find-ctx.h)
 
 # Dependencies
 set(libdep ${LIBXML2_LIBRARIES})
+link_directories(${OUTPUT_PATH})
 
 # Include headers
 include_directories(
   ${LIBXML2_INCLUDE_DIR}
-  ${CMAKE_BINARY_DIR})
+  ${CMAKE_SOURCE_DIR})
 
-# Generate libuast.a static library
-add_library(uast STATIC ${libsrc})
-target_link_libraries(uast ${libdep})
-set_target_properties(uast PROPERTIES PUBLIC_HEADER "${libinclude}")
+# Compile objects (then used by .a and .so)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+add_library(objlib OBJECT ${libsrc})
 
-# Install static library
+# Link static library
+set(libstatic "${libname}-static")
+add_library(${libstatic} STATIC $<TARGET_OBJECTS:objlib>)
+target_link_libraries(${libstatic} ${libdep})
+set_target_properties(${libstatic} PROPERTIES
+  PUBLIC_HEADER "${libinclude}"
+  OUTPUT_NAME ${libname}
+  ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_PATH}
+  LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_PATH}
+  RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_PATH})
+
+# Link shared library
+set(libshared "${libname}-shared")
+add_library(${libshared} SHARED $<TARGET_OBJECTS:objlib>)
+target_link_libraries(${libshared} ${libdep})
+set_target_properties(${libshared} PROPERTIES
+  OUTPUT_NAME ${libname}
+  VERSION ${PROJECT_VERSION}
+  SOVERSION ${PROJECT_VERSION_MAJOR}
+  ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_PATH}
+  LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_PATH}
+  RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_PATH})
+
+# Install libraries
 install(
-  TARGETS       uast
+  TARGETS       ${libstatic} ${libshared}
   ARCHIVE       DESTINATION lib
   LIBRARY       DESTINATION lib
   PUBLIC_HEADER DESTINATION include/libuast
 )
-
-# Add custom commands
-add_custom_target(release-minor
-  COMMAND sh ${CMAKE_CURRENT_BINARY_DIR}/scripts/release-minor.sh ${PROJECT_VERSION_MAJOR} ${PROJECT_VERSION_MINOR} ${PROJECT_VERSION_PATCH})
 
 # Adds examples
 add_subdirectory(examples)
