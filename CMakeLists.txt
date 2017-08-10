@@ -1,5 +1,8 @@
 cmake_minimum_required (VERSION 2.6)
-project (LIBUAST C)
+cmake_policy(SET CMP0048 NEW)
+project (LIBUAST
+  VERSION 1.3.0
+  LANGUAGES C)
 
 set(CMAKE_C_STANDARD 99)
 
@@ -38,6 +41,10 @@ install(
   LIBRARY       DESTINATION lib
   PUBLIC_HEADER DESTINATION include/libuast
 )
+
+# Add custom commands
+add_custom_target(release-minor
+  COMMAND sh ${CMAKE_CURRENT_BINARY_DIR}/scripts/release-minor.sh ${PROJECT_VERSION_MAJOR} ${PROJECT_VERSION_MINOR} ${PROJECT_VERSION_PATCH})
 
 # Adds examples
 add_subdirectory(examples)
