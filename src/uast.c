@@ -41,19 +41,6 @@ void free_find_ctx(find_ctx *ctx) {
   }
 }
 
-int find_ctx_set_len(find_ctx *ctx, int len) {
-  if (len > ctx->cap) {
-    ctx->results = realloc(ctx->results, len * sizeof(void *));
-    if (ctx->results == NULL) {
-      ctx->cap = ctx->len = 0;
-      return -1;
-    }
-    ctx->cap = len;
-  }
-  ctx->len = len;
-  return 0;
-}
-
 int find_ctx_get_len(const find_ctx *ctx) { return ctx->len; }
 
 void *find_ctx_get(const find_ctx *ctx, unsigned int index) {
@@ -133,6 +120,19 @@ end:
 //////////////////////////////
 ///////// PRIVATE API ////////
 //////////////////////////////
+
+int find_ctx_set_len(find_ctx *ctx, int len) {
+  if (len > ctx->cap) {
+    ctx->results = realloc(ctx->results, len * sizeof(void *));
+    if (ctx->results == NULL) {
+      ctx->cap = ctx->len = 0;
+      return -1;
+    }
+    ctx->cap = len;
+  }
+  ctx->len = len;
+  return 0;
+}
 
 int find_ctx_get_cap(const find_ctx *ctx) { return ctx->cap; }
 
