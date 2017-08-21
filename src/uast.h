@@ -1,11 +1,6 @@
 #ifndef LUAST_SRC_NODE_API_H_
 #define LUAST_SRC_NODE_API_H_
 
-#include <libxml/parser.h>
-#include <libxml/tree.h>
-#include <libxml/xpath.h>
-#include <libxml/xpathInternals.h>
-
 #include "find-ctx.h"
 #include "node-iface.h"
 

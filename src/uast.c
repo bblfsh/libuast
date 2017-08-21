@@ -1,8 +1,14 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+#include <libxml/parser.h>
+#include <libxml/tree.h>
+#include <libxml/xpath.h>
+#include <libxml/xpathInternals.h>
+
 #include "roles.h"
 #include "uast.h"
+#include "uast_private.h"
 
 #include "testing-tools.h"
 
