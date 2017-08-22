@@ -11,7 +11,6 @@ script:
   - mkdir -p ../libuast-build && cd ../libuast-build && cmake ../libuast && make && make test
 
 after_success:
-  - git stash --all
   - sh scripts/update-minor.sh
   - cd ..  && tar czvp --exclude-vcs -f libuast.tar.gz libuast
 
