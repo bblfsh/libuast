@@ -2,11 +2,23 @@ language: c
 compiler:
   - clang
   - gcc
+
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq libcunit1 libcunit1-doc libcunit1-dev
-before_script:
-  - cmake .
+
 script:
-  - make
-  - make test
+  - mkdir -p ../libuast-build && cd ../libuast-build && cmake ../libuast && make && make test
+
+after_success:
+  - sh scripts/update-minor.sh
+  - cd ..  && tar czvp --exclude-vcs -f libuast.tar.gz libuast
+
+deploy:
+  provider: releases
+  api_key:
+    secure: $GITHUB_TOKEN
+  file: ../libuast.tar.gz
+  skip_cleanup: true
+  on:
+    tags: true
