@@ -1,22 +1,24 @@
 #ifndef LIBUAST_NODES_TEST_H_
 #define LIBUAST_NODES_TEST_H_
 
+
+#include <cstdbool>
+#include <cstdio>
+#include <cstring>
+
 #include <iostream>
 #include <string>
 #include <vector>
-#include "mock-node.h"
 
 extern "C" {
 
 #include <CUnit/Basic.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
 
-#include "uast_private.h"
+#include "mock-node.h"
 #include "roles.h"
 #include "testing-tools.h"
 #include "uast.h"
+#include "uast_private.h"
 
 bool equal_find_ctx(const find_ctx *c1, const find_ctx *c2) {
   if (find_ctx_get_len(c1) != find_ctx_get_len(c2)) {

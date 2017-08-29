@@ -2,8 +2,10 @@
 #define LIBUAST_UAST_PRIVATE_H_
 
 #include <libxml/tree.h>
-#include "uast.h"
+
 #include "find-ctx.h"
+#include "uast.h"
+
 // These functions are used internally for testing and not exported.
 
 // Sets the length of a find_ctx and allocates memory for the results array

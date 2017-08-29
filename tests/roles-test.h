@@ -1,11 +1,13 @@
 #ifndef LIBUAST_ROLES_TEST_H_
 #define LIBUAST_ROLES_TEST_H_
 
+#include <cstdio>
+#include <cstring>
+
 extern "C" {
 
 #include <CUnit/Basic.h>
-#include <stdio.h>
-#include <string.h>
+
 #include "roles.h"
 #include "uast.h"
 

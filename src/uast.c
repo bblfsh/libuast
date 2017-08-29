@@ -1,3 +1,6 @@
+#include "uast.h"
+#include "uast_private.h"
+
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -7,9 +10,6 @@
 #include <libxml/xpathInternals.h>
 
 #include "roles.h"
-#include "uast.h"
-#include "uast_private.h"
-
 #include "testing-tools.h"
 
 #define GET(__NODE__, __PROP__, ...) \
