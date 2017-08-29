@@ -1,3 +1,6 @@
+#ifndef LIBUAST_NODES_TEST_H_
+#define LIBUAST_NODES_TEST_H_
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -224,3 +227,5 @@ void testFailingCtxSetLen() {
   fail_realloc = false;
 }
 }
+
+#endif  // LIBUAST_NODES_TEST_H_

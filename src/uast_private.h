@@ -1,5 +1,5 @@
-#ifndef LUAST_SRC_UAST_PRIVATE_H_
-#define LUAST_SRC_UAST_PRIVATE_H_
+#ifndef LIBUAST_UAST_PRIVATE_H_
+#define LIBUAST_UAST_PRIVATE_H_
 
 #include <libxml/tree.h>
 #include "uast.h"
@@ -17,4 +17,4 @@ int find_ctx_get_cap(const find_ctx *ctx);
 // Returns the pointer to the array of results.
 void **find_ctx_get_results(const find_ctx *ctx);
 
-#endif  // LUAST_SRC_UAST_PRIVATE_H_
+#endif  // LIBUAST_UAST_PRIVATE_H_

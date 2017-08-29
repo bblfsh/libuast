@@ -1,3 +1,6 @@
+#ifndef LIBUAST_ROLES_TEST_H_
+#define LIBUAST_ROLES_TEST_H_
+
 extern "C" {
 
 #include <CUnit/Basic.h>
@@ -26,3 +29,5 @@ static void testRoles(void) {
   }
 }
 }
+
+#endif  // LIBUAST_ROLES_TEST_H_

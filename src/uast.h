@@ -1,5 +1,5 @@
-#ifndef LUAST_SRC_NODE_API_H_
-#define LUAST_SRC_NODE_API_H_
+#ifndef LIBUAST_UAST_H_
+#define LIBUAST_UAST_H_
 
 #include "find-ctx.h"
 #include "node-iface.h"
@@ -55,4 +55,4 @@ node_iface node_api_get_iface(const node_api *api);
 // results.
 int node_api_find(node_api *api, find_ctx *ctx, void *node, const char *query);
 
-#endif  // LUAST_SRC_NODE_API_H_
+#endif  // LIBUAST_UAST_H_

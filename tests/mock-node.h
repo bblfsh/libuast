@@ -1,3 +1,6 @@
+#ifndef LIBUAST_MOCK_NODE_H_
+#define LIBUAST_MOCK_NODE_H_
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -148,3 +151,5 @@ static Node *new_mock_tree() {
   return module;
 }
 }
+
+#endif  // LIBUAST_MOCK_NODE_H_

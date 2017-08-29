@@ -1,5 +1,5 @@
-#ifndef LUAST_SRC_FIND_CTX_H_
-#define LUAST_SRC_FIND_CTX_H_
+#ifndef LIBUAST_FIND_CTX_H_
+#define LIBUAST_FIND_CTX_H_
 
 typedef struct _find_ctx find_ctx;
 
@@ -20,4 +20,4 @@ void *find_ctx_get(const find_ctx *ctx, unsigned int index);
 // Releases all the memory used by a find_ctx
 void free_find_ctx(find_ctx *ctx);
 
-#endif  // LUAST_SRC_FIND_CTX_H_
+#endif  // LIBUAST_FIND_CTX_H_

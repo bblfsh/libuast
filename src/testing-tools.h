@@ -1,5 +1,5 @@
-#ifndef LUAST_SRC_TESTING_TOOLS_H_
-#define LUAST_SRC_TESTING_TOOLS_H_
+#ifndef LIBUAST_TESTING_TOOLS_H_
+#define LIBUAST_TESTING_TOOLS_H_
 
 #ifdef TESTING
 
@@ -42,4 +42,4 @@ void *mock_xmlXPathNewContext(xmlDocPtr doc);
 #define xmlXPathNewContext mock_xmlXPathNewContext
 
 #endif
-#endif  // LUAST_SRC_TESTING_TOOLS_H_
+#endif  // LIBUAST_TESTING_TOOLS_H_

@@ -1,5 +1,5 @@
-#ifndef LUAST_SRC_NODE_IMPL_H_
-#define LUAST_SRC_NODE_IMPL_H_
+#ifndef LIBUAST_NODE_IFACE_H_
+#define LIBUAST_NODE_IFACE_H_
 
 #include <stdint.h>
 
@@ -22,4 +22,4 @@ typedef struct _node_iface {
   const char *(*properties)(const void *, int);
 } node_iface;
 
-#endif  // LUAST_SRC_NODE_IMPL_H_
+#endif  // LIBUAST_NODE_IFACE_H_
