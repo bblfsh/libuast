@@ -13,7 +13,6 @@
 #include "roles.h"
 #include "testing_tools.h"
 
-
 struct Uast {
   NodeIface iface;
 };
@@ -66,13 +65,13 @@ void UastFree(Uast *ctx) {
 
 NodeIface UastGetIface(const Uast *ctx) { return ctx->iface; }
 
-Nodes* UastFilter(const Uast *ctx, void *node, const char *query) {
+Nodes *UastFilter(const Uast *ctx, void *node, const char *query) {
   xmlDocPtr doc = NULL;
   xmlXPathContextPtr xpathCtx = NULL;
   xmlXPathObjectPtr xpathObj = NULL;
   bool ok = false;
 
-  Nodes* nodes = NodesNew();
+  Nodes *nodes = NodesNew();
   if (!nodes) {
     return NULL;
   }
@@ -139,7 +138,8 @@ int NodesCap(const Nodes *nodes) { return nodes->cap; }
 
 void **NodesAll(const Nodes *nodes) { return nodes->results; }
 
-static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node, xmlNodePtr parent) {
+static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
+                                xmlNodePtr parent) {
   const char *internal_type = ctx->iface.InternalType(node);
   xmlNodePtr xmlNode = xmlNewNode(NULL, BAD_CAST(internal_type));
   if (!xmlNode) {

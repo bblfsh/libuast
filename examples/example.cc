@@ -38,9 +38,7 @@ static void *ChildAt(const void *node, int index) {
   return ((Node *)node)->children.at(index);
 }
 
-static int RolesSize(const void *node) {
-  return ((Node *)node)->roles.size();
-}
+static int RolesSize(const void *node) { return ((Node *)node)->roles.size(); }
 
 static uint16_t RoleAt(const void *node, int index) {
   return ((Node *)node)->roles.at(index);
@@ -92,7 +90,7 @@ int main(int argc, char **argv) {
       .RolesSize = RolesSize,
       .RoleAt = RoleAt,
       .PropertiesSize = PropertiesSize,
-			.PropertyAt = PropertyAt,
+      .PropertyAt = PropertyAt,
   });
 
   Nodes *nodes = UastFilter(ctx, &root, "/compilation_unit//identifier");

@@ -14,8 +14,7 @@ class Node {
   std::vector<uint16_t> roles;
   std::vector<std::string> properties;
 
-
-Node(std::string i) : internal_type(i) {}
+  Node(std::string i) : internal_type(i) {}
 
   void AddChild(Node *node) { children.push_back(node); }
 
@@ -41,9 +40,7 @@ static void *ChildAt(const void *node, int index) {
   return ((Node *)node)->children.at(index);
 }
 
-static int RolesSize(const void *node) {
-  return ((Node *)node)->roles.size();
-}
+static int RolesSize(const void *node) { return ((Node *)node)->roles.size(); }
 
 static uint16_t RoleAt(const void *node, int index) {
   return ((Node *)node)->roles.at(index);

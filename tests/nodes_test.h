@@ -1,7 +1,6 @@
 #ifndef LIBUAST_NODES_TEST_H_
 #define LIBUAST_NODES_TEST_H_
 
-
 #include <cstdbool>
 #include <cstdio>
 #include <cstring>
@@ -113,7 +112,7 @@ void TestUastFilterCount() {
 
   Node *root = TreeMock();
   // Total number of nodes
-  Nodes* nodes = UastFilter(ctx, root, "//*");
+  Nodes *nodes = UastFilter(ctx, root, "//*");
   CU_ASSERT_FATAL(nodes != NULL);
   CU_ASSERT_FATAL(NodesSize(nodes) == 14);
   NodesFree(nodes);

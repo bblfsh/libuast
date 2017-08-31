@@ -48,7 +48,7 @@ void *MockXmlNewDoc(const xmlChar *xmlVersion) {
 
 #undef xmlNewProp
 void *MockXmlNewProp(xmlNodePtr node, const xmlChar *name,
-                      const xmlChar *value) {
+                     const xmlChar *value) {
   if (fail_xmlNewProc) {
     return NULL;
   } else {
