@@ -11,7 +11,7 @@ extern "C" {
 #include "roles.h"
 #include "uast.h"
 
-static void testRoleNameForId(void) {
+static void TestRoleNameForId(void) {
   // Test two first roles names
   CU_ASSERT_FATAL(strcmp(RoleNameForId(0), "roleInvalid") == 0);
   CU_ASSERT_FATAL(strcmp(RoleNameForId(1), "roleSimpleIdentifier") == 0);

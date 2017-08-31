@@ -32,7 +32,7 @@ bool EqualNodes(const Nodes *n1, const Nodes *n2) {
   return true;
 }
 
-void testUastNew() {
+void TestUastNew() {
   NodeIface iface = IfaceMock();
   Uast *ctx = UastNew(iface);
 
@@ -43,13 +43,13 @@ void testUastNew() {
   UastFree(ctx);
 }
 
-void testUastNewAlloc() {
+void TestUastNewAlloc() {
   fail_calloc = true;
   CU_ASSERT_FATAL(UastNew(IfaceMock()) == NULL);
   fail_calloc = false;
 }
 
-void testNodesNew() {
+void TestNodesNew() {
   Nodes *nodes = NodesNew();
   CU_ASSERT_FATAL(nodes != NULL);
   CU_ASSERT_FATAL(NodesAll(nodes) == NULL);
@@ -80,13 +80,13 @@ void testNodesNew() {
   NodesFree(nodes);
 }
 
-void testNodesNewAlloc() {
+void TestNodesNewAlloc() {
   fail_calloc = true;
   CU_ASSERT_FATAL(NodesNew() == NULL);
   fail_calloc = false;
 }
 
-void testUastFilterPointers() {
+void TestUastFilterPointers() {
   Uast *ctx = UastNew(IfaceMock());
 
   Node module = Node("Module");
@@ -108,7 +108,7 @@ void testUastFilterPointers() {
   UastFree(ctx);
 }
 
-void testUastFilterCount() {
+void TestUastFilterCount() {
   Uast *ctx = UastNew(IfaceMock());
 
   Node *root = TreeMock();
@@ -152,7 +152,7 @@ void testUastFilterCount() {
   UastFree(ctx);
 }
 
-void testUastFilterToken() {
+void TestUastFilterToken() {
   Uast *ctx = UastNew(IfaceMock());
 
   Node *root = TreeMock();
@@ -168,7 +168,7 @@ void testUastFilterToken() {
   UastFree(ctx);
 }
 
-void testXpath() {
+void TestXpath() {
   NodeIface iface = IfaceMock();
   Uast *ctx = UastNew(iface);
   Node module = Node("Module");
@@ -178,7 +178,7 @@ void testXpath() {
   UastFree(ctx);
 }
 
-void _testNodeFindError() {
+void TestNodeFindError() {
   NodeIface iface = IfaceMock();
   Uast *ctx = UastNew(iface);
   Node module = Node("Module");
@@ -190,39 +190,39 @@ void _testNodeFindError() {
   UastFree(ctx);
 }
 
-void testXmlNewDoc() {
+void TestXmlNewDoc() {
   fail_xmlNewDoc = true;
-  _testNodeFindError();
+  TestNodeFindError();
   fail_xmlNewDoc = false;
 }
 
-void testXmlNewNode() {
+void TestXmlNewNode() {
   fail_xmlNewNode = true;
-  _testNodeFindError();
+  TestNodeFindError();
   fail_xmlNewNode = false;
 }
 
-void testXmlNewProc() {
+void TestXmlNewProc() {
   fail_xmlNewProc = true;
-  _testNodeFindError();
+  TestNodeFindError();
   fail_xmlNewProc = false;
 }
 
-void testXmlAddChild() {
+void TestXmlAddChild() {
   fail_xmlAddChild = true;
-  _testNodeFindError();
+  TestNodeFindError();
   fail_xmlAddChild = false;
 }
 
-void testXmlNewContext() {
+void TestXmlNewContext() {
   fail_xmlXPathNewContext = true;
-  _testNodeFindError();
+  TestNodeFindError();
   fail_xmlXPathNewContext = false;
 }
 
-void testNodesSetSize() {
+void TestNodesSetSize() {
   fail_realloc = true;
-  _testNodeFindError();
+  TestNodeFindError();
   fail_realloc = false;
 }
 }
