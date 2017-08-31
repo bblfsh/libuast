@@ -2,8 +2,8 @@ extern "C" {
 #include <CUnit/Basic.h>
 }
 
-#include "nodes-test.h"
-#include "roles-test.h"
+#include "nodes_test.h"
+#include "roles_test.h"
 
 #define ADD_TEST(__SUITE__, __MESSAGE__, __FUNC__)             \
   if (CU_add_test(__SUITE__, __MESSAGE__, __FUNC__) == NULL) { \

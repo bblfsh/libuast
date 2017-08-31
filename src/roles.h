@@ -3,6 +3,6 @@
 
 #include <stdint.h>
 
-const char *role_name_for_id(uint16_t id);
+const char *RoleNameForId(uint16_t id);
 
 #endif  // LIBUAST_ROLES_H_

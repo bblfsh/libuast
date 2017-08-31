@@ -1,4 +1,4 @@
-#include "testing-tools.h"
+#include "testing_tools.h"
 
 #ifdef TESTING
 
@@ -11,7 +11,7 @@ bool fail_xmlAddChild = false;
 bool fail_xmlXPathNewContext = false;
 
 #undef calloc
-void *mock_calloc(int count, size_t size) {
+void *MockCalloc(int count, size_t size) {
   if (fail_calloc) {
     return NULL;
   } else {
@@ -20,7 +20,7 @@ void *mock_calloc(int count, size_t size) {
 }
 
 #undef realloc
-void *mock_realloc(void *ptr, size_t size) {
+void *MockRealloc(void *ptr, size_t size) {
   if (fail_realloc) {
     return NULL;
   } else {
@@ -29,7 +29,7 @@ void *mock_realloc(void *ptr, size_t size) {
 }
 
 #undef xmlNewNode
-void *mock_xmlNewNode(xmlNsPtr ns, const xmlChar *name) {
+void *MockXmlNewNode(xmlNsPtr ns, const xmlChar *name) {
   if (fail_xmlNewNode) {
     return NULL;
   } else {
@@ -38,7 +38,7 @@ void *mock_xmlNewNode(xmlNsPtr ns, const xmlChar *name) {
 }
 
 #undef xmlNewDoc
-void *mock_xmlNewDoc(const xmlChar *xmlVersion) {
+void *MockXmlNewDoc(const xmlChar *xmlVersion) {
   if (fail_xmlNewDoc) {
     return NULL;
   } else {
@@ -47,7 +47,7 @@ void *mock_xmlNewDoc(const xmlChar *xmlVersion) {
 }
 
 #undef xmlNewProp
-void *mock_xmlNewProp(xmlNodePtr node, const xmlChar *name,
+void *MockXmlNewProp(xmlNodePtr node, const xmlChar *name,
                       const xmlChar *value) {
   if (fail_xmlNewProc) {
     return NULL;
@@ -57,7 +57,7 @@ void *mock_xmlNewProp(xmlNodePtr node, const xmlChar *name,
 }
 
 #undef xmlAddChild
-void *mock_xmlAddChild(xmlNodePtr parent, xmlNodePtr cur) {
+void *MockXmlAddChild(xmlNodePtr parent, xmlNodePtr cur) {
   if (fail_xmlAddChild) {
     return NULL;
   } else {
@@ -66,7 +66,7 @@ void *mock_xmlAddChild(xmlNodePtr parent, xmlNodePtr cur) {
 }
 
 #undef xmlXPathNewContext
-void *mock_xmlXPathNewContext(xmlDocPtr doc) {
+void *MockXmlXPathNewContext(xmlDocPtr doc) {
   if (fail_xmlXPathNewContext) {
     return NULL;
   } else {

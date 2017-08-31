@@ -10,48 +10,48 @@
 #include <libxml/xpathInternals.h>
 
 #include "roles.h"
-#include "testing-tools.h"
+#include "testing_tools.h"
 
 #define GET(__NODE__, __PROP__, ...) \
   (api->iface.__PROP__(__NODE__, ##__VA_ARGS__))
 
-struct _node_api {
-  node_iface iface;
+struct NodeApi {
+  NodeIface iface;
 };
 
-struct _find_ctx {
+struct FindCtx {
   void **results;
   int len;
   int cap;
 };
 
-static xmlDocPtr create_document(node_api *api, void *node);
-static xmlNodePtr create_xml_node(node_api *api, void *node, xmlNodePtr parent);
+static xmlDocPtr CreateDocument(const NodeApi *api, void *node);
+static xmlNodePtr CreateXmlNode(const NodeApi *api, void *node, xmlNodePtr parent);
 
 //////////////////////////////
 ///////// PUBLIC API /////////
 //////////////////////////////
 
-find_ctx *new_find_ctx() { return calloc(1, sizeof(find_ctx)); }
+FindCtx *NewFindCtx() { return calloc(1, sizeof(FindCtx)); }
 
-void free_find_ctx(find_ctx *ctx) {
+void FreeFindCtx(FindCtx *ctx) {
   if (ctx) {
     free(ctx->results);
     free(ctx);
   }
 }
 
-int find_ctx_get_len(const find_ctx *ctx) { return ctx->len; }
+int FindCtxSize(const FindCtx *ctx) { return ctx->len; }
 
-void *find_ctx_get(const find_ctx *ctx, unsigned int index) {
+void *FindCtxAt(const FindCtx *ctx, unsigned int index) {
   if (index < ctx->len) {
     return ctx->results[index];
   }
   return NULL;
 }
 
-node_api *new_node_api(node_iface iface) {
-  node_api *api = calloc(1, sizeof(node_api));
+NodeApi *NewNodeApi(NodeIface iface) {
+  NodeApi *api = calloc(1, sizeof(NodeApi));
   if (!api) {
     return NULL;
   }
@@ -60,20 +60,20 @@ node_api *new_node_api(node_iface iface) {
   return api;
 }
 
-void free_node_api(node_api *api) {
+void FreeNodeApi(NodeApi *api) {
   free(api);
   xmlCleanupParser();
 }
 
-node_iface node_api_get_iface(const node_api *api) { return api->iface; }
+NodeIface NodeApiGetIface(const NodeApi *api) { return api->iface; }
 
-int node_api_find(node_api *api, find_ctx *ctx, void *node, const char *query) {
+int NodeApiFind(const NodeApi *api, void *node, const char *query, FindCtx *ctx) {
   int ret = 0;
   xmlDocPtr doc = NULL;
   xmlXPathContextPtr xpathCtx = NULL;
   xmlXPathObjectPtr xpathObj = NULL;
 
-  doc = create_document(api, node);
+  doc = CreateDocument(api, node);
   if (!doc) {
     ret = -1;
     goto end;
@@ -94,7 +94,7 @@ int node_api_find(node_api *api, find_ctx *ctx, void *node, const char *query) {
   xmlNodePtr *nodes = result->nodeTab;
   int size = (result) ? result->nodeNr : 0;
 
-  if (find_ctx_set_len(ctx, size) != 0) {
+  if (FindCtxSetLen(ctx, size) != 0) {
     ret = -4;
     goto end;
   }
@@ -112,7 +112,7 @@ end:
 
   if (ret != 0) {
     // Reset ctx
-    find_ctx_set_len(ctx, 0);
+    FindCtxSetLen(ctx, 0);
   }
   return ret;
 }
@@ -121,7 +121,7 @@ end:
 ///////// PRIVATE API ////////
 //////////////////////////////
 
-int find_ctx_set_len(find_ctx *ctx, int len) {
+int FindCtxSetLen(FindCtx *ctx, int len) {
   if (len > ctx->cap) {
     ctx->results = realloc(ctx->results, len * sizeof(void *));
     if (ctx->results == NULL) {
@@ -134,13 +134,13 @@ int find_ctx_set_len(find_ctx *ctx, int len) {
   return 0;
 }
 
-int find_ctx_get_cap(const find_ctx *ctx) { return ctx->cap; }
+int FindCtxGetCap(const FindCtx *ctx) { return ctx->cap; }
 
-void **find_ctx_get_results(const find_ctx *ctx) { return ctx->results; }
+void **FindCtxGetResults(const FindCtx *ctx) { return ctx->results; }
 
-static xmlNodePtr create_xml_node(node_api *api, void *node,
-                                  xmlNodePtr parent) {
-  const char *internal_type = GET(node, internal_type);
+static xmlNodePtr CreateXmlNode(const NodeApi *api, void *node,
+																xmlNodePtr parent) {
+  const char *internal_type = GET(node, InternalType);
   xmlNodePtr xmlNode = xmlNewNode(NULL, BAD_CAST(internal_type));
   if (!xmlNode) {
     goto error;
@@ -154,7 +154,7 @@ static xmlNodePtr create_xml_node(node_api *api, void *node,
   }
 
   // Token
-  const char *token = GET(node, token);
+  const char *token = GET(node, Token);
   if (token) {
     if (!xmlNewProp(xmlNode, BAD_CAST("token"), BAD_CAST(token))) {
       goto error;
@@ -162,10 +162,10 @@ static xmlNodePtr create_xml_node(node_api *api, void *node,
   }
 
   // Roles
-  int roles_size = GET(node, roles_size);
+  int roles_size = GET(node, RolesSize);
   for (int i = 0; i < roles_size; i++) {
-    uint16_t role = GET(node, roles, i);
-    const char *role_name = role_name_for_id(role);
+    uint16_t role = GET(node, RoleAt, i);
+    const char *role_name = RoleNameForId(role);
     if (role_name != NULL) {
       if (!xmlNewProp(xmlNode, BAD_CAST(role_name), NULL)) {
         goto error;
@@ -174,10 +174,10 @@ static xmlNodePtr create_xml_node(node_api *api, void *node,
   }
 
   // Recursivelly visit all children
-  int children_size = GET(node, children_size);
+  int children_size = GET(node, ChildrenSize);
   for (int i = 0; i < children_size; i++) {
-    void *child = GET(node, children, i);
-    if (!create_xml_node(api, child, xmlNode)) {
+    void *child = GET(node, ChildAt, i);
+    if (!CreateXmlNode(api, child, xmlNode)) {
       goto error;
     }
   }
@@ -188,12 +188,12 @@ error:
   return NULL;
 }
 
-static xmlDocPtr create_document(node_api *api, void *node) {
+static xmlDocPtr CreateDocument(const NodeApi *api, void *node) {
   xmlDocPtr doc = xmlNewDoc(BAD_CAST("1.0"));
   if (!doc) {
     return NULL;
   }
-  xmlNodePtr xmlNode = create_xml_node(api, node, NULL);
+  xmlNodePtr xmlNode = CreateXmlNode(api, node, NULL);
   if (!xmlNode) {
     xmlFreeDoc(doc);
     return NULL;

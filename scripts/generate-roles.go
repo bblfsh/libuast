@@ -31,7 +31,7 @@ static const char *id_to_roles[] = {`)
 	fmt.Println("#define TOTAL_ROLES", int(lastRole))
 
 	fmt.Println(`
-const char *role_name_for_id(uint16_t id) {
+const char *RoleNameForId(uint16_t id) {
   if (id >= TOTAL_ROLES) {
     return NULL;
   }
