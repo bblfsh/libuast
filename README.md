@@ -48,3 +48,7 @@ make install
 ```
 make test
 ```
+
+## Contribute
+
+Please follow [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html).

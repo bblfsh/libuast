@@ -1,20 +1,27 @@
-#ifndef LUAST_SRC_UAST_PRIVATE_H_
-#define LUAST_SRC_UAST_PRIVATE_H_
+#ifndef LIBUAST_UAST_PRIVATE_H_
+#define LIBUAST_UAST_PRIVATE_H_
 
 #include <libxml/tree.h>
+
 #include "uast.h"
-#include "find-ctx.h"
+
 // These functions are used internally for testing and not exported.
 
-// Sets the length of a find_ctx and allocates memory for the results array
-// if needed.
-// Returns 0 if the length was changed correctly.
-int find_ctx_set_len(find_ctx *ctx, int len);
+// Returns a new Nodes structure
+Nodes *NodesNew();
 
-// Returns the total capacity of the internal buffer.
-int find_ctx_get_cap(const find_ctx *ctx);
+// Sets the size of nodes, allocating space if needed.
+// Returns 0 if the size was changed correctly.
+int NodesSetSize(Nodes *nodes, int len);
 
-// Returns the pointer to the array of results.
-void **find_ctx_get_results(const find_ctx *ctx);
+// Returns the actual capacity of nodes.
+int NodesCap(const Nodes *nodes);
 
-#endif  // LUAST_SRC_UAST_PRIVATE_H_
+// Returns a pointer to the actual nodes array.
+void **NodesAll(const Nodes *nodes);
+
+// Returns the node_iface used by Uast
+NodeIface UastGetIface(const Uast *ctx);
+
+
+#endif  // LIBUAST_UAST_PRIVATE_H_
