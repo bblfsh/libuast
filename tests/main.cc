@@ -37,9 +37,12 @@ int main() {
   ADD_TEST(suite, "test failing UastFilter() (bad xmlNewDoc)", TestXmlNewDoc);
   ADD_TEST(suite, "test failing UastFilter() (bad xmlNewNode)", TestXmlNewNode);
   ADD_TEST(suite, "test failing UastFilter() (bad xmlNewProc)", TestXmlNewProc);
-  ADD_TEST(suite, "test failing UastFilter() (bad xmlAddChild)", TestXmlAddChild);
-  ADD_TEST(suite, "test failing UastFilter() (bad xmlNewContext)", TestXmlNewContext);
-  ADD_TEST(suite, "test failing UastFilter() (bad NodesSetSize)", TestNodesSetSize);
+  ADD_TEST(suite, "test failing UastFilter() (bad xmlAddChild)",
+           TestXmlAddChild);
+  ADD_TEST(suite, "test failing UastFilter() (bad xmlNewContext)",
+           TestXmlNewContext);
+  ADD_TEST(suite, "test failing UastFilter() (bad NodesSetSize)",
+           TestNodesSetSize);
 
   // run all tests using the CUnit Basic interface
   CU_basic_set_mode(CU_BRM_VERBOSE);

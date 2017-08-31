@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-// This interface must be implemented to create a NodeApi.
+// This interface must be implemented to create a Uast context.
 typedef struct NodeIface {
   const char *(*InternalType)(const void *);
   const char *(*Token)(const void *);

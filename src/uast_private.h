@@ -23,5 +23,4 @@ void **NodesAll(const Nodes *nodes);
 // Returns the node_iface used by Uast
 NodeIface UastGetIface(const Uast *ctx);
 
-
 #endif  // LIBUAST_UAST_PRIVATE_H_
