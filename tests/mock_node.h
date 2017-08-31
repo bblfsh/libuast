@@ -57,7 +57,7 @@ static const char *PropertyAt(const void *node, int index) {
   return ((Node *)node)->properties.at(index).data();
 }
 
-static NodeIface MockIface() {
+static NodeIface IfaceMock() {
   return (NodeIface){
       .InternalType = InternalType,
       .Token = Token,
@@ -70,39 +70,39 @@ static NodeIface MockIface() {
   };
 }
 
-static Node *NewMockIdentifier(std::string name) {
+static Node *IdentifierMock(std::string name) {
   Node *id = new Node("Identifier");
   id->token = name;
   id->AddRole(1);
   return id;
 }
 
-static Node *NewMockAssign() {
+static Node *AssignMock() {
   Node *assign = new Node("Assign");
   assign->AddRole(130);
   return assign;
 }
 
-static Node *NewMockLiteral(std::string token) {
+static Node *LiteralMock(std::string token) {
   Node *literal = new Node("NumLiteral");
   literal->token = token;
   literal->AddRole(118);
   return literal;
 }
 
-static Node *NewMockModule() {
+static Node *ModuleMock() {
   Node *module = new Node("Module");
   module->AddRole(36);
   return module;
 }
 
-static Node *NewMockSum() {
+static Node *SumMock() {
   Node *sum = new Node("Sum");
   sum->AddRole(41);
   return sum;
 }
 
-static Node *NewMockMult() {
+static Node *MultMock() {
   Node *mult = new Node("Mult");
   mult->AddRole(43);
   return mult;
@@ -115,37 +115,37 @@ static Node *NewMockMult() {
 // B = 2
 // C = (A+B) * B
 // ```
-static Node *NewMockTree() {
-  Node *module = NewMockModule();
-  Node *assign_0 = NewMockAssign();
-  Node *assign_1 = NewMockAssign();
-  Node *assign_2 = NewMockAssign();
+static Node *TreeMock() {
+  Node *module = ModuleMock();
+  Node *assign_0 = AssignMock();
+  Node *assign_1 = AssignMock();
+  Node *assign_2 = AssignMock();
   module->AddChild(assign_0);
   module->AddChild(assign_1);
   module->AddChild(assign_2);
 
-  Node *idA_0 = NewMockIdentifier("A");
-  Node *literal_1 = NewMockLiteral("1");
+  Node *idA_0 = IdentifierMock("A");
+  Node *literal_1 = LiteralMock("1");
   assign_0->AddChild(idA_0);
   assign_0->AddChild(literal_1);
 
-  Node *idB_0 = NewMockIdentifier("B");
-  Node *literal_2 = NewMockLiteral("2");
+  Node *idB_0 = IdentifierMock("B");
+  Node *literal_2 = LiteralMock("2");
   assign_1->AddChild(idB_0);
   assign_1->AddChild(literal_2);
 
-  Node *sum = NewMockSum();
-  Node *idA_1 = NewMockIdentifier("A");
-  Node *idB_1 = NewMockIdentifier("B");
+  Node *sum = SumMock();
+  Node *idA_1 = IdentifierMock("A");
+  Node *idB_1 = IdentifierMock("B");
   sum->AddChild(idA_1);
   sum->AddChild(idB_1);
 
-  Node *mult = NewMockMult();
-  Node *idB_2 = NewMockIdentifier("B");
+  Node *mult = MultMock();
+  Node *idB_2 = IdentifierMock("B");
   mult->AddChild(sum);
   mult->AddChild(idB_2);
 
-  Node *idC_0 = NewMockIdentifier("C");
+  Node *idC_0 = IdentifierMock("C");
   assign_2->AddChild(idC_0);
   assign_2->AddChild(mult);
 

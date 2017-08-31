@@ -25,31 +25,21 @@ int main() {
   }
 
   // add the tests to the suite
-  ADD_TEST(pSuite, "test of role_name_for_id()", testRoles);
-  ADD_TEST(pSuite, "test of new_node_api()", testNewNode);
-  ADD_TEST(pSuite, "test of new_find_ctx()", testFindContext);
-  ADD_TEST(pSuite, "test of node_api_find() pointers", testNodeFindPointers);
-  ADD_TEST(pSuite, "test of node_api_find() counting", testNodeFindCount);
-  ADD_TEST(pSuite, "test of node_api_find() with tokens", testNodeFindToken);
-
-  ADD_TEST(pSuite, "test wrong xpath in new_node_api()", testWrongXpath);
-
-  ADD_TEST(pSuite, "test failing new_node_api() (bad calloc)",
-           testFailingNewNodeApi);
-  ADD_TEST(pSuite, "test failing new_find_ctx() (bad calloc)",
-           testFailingNewFindContext);
-  ADD_TEST(pSuite, "test failing node_api_find() (bad xmlNewDoc)",
-           testFailingNewXMLDoc);
-  ADD_TEST(pSuite, "test failing node_api_find() (bad xmlNewNode)",
-           testFailingNewXMLNode);
-  ADD_TEST(pSuite, "test failing node_api_find() (bad xmlNewProc)",
-           testFailingNewXMLProc);
-  ADD_TEST(pSuite, "test failing node_api_find() (bad xmlAddChild)",
-           testFailingXMLAddChild);
-  ADD_TEST(pSuite, "test failing node_api_find() (bad xmlNewContext)",
-           testFailingNewXMLContext);
-  ADD_TEST(pSuite, "test failing node_api_find() (bad find_ctx_set_len)",
-           testFailingCtxSetLen);
+  ADD_TEST(pSuite, "test of RoleNameForId()", testRoleNameForId);
+  ADD_TEST(pSuite, "test of UastNew()", testUastNew);
+  ADD_TEST(pSuite, "test failing UastNew() (bad calloc)", testUastNewAlloc);
+  ADD_TEST(pSuite, "test of NodesNew()", testNodesNew);
+  ADD_TEST(pSuite, "test failing NodesNew() (bad calloc)", testNodesNewAlloc);
+  ADD_TEST(pSuite, "test of UastFilter() pointers", testUastFilterPointers);
+  ADD_TEST(pSuite, "test of UastFilter() counting", testUastFilterCount);
+  ADD_TEST(pSuite, "test of UastFilter() with tokens", testUastFilterToken);
+  ADD_TEST(pSuite, "test failing UastFilter() (bad Xpath)", testXpath);
+  ADD_TEST(pSuite, "test failing UastFilter() (bad xmlNewDoc)", testXmlNewDoc);
+  ADD_TEST(pSuite, "test failing UastFilter() (bad xmlNewNode)", testXmlNewNode);
+  ADD_TEST(pSuite, "test failing UastFilter() (bad xmlNewProc)", testXmlNewProc);
+  ADD_TEST(pSuite, "test failing UastFilter() (bad xmlAddChild)", testXmlAddChild);
+  ADD_TEST(pSuite, "test failing UastFilter() (bad xmlNewContext)", testXmlNewContext);
+  ADD_TEST(pSuite, "test failing UastFilter() (bad NodesSetSize)", testNodesSetSize);
 
   // run all tests using the CUnit Basic interface
   CU_basic_set_mode(CU_BRM_VERBOSE);

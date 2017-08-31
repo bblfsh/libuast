@@ -1,14 +1,14 @@
 #ifndef LIBUAST_UAST_H_
 #define LIBUAST_UAST_H_
 
-#include "find_ctx.h"
+#include "nodes.h"
 #include "node_iface.h"
 
 // NodeApi stores all general context required for calling the libuast's api
 // It must be initialized with `NewNodeApi(NodeIface)` passing a valid
 // implementation of the interface
 // Once it is not used anymore, it shall be released by using `FreeNodeApi()`
-typedef struct NodeApi NodeApi;
+typedef struct Uast Uast;
 
 // NodeAPI needs a node implementation in other to work. This is needed
 // because the data structure of the node itself is not defined by this
@@ -19,13 +19,10 @@ typedef struct NodeApi NodeApi;
 // implemented in other languages (like Python or Go).
 //
 // It returns NULL if the FindCtx could not be allocated sucessfully.
-NodeApi *NewNodeApi(NodeIface iface);
+Uast *UastNew(NodeIface iface);
 
 // Releases all the memory used by the node_api
-void FreeNodeApi(NodeApi *api);
-
-// Returns the node_iface used by the node_api
-NodeIface NodeApiGetIface(const NodeApi *api);
+void UastFree(Uast *ctx);
 
 // Returns the list of native root nodes that satisfy the xpath query.
 // It will return an empty vector if non node matches the query.
@@ -52,6 +49,6 @@ NodeIface NodeApiGetIface(const NodeApi *api);
 // ```
 //
 // It returns 0 if the find query worked correctly, even if it returns 0 results.
-int NodeApiFind(const NodeApi *api, void *node, const char *query, FindCtx *ctx);
+Nodes *UastFilter(const Uast *ctx, void *node, const char *query);
 
 #endif  // LIBUAST_UAST_H_

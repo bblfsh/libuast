@@ -84,7 +84,7 @@ int main(int argc, char **argv) {
   // block { loop }
   node6.AddChild(&node8);
 
-  NodeApi *api = NewNodeApi(NodeIface{
+  Uast *ctx = UastNew(NodeIface{
       .InternalType = InternalType,
       .Token = Token,
       .ChildrenSize = ChildrenSize,
@@ -95,21 +95,20 @@ int main(int argc, char **argv) {
 			.PropertyAt = PropertyAt,
   });
 
-  FindCtx *ctx = NewFindCtx();
-
-  if (NodeApiFind(api, &root, "/compilation_unit//identifier", ctx) != 0) {
+  Nodes *nodes = UastFilter(ctx, &root, "/compilation_unit//identifier");
+  if (!nodes) {
     std::cerr << "libuast.find() failed" << std::endl;
     return -1;
   }
 
   // Iterate over results and print them to stdout
-  for (int i = 0; i < FindCtxSize(ctx); i++) {
-    Node *node = (Node *)FindCtxAt(ctx, i);
+  for (int i = 0; i < NodesSize(nodes); i++) {
+    Node *node = (Node *)NodeAt(nodes, i);
     std::cout << node->internal_type << std::endl;
   }
 
-  FreeFindCtx(ctx);
-  FreeNodeApi(api);
+  NodesFree(nodes);
+  UastFree(ctx);
 
   return 0;
 }
