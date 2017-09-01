@@ -5,8 +5,8 @@
 #include <cstring>
 
 extern "C" {
-
 #include <CUnit/Basic.h>
+}
 
 #include "roles.h"
 #include "uast.h"
@@ -29,7 +29,6 @@ static void TestRoleNameForId(void) {
     const char *role = RoleNameForId(i);
     CU_ASSERT_FATAL(role == NULL);
   }
-}
 }
 
 #endif  // LIBUAST_ROLES_TEST_H_

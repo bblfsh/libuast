@@ -1,6 +1,10 @@
 #ifndef LIBUAST_UAST_H_
 #define LIBUAST_UAST_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "node_iface.h"
 #include "nodes.h"
 
@@ -43,5 +47,9 @@ void UastFree(Uast *ctx);
 // <NumLiteral token="2" roleLiteral roleSimpleIdentifier></NumLiteral>
 // ```
 Nodes *UastFilter(const Uast *ctx, void *node, const char *query);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // LIBUAST_UAST_H_
