@@ -10,8 +10,8 @@
 #include <vector>
 
 extern "C" {
-
 #include <CUnit/Basic.h>
+}
 
 #include "mock_node.h"
 #include "roles.h"
@@ -223,7 +223,6 @@ void TestNodesSetSize() {
   fail_realloc = true;
   TestNodeFindError();
   fail_realloc = false;
-}
 }
 
 #endif  // LIBUAST_NODES_TEST_H_

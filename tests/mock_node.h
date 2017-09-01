@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "node_iface.h"
+
 class Node {
  public:
   std::string internal_type;
@@ -20,9 +22,6 @@ class Node {
 
   void AddRole(uint16_t role) { roles.push_back(role); }
 };
-
-extern "C" {
-#include "node_iface.h"
 
 static const char *InternalType(const void *node) {
   return ((Node *)node)->internal_type.data();
@@ -147,7 +146,6 @@ static Node *TreeMock() {
   assign_2->AddChild(mult);
 
   return module;
-}
 }
 
 #endif  // LIBUAST_MOCK_NODE_H_

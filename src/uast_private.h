@@ -1,6 +1,10 @@
 #ifndef LIBUAST_UAST_PRIVATE_H_
 #define LIBUAST_UAST_PRIVATE_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <libxml/tree.h>
 
 #include "uast.h"
@@ -22,5 +26,9 @@ void **NodesAll(const Nodes *nodes);
 
 // Returns the node_iface used by Uast
 NodeIface UastGetIface(const Uast *ctx);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // LIBUAST_UAST_PRIVATE_H_

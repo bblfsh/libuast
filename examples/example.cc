@@ -2,9 +2,7 @@
 #include <string>
 #include <vector>
 
-extern "C" {
 #include "src/uast.h"
-}
 
 class Node {
  public:
