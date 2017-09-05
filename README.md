@@ -52,7 +52,7 @@ make test
 ## Implementing the node interface
 
 `libuast` is built to be easily bindable,
-and to allow a native data structure for a [Node](https://godoc.org/github.com/bblfsh/sdk/uast#Node) in every language,
+and to allow a native data structure for a [`Node`](https://godoc.org/github.com/bblfsh/sdk/uast#Node) in every language,
 as provided by the protobuf generator.
 
 That's why the library provides an interface to this `Node` data structure that must be implemented.
@@ -95,7 +95,7 @@ At this point, you might have already created your very first binding of libuast
 
 #### XPath querying
 
-XPath allows to filter the whole UAST using the [xpath syntax](https://www.w3.org/TR/xpath/). It can be really useful to extract features from the code and thanks to the annoation system implemented by babelfish, it can be done in an universal fashion.
+XPath allows to filter the whole UAST using the [xpath syntax](https://www.w3.org/TR/xpath/). It can be really useful to extract features from the code and thanks to the annotation system implemented by babelfish, it can be done in an universal fashion.
 
 
 In libuast, xpath querying is performed by the `UastFilter` function. This function takes a pointer to the `Uast` context, a pointer to the root node, and the xpath query string.
