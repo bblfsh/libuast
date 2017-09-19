@@ -12,7 +12,7 @@ script:
   - cd $TRAVIS_BUILD_DIR
 
 before_deploy:
-  - sh scripts/update-minor.sh
+  - sh scripts/update-version.sh
   - git archive --prefix "libuast-${TRAVIS_TAG}/" --output "libuast-${TRAVIS_TAG}.tar.gz" `git stash create`
 
 deploy:
