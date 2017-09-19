@@ -194,7 +194,7 @@ void TestEmptyResult() {
   Node module = Node("Module");
 
   CU_ASSERT_FATAL(UastFilter(ctx, &module,
-                             "//Import[@roleImportDeclaration]//alias") == NULL);
+                             "//Import[@roleImport]//alias") == NULL);
   UastFree(ctx);
 }
 
