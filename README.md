@@ -16,7 +16,7 @@ Currently only xpath querying is implemented, it allows to filter branches of th
 For example:
 
 - Return all the numeric literals in python: `//NumLiteral`
-- Return all the numeric literal in ANY language: `//*[@roleNumberLiteral]`
+- Return all the numeric literal in ANY language: `//*[@roleNumber and @roleLiteral]`
 
 As you can see, it is possible to query the UAST using the `internal_type` and/or by universal roles, this way it can be easily reused across different languages.
 
@@ -103,7 +103,7 @@ The function returns a list of matching nodes.
 
 Here's a complete example:
 ```c
-const char *query = "//*[@roleImportDeclaration]";
+const char *query = "//*[@roleImport and @roleDeclaration]";
 
 // run the xpath query and check return value
 Nodes *nodes = UastFilter(ctx, node, query);
@@ -135,8 +135,8 @@ The roles are mapped as `role{{the role name in CamelCase}}`.
 
 Examples:
 
-  - `SIMPLE_IDENTIFIER`   -> `roleSimpleIdentifier`
-  - `IMPORT_DECLARATION`  -> `roleImportDeclaration`
+  - `Identifier`   -> `roleIdentifier`
+  - `Import`  -> `roleImport`
 
 
 So, for example, to get all the number literals in Python, a filter to look for `NumLiteral` `internal_type` should work:
@@ -148,7 +148,7 @@ xpath = "//NumLiteral"
 But this is language dependant. To make it universal, roles should be used instead:
 
 ```python
-xpath = "//*[@roleNumberLiteral]"
+xpath = "//*[@roleNumber and @roleLiteral]"
 ```
 
 Look at [SDK documentation](https://godoc.org/github.com/bblfsh/sdk/uast#Role) for more information about roles.
