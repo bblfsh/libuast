@@ -1,6 +1,6 @@
 package main
 
-import "gopkg.in/bblfsh/sdk.v0/uast"
+import "gopkg.in/bblfsh/sdk.v1/uast"
 import "fmt"
 
 func main() {
