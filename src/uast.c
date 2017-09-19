@@ -90,6 +90,9 @@ Nodes *UastFilter(const Uast *ctx, void *node, const char *query) {
 
   // Get array of results
   xmlNodeSetPtr result = xpathObj->nodesetval;
+  if (!result) {
+      goto error3;
+  }
   xmlNodePtr *results = result->nodeTab;
   int size = (result) ? result->nodeNr : 0;
 
