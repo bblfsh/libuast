@@ -75,32 +75,42 @@ static Node *IdentifierMock(std::string name) {
 
 static Node *AssignMock() {
   Node *assign = new Node("Assign");
-  assign->AddRole(130);
+  assign->AddRole(3); // Operator
+  assign->AddRole(4); // Binary
+  assign->AddRole(105); // Assignment
   return assign;
 }
 
 static Node *LiteralMock(std::string token) {
   Node *literal = new Node("NumLiteral");
   literal->token = token;
-  literal->AddRole(118);
+  literal->AddRole(18); // Expression
+  literal->AddRole(88); // Literal
+  literal->AddRole(96); // Number
   return literal;
 }
 
 static Node *ModuleMock() {
   Node *module = new Node("Module");
-  module->AddRole(36);
+  module->AddRole(34); // File
   return module;
 }
 
 static Node *SumMock() {
   Node *sum = new Node("Sum");
-  sum->AddRole(41);
+  sum->AddRole(3); // Operator
+  sum->AddRole(4); // Binary
+  sum->AddRole(18); // Expression
+  sum->AddRole(35); // Add
   return sum;
 }
 
 static Node *MultMock() {
   Node *mult = new Node("Mult");
-  mult->AddRole(43);
+  mult->AddRole(3); // Operator
+  mult->AddRole(4); // Binary
+  mult->AddRole(18); // Expression
+  mult->AddRole(37); // Multiply
   return mult;
 }
 

@@ -72,7 +72,6 @@ void TestNodesNew() {
   CU_ASSERT_FATAL(NodesSetSize(nodes, 1024) == 0);
   void *tmp2 = NodesAll(nodes);
   CU_ASSERT_FATAL(tmp2 != NULL);
-  CU_ASSERT_FATAL(tmp1 != tmp2);
   CU_ASSERT_FATAL(NodesSize(nodes) == 1024);
   CU_ASSERT_FATAL(NodesCap(nodes) == 1024);
 
@@ -140,7 +139,7 @@ void TestUastFilterCount() {
 
   // Total number of identifiers
   nodes = UastFilter(ctx, root, "//Identifier");
-  nodes2 = UastFilter(ctx, root, "//*[@roleSimpleIdentifier]");
+  nodes2 = UastFilter(ctx, root, "//*[@roleIdentifier]");
   CU_ASSERT_FATAL(nodes != NULL);
   CU_ASSERT_FATAL(nodes2 != NULL);
   CU_ASSERT_FATAL(NodesSize(nodes) == 6);

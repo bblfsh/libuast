@@ -14,10 +14,10 @@ extern "C" {
 static void TestRoleNameForId(void) {
   // Test two first roles names
   CU_ASSERT_FATAL(strcmp(RoleNameForId(0), "roleInvalid") == 0);
-  CU_ASSERT_FATAL(strcmp(RoleNameForId(1), "roleSimpleIdentifier") == 0);
+  CU_ASSERT_FATAL(strcmp(RoleNameForId(1), "roleIdentifier") == 0);
 
   // Automatically test the rest of names
-  int nu_roles = 141;
+  int nu_roles = 110;
   for (int i = 0; i < nu_roles; i++) {
     const char *role = RoleNameForId(i);
     CU_ASSERT_FATAL(strlen(role) > 4);
