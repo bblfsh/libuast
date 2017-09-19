@@ -43,6 +43,7 @@ int main() {
            TestXmlNewContext);
   ADD_TEST(suite, "test failing UastFilter() (bad NodesSetSize)",
            TestNodesSetSize);
+  ADD_TEST(suite, "test empty UastFilter() result", TestEmptyResult);
 
   // run all tests using the CUnit Basic interface
   CU_basic_set_mode(CU_BRM_VERBOSE);

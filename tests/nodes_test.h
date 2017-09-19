@@ -189,6 +189,16 @@ void TestNodeFindError() {
   UastFree(ctx);
 }
 
+void TestEmptyResult() {
+  NodeIface iface = IfaceMock();
+  Uast *ctx = UastNew(iface);
+  Node module = Node("Module");
+
+  CU_ASSERT_FATAL(UastFilter(ctx,
+              &module, "//Import[@roleImportDeclaration]//alias") == NULL);
+  UastFree(ctx);
+}
+
 void TestXmlNewDoc() {
   fail_xmlNewDoc = true;
   TestNodeFindError();
