@@ -77,7 +77,7 @@ static Node *AssignMock() {
   Node *assign = new Node("Assign");
   assign->AddRole(3); // Operator
   assign->AddRole(4); // Binary
-  assign->AddRole(105); // Assignment
+  assign->AddRole(104); // Assignment
   return assign;
 }
 
@@ -86,7 +86,7 @@ static Node *LiteralMock(std::string token) {
   literal->token = token;
   literal->AddRole(18); // Expression
   literal->AddRole(88); // Literal
-  literal->AddRole(96); // Number
+  literal->AddRole(95); // Number
   return literal;
 }
 
