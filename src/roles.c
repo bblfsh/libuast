@@ -63,7 +63,6 @@ static const char *id_to_roles[] = {
     "roleImplements",
     "roleInstance",
     "roleSubtype",
-    "roleVisibility",
     "roleSubpackage",
     "roleModule",
     "roleFriend",
@@ -117,8 +116,11 @@ static const char *id_to_roles[] = {
     "roleComment",
     "roleDocumentation",
     "roleWhitespace",
+    "roleIncomplete",
+    "roleUnannotated",
+    "roleVisibility",
 };
-#define TOTAL_ROLES 110
+#define TOTAL_ROLES 112
 
 const char *RoleNameForId(uint16_t id) {
   if (id >= TOTAL_ROLES) {
