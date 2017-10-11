@@ -72,9 +72,9 @@ Uast *ctx = Node((NodeIface){
 `NodeIface` holds the functions that need the be executed when the library needs to access some of the properties of the node, such as `internal_type`, `token`, `children`, ...
 
 Here you can see several examples of the `Uast`:
-- [C++ node](https://github.com/bblfsh/libuast/blob/master/tests/mock-node.h)
+- [C++ node](https://github.com/bblfsh/libuast/blob/master/tests/mock_node.h)
 - [Python node](https://github.com/bblfsh/client-python/blob/master/bblfsh/pyuast.c)
-- [Go node](https://github.com/bblfsh/client-go/blob/master/bindings.h)
+- [Go node](https://github.com/bblfsh/client-go/blob/master/tools/bindings.h)
 
 Once the `Uast` context is created, it can be easily used to run xpath queries against the native nodes:
 
