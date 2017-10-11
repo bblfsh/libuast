@@ -119,8 +119,14 @@ static const char *id_to_roles[] = {
     "roleIncomplete",
     "roleUnannotated",
     "roleVisibility",
+    "roleAnnotation",
+    "roleAnonymous",
+    "roleEnumeration",
+    "roleArithmetic",
+    "roleRelational",
+    "roleVariable",
 };
-#define TOTAL_ROLES 112
+#define TOTAL_ROLES 117
 
 const char *RoleNameForId(uint16_t id) {
   if (id >= TOTAL_ROLES) {

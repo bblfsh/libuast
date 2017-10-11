@@ -17,7 +17,7 @@ static void TestRoleNameForId(void) {
   CU_ASSERT_FATAL(strcmp(RoleNameForId(1), "roleIdentifier") == 0);
 
   // Automatically test the rest of names
-  int nu_roles = 112;
+  int nu_roles = 117;
   for (int i = 0; i < nu_roles; i++) {
     const char *role = RoleNameForId(i);
     CU_ASSERT_FATAL(strlen(role) > 4);
