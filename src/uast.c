@@ -143,6 +143,9 @@ void **NodesAll(const Nodes *nodes) { return nodes->results; }
 
 static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
                                 xmlNodePtr parent) {
+  const int BUF_SIZE = 256;
+  char buf[BUF_SIZE];
+
   const char *internal_type = ctx->iface.InternalType(node);
   xmlNodePtr xmlNode = xmlNewNode(NULL, BAD_CAST(internal_type));
   if (!xmlNode) {
@@ -173,6 +176,71 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
       if (!xmlNewProp(xmlNode, BAD_CAST(role_name), NULL)) {
         goto error;
       }
+    }
+  }
+
+  // Properties
+  for (int i = 0; i < ctx->iface.PropertiesSize(node); i++) {
+    const char *key = ctx->iface.PropertyKeyAt(node, i);
+    const char *value = ctx->iface.PropertyValueAt(node, i);
+    if (!xmlNewProp(xmlNode, BAD_CAST(key), BAD_CAST(value))) {
+      goto error;
+    }
+  }
+
+  // Position
+  if (ctx->iface.HasStartOffset(node)) {
+    int ret = snprintf(buf, BUF_SIZE, "%lu", ctx->iface.StartOffset(node));
+    if (ret < 0 || ret >= BUF_SIZE) {
+      goto error;
+    }
+    if (!xmlNewProp(xmlNode, BAD_CAST "startOffset", BAD_CAST buf)) {
+      goto error;
+    }
+  }
+  if (ctx->iface.HasStartLine(node)) {
+    int ret = snprintf(buf, BUF_SIZE, "%lu", ctx->iface.StartLine(node));
+    if (ret < 0 || ret >= BUF_SIZE) {
+      goto error;
+    }
+    if (!xmlNewProp(xmlNode, BAD_CAST "startLine", BAD_CAST buf)) {
+      goto error;
+    }
+  }
+  if (ctx->iface.HasStartCol(node)) {
+    int ret = snprintf(buf, BUF_SIZE, "%lu", ctx->iface.StartCol(node));
+    if (ret < 0 || ret >= BUF_SIZE) {
+      goto error;
+    }
+    if (!xmlNewProp(xmlNode, BAD_CAST "startCol", BAD_CAST buf)) {
+      goto error;
+    }
+  }
+  if (ctx->iface.HasEndOffset(node)) {
+    int ret = snprintf(buf, BUF_SIZE, "%lu", ctx->iface.EndOffset(node));
+    if (ret < 0 || ret >= BUF_SIZE) {
+      goto error;
+    }
+    if (!xmlNewProp(xmlNode, BAD_CAST "endOffset", BAD_CAST buf)) {
+      goto error;
+    }
+  }
+  if (ctx->iface.HasEndLine(node)) {
+    int ret = snprintf(buf, BUF_SIZE, "%lu", ctx->iface.EndLine(node));
+    if (ret < 0 || ret >= BUF_SIZE) {
+      goto error;
+    }
+    if (!xmlNewProp(xmlNode, BAD_CAST "endLine", BAD_CAST buf)) {
+      goto error;
+    }
+  }
+  if (ctx->iface.HasEndCol(node)) {
+    int ret = snprintf(buf, BUF_SIZE, "%lu", ctx->iface.EndCol(node));
+    if (ret < 0 || ret >= BUF_SIZE) {
+      goto error;
+    }
+    if (!xmlNewProp(xmlNode, BAD_CAST "endCol", BAD_CAST buf)) {
+      goto error;
     }
   }
 
