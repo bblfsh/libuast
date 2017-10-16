@@ -1,8 +1,10 @@
 #include "uast.h"
 #include "uast_private.h"
 
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 #include <libxml/parser.h>
@@ -190,7 +192,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
 
   // Position
   if (ctx->iface.HasStartOffset(node)) {
-    int ret = snprintf(buf, BUF_SIZE, "%lu", ctx->iface.StartOffset(node));
+    int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.StartOffset(node));
     if (ret < 0 || ret >= BUF_SIZE) {
       goto error;
     }
@@ -199,7 +201,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
     }
   }
   if (ctx->iface.HasStartLine(node)) {
-    int ret = snprintf(buf, BUF_SIZE, "%lu", ctx->iface.StartLine(node));
+    int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.StartLine(node));
     if (ret < 0 || ret >= BUF_SIZE) {
       goto error;
     }
@@ -208,7 +210,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
     }
   }
   if (ctx->iface.HasStartCol(node)) {
-    int ret = snprintf(buf, BUF_SIZE, "%lu", ctx->iface.StartCol(node));
+    int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.StartCol(node));
     if (ret < 0 || ret >= BUF_SIZE) {
       goto error;
     }
@@ -217,7 +219,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
     }
   }
   if (ctx->iface.HasEndOffset(node)) {
-    int ret = snprintf(buf, BUF_SIZE, "%lu", ctx->iface.EndOffset(node));
+    int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.EndOffset(node));
     if (ret < 0 || ret >= BUF_SIZE) {
       goto error;
     }
@@ -226,7 +228,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
     }
   }
   if (ctx->iface.HasEndLine(node)) {
-    int ret = snprintf(buf, BUF_SIZE, "%lu", ctx->iface.EndLine(node));
+    int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.EndLine(node));
     if (ret < 0 || ret >= BUF_SIZE) {
       goto error;
     }
@@ -235,7 +237,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
     }
   }
   if (ctx->iface.HasEndCol(node)) {
-    int ret = snprintf(buf, BUF_SIZE, "%lu", ctx->iface.EndCol(node));
+    int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.EndCol(node));
     if (ret < 0 || ret >= BUF_SIZE) {
       goto error;
     }
