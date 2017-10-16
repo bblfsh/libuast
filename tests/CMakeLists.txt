@@ -1,5 +1,9 @@
 project (LIBUAST_TESTS C CXX)
-set (CMAKE_CXX_STANDARD 11)
+
+# Since older versions of CMake don't support C++ 17 standard yet,
+# hardcode flags instead of using
+# set (CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17" CACHE STRING "" FORCE)
 
 enable_testing()
 
