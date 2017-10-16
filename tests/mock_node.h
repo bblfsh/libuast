@@ -35,6 +35,10 @@ class Node {
 
   void AddRole(uint16_t role) { roles.push_back(role); }
 
+  void AddProperty(const std::string &key, const std::string &value) {
+    properties.push_back(make_tuple(key, value));
+  }
+
   void SetStartPosition(position p) { start_position = p; }
   void SetEndPosition(position p) { end_position = p; }
 };
@@ -101,29 +105,29 @@ static uint32_t StartCol(const void *node) {
 }
 
 static bool HasEndOffset(const void *node) {
-  return ((Node *)node)->start_position.has_value();
+  return ((Node *)node)->end_position.has_value();
 }
 
 static uint32_t EndOffset(const void *node) {
-  std::optional<position> p = ((Node *)node)->start_position;
+  std::optional<position> p = ((Node *)node)->end_position;
   return p.has_value() ? p.value().offset : 0;
 }
 
 static bool HasEndLine(const void *node) {
-  return ((Node *)node)->start_position.has_value();
+  return ((Node *)node)->end_position.has_value();
 }
 
 static uint32_t EndLine(const void *node) {
-  std::optional<position> p = ((Node *)node)->start_position;
+  std::optional<position> p = ((Node *)node)->end_position;
   return p.has_value() ? p.value().line : 0;
 }
 
 static bool HasEndCol(const void *node) {
-  return ((Node *)node)->start_position.has_value();
+  return ((Node *)node)->end_position.has_value();
 }
 
 static uint32_t EndCol(const void *node) {
-  std::optional<position> p = ((Node *)node)->start_position;
+  std::optional<position> p = ((Node *)node)->end_position;
   return p.has_value() ? p.value().col : 0;
 }
 
@@ -157,6 +161,7 @@ static Node *IdentifierMock(std::string name) {
   Node *id = new Node("Identifier");
   id->token = name;
   id->AddRole(1);
+  id->AddProperty("level", "0");
   return id;
 }
 
@@ -180,6 +185,8 @@ static Node *LiteralMock(std::string token) {
 static Node *ModuleMock() {
   Node *module = new Node("Module");
   module->AddRole(34); // File
+  module->SetStartPosition({0, 1, 1});
+  module->SetEndPosition({2813, 10, 92});
   return module;
 }
 
