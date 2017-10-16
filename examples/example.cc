@@ -10,8 +10,8 @@
 
 struct position {
   uint32_t offset;
-  uint32_t col;
   uint32_t line;
+  uint32_t col;
 };
 
 class Node {
@@ -162,7 +162,7 @@ int main(int argc, char **argv) {
       .RolesSize = RolesSize,
       .RoleAt = RoleAt,
       .PropertiesSize = PropertiesSize,
-      .PropertyKeyAt = PropertyValueAt,
+      .PropertyKeyAt = PropertyKeyAt,
       .PropertyValueAt = PropertyValueAt,
       .HasStartOffset = HasStartOffset,
       .StartOffset = StartOffset,
