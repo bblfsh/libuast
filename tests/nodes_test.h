@@ -166,6 +166,110 @@ void TestUastFilterToken() {
   UastFree(ctx);
 }
 
+void TestUastFilterProperties() {
+  Uast *ctx = UastNew(IfaceMock());
+  Node *root = TreeMock();
+  Nodes *nodes = UastFilter(ctx, root, "//*[@level='0']");
+  CU_ASSERT_FATAL(nodes != NULL);
+  CU_ASSERT_FATAL(NodesSize(nodes) == 6);
+
+  Node *node = (Node *)NodeAt(nodes, 0);
+  CU_ASSERT_FATAL(node->internal_type == "Identifier");
+
+  NodesFree(nodes);
+  UastFree(ctx);
+}
+
+void TestUastFilterStartOffset() {
+  Uast *ctx = UastNew(IfaceMock());
+  Node *root = TreeMock();
+  Nodes *nodes = UastFilter(ctx, root, "//*[@startOffset='0']");
+  CU_ASSERT_FATAL(nodes != NULL);
+  CU_ASSERT_FATAL(NodesSize(nodes) == 1);
+
+  Node *node = (Node *)NodeAt(nodes, 0);
+  CU_ASSERT_FATAL(node->internal_type == "Module");
+  CU_ASSERT_FATAL(HasStartOffset(node));
+
+  NodesFree(nodes);
+  UastFree(ctx);
+}
+
+void TestUastFilterStartLine() {
+  Uast *ctx = UastNew(IfaceMock());
+  Node *root = TreeMock();
+  Nodes *nodes = UastFilter(ctx, root, "//*[@startLine='1']");
+  CU_ASSERT_FATAL(nodes != NULL);
+  CU_ASSERT_FATAL(NodesSize(nodes) == 1);
+
+  Node *node = (Node *)NodeAt(nodes, 0);
+  CU_ASSERT_FATAL(node->internal_type == "Module");
+  CU_ASSERT_FATAL(HasStartLine(node));
+
+  NodesFree(nodes);
+  UastFree(ctx);
+}
+
+void TestUastFilterStartCol() {
+  Uast *ctx = UastNew(IfaceMock());
+  Node *root = TreeMock();
+  Nodes *nodes = UastFilter(ctx, root, "//*[@startCol='1']");
+  CU_ASSERT_FATAL(nodes != NULL);
+  CU_ASSERT_FATAL(NodesSize(nodes) == 1);
+
+  Node *node = (Node *)NodeAt(nodes, 0);
+  CU_ASSERT_FATAL(node->internal_type == "Module");
+  CU_ASSERT_FATAL(HasStartCol(node));
+
+  NodesFree(nodes);
+  UastFree(ctx);
+}
+
+void TestUastFilterEndOffset() {
+  Uast *ctx = UastNew(IfaceMock());
+  Node *root = TreeMock();
+  Nodes *nodes = UastFilter(ctx, root, "//*[@endOffset='2813']");
+  CU_ASSERT_FATAL(nodes != NULL);
+  CU_ASSERT_FATAL(NodesSize(nodes) == 1);
+
+  Node *node = (Node *)NodeAt(nodes, 0);
+  CU_ASSERT_FATAL(node->internal_type == "Module");
+  CU_ASSERT_FATAL(HasEndOffset(node));
+
+  NodesFree(nodes);
+  UastFree(ctx);
+}
+
+void TestUastFilterEndLine() {
+  Uast *ctx = UastNew(IfaceMock());
+  Node *root = TreeMock();
+  Nodes *nodes = UastFilter(ctx, root, "//*[@endLine='10']");
+  CU_ASSERT_FATAL(nodes != NULL);
+  CU_ASSERT_FATAL(NodesSize(nodes) == 1);
+
+  Node *node = (Node *)NodeAt(nodes, 0);
+  CU_ASSERT_FATAL(node->internal_type == "Module");
+  CU_ASSERT_FATAL(HasEndLine(node));
+
+  NodesFree(nodes);
+  UastFree(ctx);
+}
+
+void TestUastFilterEndCol() {
+  Uast *ctx = UastNew(IfaceMock());
+  Node *root = TreeMock();
+  Nodes *nodes = UastFilter(ctx, root, "//*[@endCol='92']");
+  CU_ASSERT_FATAL(nodes != NULL);
+  CU_ASSERT_FATAL(NodesSize(nodes) == 1);
+
+  Node *node = (Node *)NodeAt(nodes, 0);
+  CU_ASSERT_FATAL(node->internal_type == "Module");
+  CU_ASSERT_FATAL(HasEndCol(node));
+
+  NodesFree(nodes);
+  UastFree(ctx);
+}
+
 void TestXpath() {
   NodeIface iface = IfaceMock();
   Uast *ctx = UastNew(iface);

@@ -33,6 +33,13 @@ int main() {
   ADD_TEST(suite, "test of UastFilter() pointers", TestUastFilterPointers);
   ADD_TEST(suite, "test of UastFilter() counting", TestUastFilterCount);
   ADD_TEST(suite, "test of UastFilter() with tokens", TestUastFilterToken);
+  ADD_TEST(suite, "test of UastFilter() with properties", TestUastFilterProperties);
+  ADD_TEST(suite, "test of UastFilter() with start offset", TestUastFilterStartOffset);
+  ADD_TEST(suite, "test of UastFilter() with start line", TestUastFilterStartLine);
+  ADD_TEST(suite, "test of UastFilter() with start col", TestUastFilterStartCol);
+  ADD_TEST(suite, "test of UastFilter() with end offset", TestUastFilterEndOffset);
+  ADD_TEST(suite, "test of UastFilter() with end line", TestUastFilterEndLine);
+  ADD_TEST(suite, "test of UastFilter() with end col", TestUastFilterEndCol);
   ADD_TEST(suite, "test failing UastFilter() (bad Xpath)", TestXpath);
   ADD_TEST(suite, "test failing UastFilter() (bad xmlNewDoc)", TestXmlNewDoc);
   ADD_TEST(suite, "test failing UastFilter() (bad xmlNewNode)", TestXmlNewNode);
