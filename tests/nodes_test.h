@@ -270,6 +270,14 @@ void TestUastFilterEndCol() {
   UastFree(ctx);
 }
 
+void TestUastFilterPosition() {
+  Uast *ctx = UastNew(IfaceMock());
+  Node *root = TreeMock();
+  Nodes *nodes = UastFilter(ctx, root, "//*[@startOffset or @endOffset]");
+  CU_ASSERT_FATAL(nodes != NULL);
+  CU_ASSERT_FATAL(NodesSize(nodes) == 7);
+}
+
 void TestXpath() {
   NodeIface iface = IfaceMock();
   Uast *ctx = UastNew(iface);

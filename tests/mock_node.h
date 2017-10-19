@@ -162,6 +162,7 @@ static Node *IdentifierMock(std::string name) {
   id->token = name;
   id->AddRole(1);
   id->AddProperty("level", "0");
+  id->SetStartPosition({100, 20, 10});
   return id;
 }
 
