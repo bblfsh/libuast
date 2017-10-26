@@ -6,19 +6,9 @@ Libuast is decoupled from the UAST data structures. This means that the UAST its
 
 ## Features
 
-- [x] xpath querying
-- [ ] iterators
-
-#### xpath querying
-
 Currently only xpath querying is implemented, it allows to filter branches of the UAST tree that satisfy the xpath query string.
 
-For example:
-
-- Return all the numeric literals in python: `//NumLiteral`
-- Return all the numeric literal in ANY language: `//*[@roleNumber and @roleLiteral]`
-
-As you can see, it is possible to query the UAST using the `internal_type` and/or by universal roles, this way it can be easily reused across different languages.
+More features may be implemented in the future, like UAST iterators.
 
 ## Installation
 
@@ -49,6 +39,57 @@ make install
 make test
 ```
 
+## Query language
+
+Any of the [node](https://godoc.org/github.com/bblfsh/sdk/uast#Role) fields can be used for querying, which are mapped in the following way:
+
+* `InternalType` is converted to the element name
+* `Token`, if available, is converted to an attribute with `token` as keyword and the actual token as value
+* Every `Role` is converted to an attribute concatenating a `role` prefix and the role name in CamelCase.
+* Every `Property` is converted to an attribute with the property keyword as keyword and the property value as value
+* `StartPosition`, if available, is mapped to three attributes:
+  * A `startOffset` attribute, with the offset as value
+  * A `startLine` attribute, with the line as value
+  * A `startCol` attribute, with the column as value
+* `EndPosition`, if available, is mapped to three attributes:
+  * A `endOffset` attribute, with the offset as value
+  * A `endLine` attribute, with the line as value
+  * A `endCol` attribute, with the column as value
+
+which are mapped in to XML in the following way:
+
+```xml
+<{{InternalType}}
+    token='{{Token}}'
+	{{for role in Roles}}
+	role{{role}}
+	{{for key, value in Properties}}
+	{{key}}='{{value}}
+	startOffset={{StartPosition.Offset}}
+	startLine={{StartPosition.Line}}
+	startCol={{StartPosition.Col}}
+	endOffset={{EndPosition.Offset}}
+	endLine={{EndPosition.Line}}
+	endCol={{EndPosition.Col}}>
+	{{Children}}
+</{{InternalType}}>
+```
+
+This means that both language specific queries (`InternalType`, `Properties`) and language agnostic queries (`Roles`) can be done.
+For example:
+
+- Return all the numeric literals in Python: `//NumLiteral`
+- Return all the numeric literals in ANY language: `//*[@roleNumber and @roleLiteral]`
+- Return all the integer literals in Python: `//*[@NumType='int']`
+
+The query language also allow some more complex queries:
+
+- All the elements in the tree that have either start or end offsets: `//*[@startOffset or @endOffset]`
+- All the simple identifiers: `//*[@roleIdentifier and not(@roleQualified)]`
+- All the simple identifiers that don't have any positioning: `//*[@roleIdentifier and not(@roleQualified) and not(@startOffset) and not(@endOffset)]`
+- All the arguments in function calls: `//*[@roleCall and @roleArgument]`
+- All the numeric literals in binary arithmetic operators: `//*[@roleBinary and @roleOperator and @roleArithmetic]//*[@roleNumber and @roleLiteral]`
+
 ## Implementing the node interface
 
 `libuast` is built to be easily bindable,
@@ -66,6 +107,21 @@ Uast *ctx = Node((NodeIface){
     .ChildAt = ChildAt,
     .RolesSize = RolesSize,
     .RoleAt = RoleAt,
+    .PropertiesSize = PropertiesSize,
+    .PropertyKeyAt = PropertyKeyAt,
+    .PropertyValueAt = PropertyValueAt,
+    .HasStartOffset = HasStartOffset,
+    .StartOffset = StartOffset,
+    .HasStartLine = HasStartLine,
+    .StartLine = StartLine,
+    .HasStartCol = HasStartCol,
+    .StartCol = StartCol,
+    .HasEndOffset = HasEndOffset,
+    .EndOffset = EndOffset,
+    .HasEndLine = HasEndLine,
+    .EndLine = EndLine,
+    .HasEndCol = HasEndCol,
+    .EndCol = EndCol,
 });
 ```
 
@@ -118,40 +174,6 @@ if (nodes) {
 // do not forget to free the nodes afterwards.
 NodesFree(nodes);
 ```
-
-## Library internals
-
-Internally UAST nodes are mapped to XML nodes in order to run xpath queries against them.
-
-In _pseudo-xml_:
-
-```xml
-<{{internal_node}} role{{ROLE[n]}}> {{CHILDREN}} </{{internal_node}}>
-```
-
-As we can see, the `internal_type` (which is language-dependant) of the node is mapped as the tag-name while the roles are mapped as attributes of the element.
-
-The roles are mapped as `role{{the role name in CamelCase}}`.
-
-Examples:
-
-  - `Identifier`   -> `roleIdentifier`
-  - `Import`  -> `roleImport`
-
-
-So, for example, to get all the number literals in Python, a filter to look for `NumLiteral` `internal_type` should work:
-
-```python
-xpath = "//NumLiteral"
-```
-
-But this is language dependant. To make it universal, roles should be used instead:
-
-```python
-xpath = "//*[@roleNumber and @roleLiteral]"
-```
-
-Look at [SDK documentation](https://godoc.org/github.com/bblfsh/sdk/uast#Role) for more information about roles.
 
 ## Contribute
 
