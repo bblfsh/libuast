@@ -284,7 +284,10 @@ void TestXpath() {
   Node module = Node("Module");
 
   CU_ASSERT_FATAL(UastFilter(ctx, &module, "/Module/") == NULL);
+  char* error = LastError();
+  CU_ASSERT_FATAL(!strcmp(error, "Invalid expression\n"));
 
+  free(error);
   UastFree(ctx);
 }
 
