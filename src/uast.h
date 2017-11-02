@@ -48,6 +48,12 @@ void UastFree(Uast *ctx);
 // ```
 Nodes *UastFilter(const Uast *ctx, void *node, const char *query);
 
+// Returns a string with the latest error.
+// It may be an empty string if there's been no error.
+//
+// Memory for the string is obtained with malloc, and can be freed with free.
+char *LastError();
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
