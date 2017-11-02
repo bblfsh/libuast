@@ -2,10 +2,12 @@
 #include "uast_private.h"
 
 #include <inttypes.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -14,6 +16,9 @@
 
 #include "roles.h"
 #include "testing_tools.h"
+
+#define BUF_SIZE 256
+char error_message[BUF_SIZE];
 
 struct Uast {
   NodeIface iface;
@@ -51,6 +56,7 @@ void *NodeAt(const Nodes *nodes, int index) {
 }
 
 Uast *UastNew(NodeIface iface) {
+  memset(error_message, BUF_SIZE, 0);
   Uast *ctx = calloc(1, sizeof(Uast));
   if (!ctx) {
     return NULL;
@@ -66,6 +72,18 @@ void UastFree(Uast *ctx) {
 }
 
 NodeIface UastGetIface(const Uast *ctx) { return ctx->iface; }
+
+void Error(void *ctx, const char *msg, ...) {
+   va_list arg_ptr;
+
+   va_start(arg_ptr, msg);
+   vsnprintf(error_message, BUF_SIZE, msg, arg_ptr);
+   va_end(arg_ptr);
+}
+
+const char *LastError() {
+  return strndup(error_message, BUF_SIZE);
+}
 
 Nodes *UastFilter(const Uast *ctx, void *node, const char *query) {
   xmlDocPtr doc = NULL;
@@ -85,6 +103,10 @@ Nodes *UastFilter(const Uast *ctx, void *node, const char *query) {
   if (!xpathCtx) {
     goto error2;
   }
+
+  xmlGenericErrorFunc handler = (xmlGenericErrorFunc)Error;
+  initGenericErrorDefaultFunc(&handler);
+
   xpathObj = xmlXPathEvalExpression(BAD_CAST(query), xpathCtx);
   if (!xpathObj) {
     goto error3;
@@ -145,7 +167,6 @@ void **NodesAll(const Nodes *nodes) { return nodes->results; }
 
 static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
                                 xmlNodePtr parent) {
-  const int BUF_SIZE = 256;
   char buf[BUF_SIZE];
 
   const char *internal_type = ctx->iface.InternalType(node);
