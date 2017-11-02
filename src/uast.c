@@ -60,7 +60,7 @@ Uast *UastNew(NodeIface iface) {
   memset(error_message, BUF_SIZE, 0);
   Uast *ctx = calloc(1, sizeof(Uast));
   if (!ctx) {
-    Error(NULL, "Unable to get memory");
+    Error(NULL, "Unable to get memory\n");
     return NULL;
   }
   xmlInitParser();
@@ -83,7 +83,7 @@ Nodes *UastFilter(const Uast *ctx, void *node, const char *query) {
 
   Nodes *nodes = NodesNew();
   if (!nodes) {
-    Error(NULL, "Unable to get memory");
+    Error(NULL, "Unable to get memory\n");
     return NULL;
   }
   doc = CreateDocument(ctx, node);
@@ -106,14 +106,14 @@ Nodes *UastFilter(const Uast *ctx, void *node, const char *query) {
   // Get array of results
   xmlNodeSetPtr result = xpathObj->nodesetval;
   if (!result) {
-    Error(NULL, "Unable to get array of results");
+    Error(NULL, "Unable to get array of results\n");
     goto error3;
   }
   xmlNodePtr *results = result->nodeTab;
   int size = (result) ? result->nodeNr : 0;
 
   if (NodesSetSize(nodes, size) != 0) {
-    Error(NULL, "Unable to set nodes size");
+    Error(NULL, "Unable to set nodes size\n");
     goto error3;
   }
 
@@ -212,7 +212,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
   if (ctx->iface.HasStartOffset(node)) {
     int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.StartOffset(node));
     if (ret < 0 || ret >= BUF_SIZE) {
-      Error(NULL, "Unable to set start offset");
+      Error(NULL, "Unable to set start offset\n");
       goto error;
     }
     if (!xmlNewProp(xmlNode, BAD_CAST "startOffset", BAD_CAST buf)) {
@@ -222,7 +222,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
   if (ctx->iface.HasStartLine(node)) {
     int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.StartLine(node));
     if (ret < 0 || ret >= BUF_SIZE) {
-      Error(NULL, "Unable to set start line");
+      Error(NULL, "Unable to set start line\n");
       goto error;
     }
     if (!xmlNewProp(xmlNode, BAD_CAST "startLine", BAD_CAST buf)) {
@@ -232,7 +232,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
   if (ctx->iface.HasStartCol(node)) {
     int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.StartCol(node));
     if (ret < 0 || ret >= BUF_SIZE) {
-      Error(NULL, "Unable to set start column");
+      Error(NULL, "Unable to set start column\n");
       goto error;
     }
     if (!xmlNewProp(xmlNode, BAD_CAST "startCol", BAD_CAST buf)) {
@@ -242,7 +242,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
   if (ctx->iface.HasEndOffset(node)) {
     int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.EndOffset(node));
     if (ret < 0 || ret >= BUF_SIZE) {
-      Error(NULL, "Unable to set end offset");
+      Error(NULL, "Unable to set end offset\n");
       goto error;
     }
     if (!xmlNewProp(xmlNode, BAD_CAST "endOffset", BAD_CAST buf)) {
@@ -252,7 +252,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
   if (ctx->iface.HasEndLine(node)) {
     int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.EndLine(node));
     if (ret < 0 || ret >= BUF_SIZE) {
-      Error(NULL, "Unable to set end line");
+      Error(NULL, "Unable to set end line\n");
       goto error;
     }
     if (!xmlNewProp(xmlNode, BAD_CAST "endLine", BAD_CAST buf)) {
@@ -262,7 +262,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
   if (ctx->iface.HasEndCol(node)) {
     int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.EndCol(node));
     if (ret < 0 || ret >= BUF_SIZE) {
-      Error(NULL, "Unable to set end column");
+      Error(NULL, "Unable to set end column\n");
       goto error;
     }
     if (!xmlNewProp(xmlNode, BAD_CAST "endCol", BAD_CAST buf)) {
