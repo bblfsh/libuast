@@ -180,7 +180,9 @@ int main(int argc, char **argv) {
 
   Nodes *nodes = UastFilter(ctx, &root, "/compilation_unit//identifier");
   if (!nodes) {
-    std::cerr << "libuast.find() failed" << std::endl;
+    char *error = LastError();
+    std::cerr << "libuast.find() failed: " << error;
+    free(error);
     return -1;
   }
 
