@@ -57,7 +57,7 @@ void *NodeAt(const Nodes *nodes, int index) {
 }
 
 Uast *UastNew(NodeIface iface) {
-  memset(error_message, BUF_SIZE, 0);
+  memset(error_message, 0, BUF_SIZE);
   Uast *ctx = calloc(1, sizeof(Uast));
   if (!ctx) {
     Error(NULL, "Unable to get memory\n");
