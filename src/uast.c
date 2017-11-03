@@ -38,7 +38,7 @@ void Error(void *ctx, const char *msg, ...);
 ///////// PUBLIC API /////////
 //////////////////////////////
 
-Nodes *NodesNew() { return calloc(1, sizeof(Nodes)); }
+Nodes *NodesNew(void) { return calloc(1, sizeof(Nodes)); }
 
 void NodesFree(Nodes *nodes) {
   if (nodes) {
@@ -137,7 +137,7 @@ error1:
   return nodes;
 }
 
-char *LastError() {
+char *LastError(void) {
   return strndup(error_message, BUF_SIZE);
 }
 

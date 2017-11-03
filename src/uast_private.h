@@ -12,7 +12,7 @@ extern "C" {
 // These functions are used internally for testing and not exported.
 
 // Returns a new Nodes structure
-Nodes *NodesNew();
+Nodes *NodesNew(void);
 
 // Sets the size of nodes, allocating space if needed.
 // Returns 0 if the size was changed correctly.

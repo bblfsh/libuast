@@ -52,7 +52,7 @@ Nodes *UastFilter(const Uast *ctx, void *node, const char *query);
 // It may be an empty string if there's been no error.
 //
 // Memory for the string is obtained with malloc, and can be freed with free.
-char *LastError();
+char *LastError(void);
 
 #ifdef __cplusplus
 }  // extern "C"
