@@ -38,7 +38,7 @@ void Error(void *ctx, const char *msg, ...);
 ///////// PUBLIC API /////////
 //////////////////////////////
 
-Nodes *NodesNew() { return calloc(1, sizeof(Nodes)); }
+Nodes *NodesNew(void) { return calloc(1, sizeof(Nodes)); }
 
 void NodesFree(Nodes *nodes) {
   if (nodes) {
@@ -57,7 +57,7 @@ void *NodeAt(const Nodes *nodes, int index) {
 }
 
 Uast *UastNew(NodeIface iface) {
-  memset(error_message, BUF_SIZE, 0);
+  memset(error_message, 0, BUF_SIZE);
   Uast *ctx = calloc(1, sizeof(Uast));
   if (!ctx) {
     Error(NULL, "Unable to get memory\n");
@@ -137,7 +137,7 @@ error1:
   return nodes;
 }
 
-char *LastError() {
+char *LastError(void) {
   return strndup(error_message, BUF_SIZE);
 }
 
