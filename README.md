@@ -41,7 +41,7 @@ make test
 
 ## Query language
 
-Any of the [node](https://godoc.org/github.com/bblfsh/sdk/uast#Role) fields can be used for querying, which are mapped in the following way:
+Any of the [node](https://godoc.org/github.com/bblfsh/sdk/uast#Node) fields can be used for querying, which are mapped in the following way:
 
 * `InternalType` is converted to the element name
 * `Token`, if available, is converted to an attribute with `token` as keyword and the actual token as value
@@ -75,20 +75,9 @@ which are mapped in to XML in the following way:
 </{{InternalType}}>
 ```
 
-This means that both language specific queries (`InternalType`, `Properties`) and language agnostic queries (`Roles`) can be done.
-For example:
-
-- Return all the numeric literals in Python: `//NumLiteral`
-- Return all the numeric literals in ANY language: `//*[@roleNumber and @roleLiteral]`
-- Return all the integer literals in Python: `//*[@NumType='int']`
-
-The query language also allow some more complex queries:
-
-- All the elements in the tree that have either start or end offsets: `//*[@startOffset or @endOffset]`
-- All the simple identifiers: `//*[@roleIdentifier and not(@roleQualified)]`
-- All the simple identifiers that don't have any positioning: `//*[@roleIdentifier and not(@roleQualified) and not(@startOffset) and not(@endOffset)]`
-- All the arguments in function calls: `//*[@roleCall and @roleArgument]`
-- All the numeric literals in binary arithmetic operators: `//*[@roleBinary and @roleOperator and @roleArithmetic]//*[@roleNumber and @roleLiteral]`
+This means that both language specific queries (`InternalType`, `Properties`)
+and language agnostic queries (`Roles`) can be done.  Check [the official
+documentation](https://doc.bblf.sh/user/uast-querying.html) for example queries.
 
 ## Implementing the node interface
 
