@@ -112,7 +112,9 @@ UastIterator *UastIteratorNew(const Uast *ctx, void *node, TreeOrder order) {
 
 void UastIteratorFree(UastIterator *iter) {
   g_queue_free(iter->stack);
-  g_hash_table_destroy(iter->childrenAdded);
+  if (iter->childrenAdded) {
+    g_hash_table_destroy(iter->childrenAdded);
+  }
   g_free(iter);
 }
 

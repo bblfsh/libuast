@@ -349,6 +349,8 @@ void TestUastIteratorPreOrder() {
   CU_ASSERT_FATAL(node->internal_type == "Identifier");
   CU_ASSERT_FATAL(node->token == "B2");
 
+  UastIteratorFree(iter);
+  UastFree(ctx);
 }
 
 void TestUastIteratorLevelOrder() {
@@ -359,6 +361,10 @@ void TestUastIteratorLevelOrder() {
   CU_ASSERT_FATAL(iter != NULL);
 
   Node *node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Module");
+
+  node = (Node *)UastIteratorNext(iter);
   CU_ASSERT_FATAL(node != NULL);
   CU_ASSERT_FATAL(node->internal_type == "Assign");
 
@@ -417,6 +423,9 @@ void TestUastIteratorLevelOrder() {
   CU_ASSERT_FATAL(node != NULL);
   CU_ASSERT_FATAL(node->internal_type == "Identifier");
   CU_ASSERT_FATAL(node->token == "B1");
+
+  UastIteratorFree(iter);
+  UastFree(ctx);
 }
 
 void TestUastIteratorPostOrder() {
@@ -427,6 +436,11 @@ void TestUastIteratorPostOrder() {
   CU_ASSERT_FATAL(iter != NULL);
 
   Node *node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Identifier");
+  CU_ASSERT_FATAL(node->token == "A0");
+
+  node = (Node *)UastIteratorNext(iter);
   CU_ASSERT_FATAL(node != NULL);
   CU_ASSERT_FATAL(node->internal_type == "NumLiteral");
   CU_ASSERT_FATAL(node->token == "1");
@@ -484,6 +498,9 @@ void TestUastIteratorPostOrder() {
   node = (Node *)UastIteratorNext(iter);
   CU_ASSERT_FATAL(node != NULL);
   CU_ASSERT_FATAL(node->internal_type == "Module");
+
+  UastIteratorFree(iter);
+  UastFree(ctx);
 }
 
 void TestXpath() {
