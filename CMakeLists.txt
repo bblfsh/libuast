@@ -11,8 +11,10 @@ set(OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/lib")
 
 # Required dependencies
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
-find_package (CUnit REQUIRED)
+find_package(CUnit REQUIRED)
 find_package(LibXml2 REQUIRED)
+find_package(PkgConfig REQUIRED) 
+pkg_check_modules(GLIB2 REQUIRED glib-2.0)
 
 # Library name
 set(libname uast)
@@ -30,12 +32,16 @@ set(libinclude
   ${CMAKE_SOURCE_DIR}/src/nodes.h)
 
 # Dependencies
-set(libdep ${LIBXML2_LIBRARIES})
-link_directories(${OUTPUT_PATH})
+set(libdep ${LIBXML2_LIBRARIES} ${GLIB2_LIBRARIES})
+link_directories(
+  ${OUTPUT_PATH} 
+  ${GLIB2_LIBRARY_DIRS}
+  )
 
 # Include headers
 include_directories(
   ${LIBXML2_INCLUDE_DIR}
+  ${GLIB2_INCLUDE_DIRS}
   ${CMAKE_SOURCE_DIR})
 
 # Compile objects (then used by .a and .so)

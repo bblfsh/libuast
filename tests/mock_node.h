@@ -224,28 +224,28 @@ static Node *TreeMock() {
   module->AddChild(assign_1);
   module->AddChild(assign_2);
 
-  Node *idA_0 = IdentifierMock("A");
+  Node *idA_0 = IdentifierMock("A0");
   Node *literal_1 = LiteralMock("1");
   assign_0->AddChild(idA_0);
   assign_0->AddChild(literal_1);
 
-  Node *idB_0 = IdentifierMock("B");
+  Node *idB_0 = IdentifierMock("B0");
   Node *literal_2 = LiteralMock("2");
   assign_1->AddChild(idB_0);
   assign_1->AddChild(literal_2);
 
   Node *sum = SumMock();
-  Node *idA_1 = IdentifierMock("A");
-  Node *idB_1 = IdentifierMock("B");
+  Node *idA_1 = IdentifierMock("A1");
+  Node *idB_1 = IdentifierMock("B1");
   sum->AddChild(idA_1);
   sum->AddChild(idB_1);
 
   Node *mult = MultMock();
-  Node *idB_2 = IdentifierMock("B");
+  Node *idB_2 = IdentifierMock("B2");
   mult->AddChild(sum);
   mult->AddChild(idB_2);
 
-  Node *idC_0 = IdentifierMock("C");
+  Node *idC_0 = IdentifierMock("C0");
   assign_2->AddChild(idC_0);
   assign_2->AddChild(mult);
 

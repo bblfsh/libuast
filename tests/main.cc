@@ -1,4 +1,5 @@
 extern "C" {
+
 #include <CUnit/Basic.h>
 }
 
@@ -31,6 +32,9 @@ int main() {
   ADD_TEST(suite, "test of NodesNew()", TestNodesNew);
   ADD_TEST(suite, "test failing NodesNew() (bad calloc)", TestNodesNewAlloc);
   ADD_TEST(suite, "test of UastFilter() pointers", TestUastFilterPointers);
+  ADD_TEST(suite, "test iteration", TestUastIteratorPreOrder);
+  ADD_TEST(suite, "test iteration", TestUastIteratorLevelOrder);
+  ADD_TEST(suite, "test iteration", TestUastIteratorPostOrder);
   ADD_TEST(suite, "test of UastFilter() counting", TestUastFilterCount);
   ADD_TEST(suite, "test of UastFilter() with tokens", TestUastFilterToken);
   ADD_TEST(suite, "test of UastFilter() with properties", TestUastFilterProperties);
@@ -55,7 +59,7 @@ int main() {
 
   // run all tests using the CUnit Basic interface
   CU_basic_set_mode(CU_BRM_VERBOSE);
-  CU_set_error_action(CUEA_ABORT);
+  CU_set_error_action(CUEA_FAIL);
   CU_basic_run_tests();
   CU_pRunSummary summary = CU_get_run_summary();
   int exitValue = summary->nTestsFailed + summary->nAssertsFailed;

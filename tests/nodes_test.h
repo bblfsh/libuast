@@ -278,6 +278,214 @@ void TestUastFilterPosition() {
   CU_ASSERT_FATAL(NodesSize(nodes) == 7);
 }
 
+void TestUastIteratorPreOrder() {
+  Uast *ctx = UastNew(IfaceMock());
+  Node *root = TreeMock();
+
+  UastIterator *iter = UastIteratorNew(ctx, root, PREORDER);
+  CU_ASSERT_FATAL(iter != NULL);
+
+  Node *node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Module");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Assign");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Identifier");
+  CU_ASSERT_FATAL(node->token == "A0");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "NumLiteral");
+  CU_ASSERT_FATAL(node->token == "1");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Assign");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Identifier");
+  CU_ASSERT_FATAL(node->token == "B0");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "NumLiteral");
+  CU_ASSERT_FATAL(node->token == "2");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Assign");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Identifier");
+  CU_ASSERT_FATAL(node->token == "C0");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Mult");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Sum");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Identifier");
+  CU_ASSERT_FATAL(node->token == "A1");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Identifier");
+  CU_ASSERT_FATAL(node->token == "B1");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Identifier");
+  CU_ASSERT_FATAL(node->token == "B2");
+
+}
+
+void TestUastIteratorLevelOrder() {
+  Uast *ctx = UastNew(IfaceMock());
+  Node *root = TreeMock();
+
+  UastIterator *iter = UastIteratorNew(ctx, root, LEVELORDER);
+  CU_ASSERT_FATAL(iter != NULL);
+
+  Node *node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Assign");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Assign");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Assign");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Identifier");
+  CU_ASSERT_FATAL(node->token == "A0");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "NumLiteral");
+  CU_ASSERT_FATAL(node->token == "1");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Identifier");
+  CU_ASSERT_FATAL(node->token == "B0");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "NumLiteral");
+  CU_ASSERT_FATAL(node->token == "2");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Identifier");
+  CU_ASSERT_FATAL(node->token == "C0");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Mult");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Sum");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Identifier");
+  CU_ASSERT_FATAL(node->token == "B2");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Identifier");
+  CU_ASSERT_FATAL(node->token == "A1");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Identifier");
+  CU_ASSERT_FATAL(node->token == "B1");
+}
+
+void TestUastIteratorPostOrder() {
+  Uast *ctx = UastNew(IfaceMock());
+  Node *root = TreeMock();
+
+  UastIterator *iter = UastIteratorNew(ctx, root, POSTORDER);
+  CU_ASSERT_FATAL(iter != NULL);
+
+  Node *node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "NumLiteral");
+  CU_ASSERT_FATAL(node->token == "1");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Assign");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Identifier");
+  CU_ASSERT_FATAL(node->token == "B0");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "NumLiteral");
+  CU_ASSERT_FATAL(node->token == "2");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Assign");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Identifier");
+  CU_ASSERT_FATAL(node->token == "C0");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Identifier");
+  CU_ASSERT_FATAL(node->token == "A1");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Identifier");
+  CU_ASSERT_FATAL(node->token == "B1");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Sum");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Identifier");
+  CU_ASSERT_FATAL(node->token == "B2");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Mult");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Assign");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Module");
+}
+
 void TestXpath() {
   NodeIface iface = IfaceMock();
   Uast *ctx = UastNew(iface);

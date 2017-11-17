@@ -14,6 +14,12 @@ extern "C" {
 // Once it is not used anymore, it shall be released calling `UastFree`.
 typedef struct Uast Uast;
 
+// An UastIterator is used to keep the state of the current iteration over the tree.
+// It's initialized with UastIteratorNew and freed with UastIteratorFree.
+typedef struct UastIterator UastIterator;
+
+typedef enum { PREORDER, POSTORDER, LEVELORDER } TreeOrder;
+
 // Uast needs a node implementation in order to work. This is needed
 // because the data structure of the node itself is not defined by this
 // library, instead it provides an interface that is expected to be satisfied by
@@ -47,6 +53,10 @@ void UastFree(Uast *ctx);
 // <NumLiteral token="2" roleLiteral roleSimpleIdentifier></NumLiteral>
 // ```
 Nodes *UastFilter(const Uast *ctx, void *node, const char *query);
+
+UastIterator *UastIteratorNew(const Uast *ctx, void *node, TreeOrder order);
+void UastIteratorFree(UastIterator *iter);
+void *UastIteratorNext(UastIterator *iter);
 
 // Returns a string with the latest error.
 // It may be an empty string if there's been no error.

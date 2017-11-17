@@ -13,6 +13,7 @@
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
+#include <glib.h>
 
 #include "roles.h"
 #include "testing_tools.h"
@@ -22,6 +23,21 @@ char error_message[BUF_SIZE];
 
 struct Uast {
   NodeIface iface;
+};
+
+struct _NodeWrapper {
+  void *node;
+  struct _NodeWrapper *parent;
+  bool visited;
+};
+
+typedef struct _NodeWrapper NodeWrapper;
+
+struct UastIterator {
+  const Uast *ctx;
+  TreeOrder order;
+  GQueue *stack;
+  GHashTable *childrenAdded;
 };
 
 struct Nodes {
@@ -41,10 +57,8 @@ void Error(void *ctx, const char *msg, ...);
 Nodes *NodesNew(void) { return calloc(1, sizeof(Nodes)); }
 
 void NodesFree(Nodes *nodes) {
-  if (nodes) {
-    free(nodes->results);
-    free(nodes);
-  }
+  g_free(nodes->results);
+  g_free(nodes);
 }
 
 int NodesSize(const Nodes *nodes) { return nodes->len; }
@@ -69,8 +83,115 @@ Uast *UastNew(NodeIface iface) {
 }
 
 void UastFree(Uast *ctx) {
-  free(ctx);
+  g_free(ctx);
   xmlCleanupParser();
+}
+
+UastIterator *UastIteratorNew(const Uast *ctx, void *node, TreeOrder order) {
+  memset(error_message, 0, BUF_SIZE);
+
+  UastIterator *iter = calloc(1, sizeof(UastIterator));
+  if (!iter) {
+    Error(NULL, "Unable to get memory\n");
+    return NULL;
+  }
+
+  iter->stack = g_queue_new();
+  iter->order = order;
+
+  if (iter->order == POSTORDER) {
+    iter->childrenAdded = g_hash_table_new(g_int_hash, g_str_equal);
+  } else {
+    iter->childrenAdded = NULL;
+  }
+
+  g_queue_push_head(iter->stack, node);
+  iter->ctx = ctx;
+  return iter;
+}
+
+void UastIteratorFree(UastIterator *iter) {
+  g_queue_free(iter->stack);
+  g_hash_table_destroy(iter->childrenAdded);
+  g_free(iter);
+}
+
+static bool MaybeAddChildren(UastIterator *iter, void *node) {
+  bool wasAdded = g_hash_table_contains(iter->childrenAdded, node);
+
+  if(!wasAdded) {
+    int children_size = iter->ctx->iface.ChildrenSize(node);
+
+    for (int i = children_size - 1; i >= 0; i--) {
+      g_queue_push_head(iter->stack, iter->ctx->iface.ChildAt(node, i));
+    }
+    g_hash_table_add(iter->childrenAdded, node);
+  }
+
+  return wasAdded;
+}
+
+static void *PreOrderNext(UastIterator *iter) {
+  void *retNode = g_queue_pop_head(iter->stack);
+  if (retNode == NULL) {
+    return NULL;
+  }
+
+  // Add the node and children of the current to the stack
+  int children_size = iter->ctx->iface.ChildrenSize(retNode);
+
+  for (int i = children_size - 1; i >= 0; i--) {
+    g_queue_push_head(iter->stack, iter->ctx->iface.ChildAt(retNode, i));
+  }
+
+  return retNode;
+}
+
+static void *LevelOrderNext(UastIterator *iter) {
+  void *retNode = g_queue_pop_head(iter->stack);
+  if (retNode == NULL) {
+    return NULL;
+  }
+
+  // Add the node and children of the current to the stack
+  int children_size = iter->ctx->iface.ChildrenSize(retNode);
+
+  for (int i = 0; i < children_size; i++) {
+    g_queue_push_tail(iter->stack, iter->ctx->iface.ChildAt(retNode, i));
+  }
+
+  return retNode;
+}
+
+static void *PostOrderNext(UastIterator *iter) {
+  void *curNode = g_queue_peek_head(iter->stack);
+  if (curNode == NULL) {
+    return NULL;
+  }
+
+  while(!MaybeAddChildren(iter, curNode)) {
+    curNode = g_queue_peek_head(iter->stack);
+  }
+
+  return g_queue_pop_head(iter->stack);
+}
+
+void *UastIteratorNext(UastIterator *iter) {
+
+  if (iter == NULL || g_queue_is_empty(iter->stack)) {
+    return NULL;
+  }
+
+  void *retNode = NULL;
+
+  switch(iter->order) {
+    case PREORDER:
+      return PreOrderNext(iter);
+    case LEVELORDER:
+      return LevelOrderNext(iter);
+    case POSTORDER:
+      return PostOrderNext(iter);
+  }
 }
 
 NodeIface UastGetIface(const Uast *ctx) { return ctx->iface; }
