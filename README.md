@@ -165,6 +165,27 @@ if (nodes) {
 NodesFree(nodes);
 ```
 
+#### UAST Iterators
+
+The API provides a UASTIterator type that can iterate over the UAST in
+pre-order, post-order or level-order.
+
+Example:
+```c
+UastIterator *iter = UastIteratorNew(uast, rootNode, PREORDER);
+
+for(;;) {
+  void *node = UastIteratorNext(iter);
+  
+  if (node == NULL)
+    break;
+
+  // ... do something with the node
+}
+
+UastIteratorFree(iter);
+```
+
 ## Contribute
 
 Please follow [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html).
