@@ -15,7 +15,8 @@ extern "C" {
 typedef struct Uast Uast;
 
 // An UastIterator is used to keep the state of the current iteration over the tree.
-// It's initialized with UastIteratorNew and freed with UastIteratorFree.
+// It's initialized with UastIteratorNew, used with UastIteratorNext and freed
+// with UastIteratorFree.
 typedef struct UastIterator UastIterator;
 
 typedef enum { PREORDER, POSTORDER, LEVELORDER } TreeOrder;
@@ -28,7 +29,7 @@ typedef enum { PREORDER, POSTORDER, LEVELORDER } TreeOrder;
 // This architecture allows libuast to work with every language's native node
 // data structures.
 //
-// Returns NULL if the Uast can not initialized.
+// Returns NULL and sets LastError if the Uast couldn't initialize.
 Uast *UastNew(NodeIface iface);
 
 // Releases Uast resources.
@@ -54,8 +55,20 @@ void UastFree(Uast *ctx);
 // ```
 Nodes *UastFilter(const Uast *ctx, void *node, const char *query);
 
+// Create a new UastIterator pointer. This will allow you to traverse the UAST
+// calling UastIteratorNext. The node argument will be user as the root node of
+// the iteration. The TreeOrder argument specifies the traversal mode. It can be
+// PREORDER, POSTORDER or LEVELORDER. Once you've used the UastIterator, it must
+// be frees using UastIteratorFree.
+//
+// Returns NULL and sets LastError if the UastIterator couldn't initialize.
 UastIterator *UastIteratorNew(const Uast *ctx, void *node, TreeOrder order);
+
+// Frees an used UastIterator.
 void UastIteratorFree(UastIterator *iter);
+
+// Retrieve the next node of the traversal of an UAST tree or NULL if the
+// traversal has finished.
 void *UastIteratorNext(UastIterator *iter);
 
 // Returns a string with the latest error.

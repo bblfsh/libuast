@@ -174,12 +174,8 @@ Example:
 ```c
 UastIterator *iter = UastIteratorNew(uast, rootNode, PREORDER);
 
-for(;;) {
-  void *node = UastIteratorNext(iter);
-  
-  if (node == NULL)
-    break;
-
+void *node = NULL;
+while((node = UastIteratorNext(iter)) != NULL) {
   // ... do something with the node
 }
 

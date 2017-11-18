@@ -59,7 +59,7 @@ int main() {
 
   // run all tests using the CUnit Basic interface
   CU_basic_set_mode(CU_BRM_VERBOSE);
-  CU_set_error_action(CUEA_FAIL);
+  CU_set_error_action(CUEA_ABORT);
   CU_basic_run_tests();
   CU_pRunSummary summary = CU_get_run_summary();
   int exitValue = summary->nTestsFailed + summary->nAssertsFailed;
@@ -72,3 +72,4 @@ int main() {
     return exitValue;
   }
 }
+

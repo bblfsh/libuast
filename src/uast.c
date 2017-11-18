@@ -25,14 +25,6 @@ struct Uast {
   NodeIface iface;
 };
 
-struct _NodeWrapper {
-  void *node;
-  struct _NodeWrapper *parent;
-  bool visited;
-};
-
-typedef struct _NodeWrapper NodeWrapper;
-
 struct UastIterator {
   const Uast *ctx;
   TreeOrder order;
@@ -72,6 +64,7 @@ void *NodeAt(const Nodes *nodes, int index) {
 
 Uast *UastNew(NodeIface iface) {
   memset(error_message, 0, BUF_SIZE);
+
   Uast *ctx = calloc(1, sizeof(Uast));
   if (!ctx) {
     Error(NULL, "Unable to get memory\n");
@@ -118,19 +111,23 @@ void UastIteratorFree(UastIterator *iter) {
   g_free(iter);
 }
 
+// Adds the children of the node to the iterator queue and returns
+// if the node was already checked, which will happen with leaf nodes
+// or nodes which childs already processed. Used for the POSTORDER
+// iterative traversal algorithm.
 static bool MaybeAddChildren(UastIterator *iter, void *node) {
-  bool wasAdded = g_hash_table_contains(iter->childrenAdded, node);
 
-  if(!wasAdded) {
+  bool checked = g_hash_table_contains(iter->childrenAdded, node);
+
+  if(!checked) {
     int children_size = iter->ctx->iface.ChildrenSize(node);
-
     for (int i = children_size - 1; i >= 0; i--) {
       g_queue_push_head(iter->stack, iter->ctx->iface.ChildAt(node, i));
     }
     g_hash_table_add(iter->childrenAdded, node);
   }
 
-  return wasAdded;
+  return checked;
 }
 
 static void *PreOrderNext(UastIterator *iter) {
@@ -139,9 +136,7 @@ static void *PreOrderNext(UastIterator *iter) {
     return NULL;
   }
 
-  // Add the node and children of the current to the stack
   int children_size = iter->ctx->iface.ChildrenSize(retNode);
-
   for (int i = children_size - 1; i >= 0; i--) {
     g_queue_push_head(iter->stack, iter->ctx->iface.ChildAt(retNode, i));
   }
@@ -155,9 +150,7 @@ static void *LevelOrderNext(UastIterator *iter) {
     return NULL;
   }
 
-  // Add the node and children of the current to the stack
   int children_size = iter->ctx->iface.ChildrenSize(retNode);
-
   for (int i = 0; i < children_size; i++) {
     g_queue_push_tail(iter->stack, iter->ctx->iface.ChildAt(retNode, i));
   }
@@ -187,12 +180,12 @@ void *UastIteratorNext(UastIterator *iter) {
   void *retNode = NULL;
 
   switch(iter->order) {
-    case PREORDER:
-      return PreOrderNext(iter);
     case LEVELORDER:
       return LevelOrderNext(iter);
     case POSTORDER:
       return PostOrderNext(iter);
+    default:
+      return PreOrderNext(iter);
   }
 }
 
