@@ -41,6 +41,17 @@ struct Nodes {
 static xmlDocPtr CreateDocument(const Uast *ctx, void *node);
 static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node, xmlNodePtr parent);
 void Error(void *ctx, const char *msg, ...);
+// Adds the children of the node to the iterator queue and returns
+// if the node was already checked, which will happen with leaf nodes
+// or nodes which childs already processed. Used for the POSTORDER
+// iterative traversal algorithm.
+static bool MaybeAddChildren(UastIterator *iter, void *node);
+// Get the next element in pre-order traversal mode.
+static void *PreOrderNext(UastIterator *iter);
+// Get the next element in level-order traversal mode.
+static void *LevelOrderNext(UastIterator *iter);
+// Get the next element in post-order traversal mode.
+static void *PostOrderNext(UastIterator *iter);
 
 //////////////////////////////
 ///////// PUBLIC API /////////
@@ -109,66 +120,6 @@ void UastIteratorFree(UastIterator *iter) {
     g_hash_table_destroy(iter->childrenAdded);
   }
   g_free(iter);
-}
-
-// Adds the children of the node to the iterator queue and returns
-// if the node was already checked, which will happen with leaf nodes
-// or nodes which childs already processed. Used for the POSTORDER
-// iterative traversal algorithm.
-static bool MaybeAddChildren(UastIterator *iter, void *node) {
-
-  bool checked = g_hash_table_contains(iter->childrenAdded, node);
-
-  if(!checked) {
-    int children_size = iter->ctx->iface.ChildrenSize(node);
-    for (int i = children_size - 1; i >= 0; i--) {
-      g_queue_push_head(iter->stack, iter->ctx->iface.ChildAt(node, i));
-    }
-    g_hash_table_add(iter->childrenAdded, node);
-  }
-
-  return checked;
-}
-
-static void *PreOrderNext(UastIterator *iter) {
-  void *retNode = g_queue_pop_head(iter->stack);
-  if (retNode == NULL) {
-    return NULL;
-  }
-
-  int children_size = iter->ctx->iface.ChildrenSize(retNode);
-  for (int i = children_size - 1; i >= 0; i--) {
-    g_queue_push_head(iter->stack, iter->ctx->iface.ChildAt(retNode, i));
-  }
-
-  return retNode;
-}
-
-static void *LevelOrderNext(UastIterator *iter) {
-  void *retNode = g_queue_pop_head(iter->stack);
-  if (retNode == NULL) {
-    return NULL;
-  }
-
-  int children_size = iter->ctx->iface.ChildrenSize(retNode);
-  for (int i = 0; i < children_size; i++) {
-    g_queue_push_tail(iter->stack, iter->ctx->iface.ChildAt(retNode, i));
-  }
-
-  return retNode;
-}
-
-static void *PostOrderNext(UastIterator *iter) {
-  void *curNode = g_queue_peek_head(iter->stack);
-  if (curNode == NULL) {
-    return NULL;
-  }
-
-  while(!MaybeAddChildren(iter, curNode)) {
-    curNode = g_queue_peek_head(iter->stack);
-  }
-
-  return g_queue_pop_head(iter->stack);
 }
 
 void *UastIteratorNext(UastIterator *iter) {
@@ -422,3 +373,59 @@ void Error(void *ctx, const char *msg, ...) {
    vsnprintf(error_message, BUF_SIZE, msg, arg_ptr);
    va_end(arg_ptr);
 }
+
+static bool MaybeAddChildren(UastIterator *iter, void *node) {
+  bool checked = g_hash_table_contains(iter->childrenAdded, node);
+
+  if(!checked) {
+    int children_size = iter->ctx->iface.ChildrenSize(node);
+    for (int i = children_size - 1; i >= 0; i--) {
+      g_queue_push_head(iter->stack, iter->ctx->iface.ChildAt(node, i));
+    }
+    g_hash_table_add(iter->childrenAdded, node);
+  }
+
+  return checked;
+}
+
+static void *PreOrderNext(UastIterator *iter) {
+  void *retNode = g_queue_pop_head(iter->stack);
+  if (retNode == NULL) {
+    return NULL;
+  }
+
+  int children_size = iter->ctx->iface.ChildrenSize(retNode);
+  for (int i = children_size - 1; i >= 0; i--) {
+    g_queue_push_head(iter->stack, iter->ctx->iface.ChildAt(retNode, i));
+  }
+
+  return retNode;
+}
+
+static void *LevelOrderNext(UastIterator *iter) {
+  void *retNode = g_queue_pop_head(iter->stack);
+  if (retNode == NULL) {
+    return NULL;
+  }
+
+  int children_size = iter->ctx->iface.ChildrenSize(retNode);
+  for (int i = 0; i < children_size; i++) {
+    g_queue_push_tail(iter->stack, iter->ctx->iface.ChildAt(retNode, i));
+  }
+
+  return retNode;
+}
+
+static void *PostOrderNext(UastIterator *iter) {
+  void *curNode = g_queue_peek_head(iter->stack);
+  if (curNode == NULL) {
+    return NULL;
+  }
+
+  while(!MaybeAddChildren(iter, curNode)) {
+    curNode = g_queue_peek_head(iter->stack);
+  }
+
+  return g_queue_pop_head(iter->stack);
+}
+
