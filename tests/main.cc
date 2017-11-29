@@ -28,9 +28,6 @@ int main() {
   // add the tests to the suite
   ADD_TEST(suite, "test of RoleNameForId()", TestRoleNameForId);
   ADD_TEST(suite, "test of UastNew()", TestUastNew);
-  ADD_TEST(suite, "test failing UastNew() (bad calloc)", TestUastNewAlloc);
-  ADD_TEST(suite, "test of NodesNew()", TestNodesNew);
-  ADD_TEST(suite, "test failing NodesNew() (bad calloc)", TestNodesNewAlloc);
   ADD_TEST(suite, "test of UastFilter() pointers", TestUastFilterPointers);
   ADD_TEST(suite, "test iteration", TestUastIteratorPreOrder);
   ADD_TEST(suite, "test iteration", TestUastIteratorLevelOrder);
@@ -53,8 +50,6 @@ int main() {
            TestXmlAddChild);
   ADD_TEST(suite, "test failing UastFilter() (bad xmlNewContext)",
            TestXmlNewContext);
-  ADD_TEST(suite, "test failing UastFilter() (bad NodesSetSize)",
-           TestNodesSetSize);
   ADD_TEST(suite, "test empty UastFilter() result", TestEmptyResult);
 
   // run all tests using the CUnit Basic interface

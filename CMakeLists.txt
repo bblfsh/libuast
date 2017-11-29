@@ -2,9 +2,10 @@ cmake_minimum_required (VERSION 2.6)
 cmake_policy(SET CMP0048 NEW)
 project (LIBUAST
   VERSION 0.0.0
-  LANGUAGES C)
+  LANGUAGES CXX C)
 
-set(CMAKE_C_STANDARD 99)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11" CACHE STRING "" FORCE)
+
 set(CMAKE_MACOSX_RPATH ON)  # fixes CMP0042
 
 set(OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/lib")
@@ -14,14 +15,13 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 find_package(CUnit REQUIRED)
 find_package(LibXml2 REQUIRED)
 find_package(PkgConfig REQUIRED) 
-pkg_check_modules(GLIB2 REQUIRED glib-2.0)
 
 # Library name
 set(libname uast)
 
 # Source files
 set(libsrc
-  ${CMAKE_SOURCE_DIR}/src/uast.c
+  ${CMAKE_SOURCE_DIR}/src/uast.cc
   ${CMAKE_SOURCE_DIR}/src/roles.c)
 
 # Header files
@@ -32,16 +32,14 @@ set(libinclude
   ${CMAKE_SOURCE_DIR}/src/nodes.h)
 
 # Dependencies
-set(libdep ${LIBXML2_LIBRARIES} ${GLIB2_LIBRARIES})
+set(libdep ${LIBXML2_LIBRARIES})
 link_directories(
   ${OUTPUT_PATH} 
-  ${GLIB2_LIBRARY_DIRS}
   )
 
 # Include headers
 include_directories(
   ${LIBXML2_INCLUDE_DIR}
-  ${GLIB2_INCLUDE_DIRS}
   ${CMAKE_SOURCE_DIR})
 
 # Compile objects (then used by .a and .so)

@@ -17,12 +17,11 @@ More features may be implemented in the future, like UAST iterators.
 - cmake
 - libxml2
 - libcunit1
-- glib2
 
 #### Ubuntu instructions
 
 ```
-sudo apt install cmake libxml2 libxml2-dev libcunit1 libcunit1-dev libglib2.0 libglib2.0-dev
+sudo apt install build-essential cmake libxml2 libxml2-dev libcunit1 libcunit1-dev
 ```
 
 

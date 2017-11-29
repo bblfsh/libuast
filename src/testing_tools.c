@@ -2,31 +2,11 @@
 
 #ifdef TESTING
 
-bool fail_calloc = false;
-bool fail_realloc = false;
 bool fail_xmlNewNode = false;
 bool fail_xmlNewDoc = false;
 bool fail_xmlNewProc = false;
 bool fail_xmlAddChild = false;
 bool fail_xmlXPathNewContext = false;
-
-#undef calloc
-void *MockCalloc(int count, size_t size) {
-  if (fail_calloc) {
-    return NULL;
-  } else {
-    return calloc(count, size);
-  }
-}
-
-#undef realloc
-void *MockRealloc(void *ptr, size_t size) {
-  if (fail_realloc) {
-    return NULL;
-  } else {
-    return realloc(ptr, size);
-  }
-}
 
 #undef xmlNewNode
 void *MockXmlNewNode(xmlNsPtr ns, const xmlChar *name) {

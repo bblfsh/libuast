@@ -11,19 +11,11 @@
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 
-extern bool fail_calloc;
-extern bool fail_realloc;
 extern bool fail_xmlNewNode;
 extern bool fail_xmlNewDoc;
 extern bool fail_xmlNewProc;
 extern bool fail_xmlAddChild;
 extern bool fail_xmlXPathNewContext;
-
-void *MockCalloc(int count, size_t size);
-#define calloc MockCalloc
-
-void *MockRealloc(void *ptr, size_t size);
-#define realloc MockRealloc
 
 void *MockXmlNewNode(xmlNsPtr ns, const xmlChar *name);
 #define xmlNewNode MockXmlNewNode
