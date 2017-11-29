@@ -4,7 +4,6 @@
 #include <cstdint>
 
 #include <iostream>
-#include <optional>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -15,7 +14,13 @@ struct position {
   uint32_t offset;
   uint32_t line;
   uint32_t col;
+
+  bool operator!=(const position& other) {
+    return offset != other.offset || line != other.line || col != other.col;
+  }
 };
+
+const position NO_POSITION = {0, 0, 0};
 
 class Node {
  public:
@@ -26,10 +31,10 @@ class Node {
   std::vector<uint16_t> roles;
   std::vector<std::tuple<std::string, std::string>> properties;
 
-  std::optional<position> start_position;
-  std::optional<position> end_position;
+  position start_position;
+  position end_position;
 
-  Node(std::string i) : internal_type(i) {}
+  Node(std::string i) : internal_type(i), start_position(NO_POSITION), end_position(NO_POSITION) {}
 
   void AddChild(Node *node) { children.push_back(node); }
 
@@ -78,57 +83,51 @@ static const char *PropertyValueAt(const void *node, int index) {
 }
 
 static bool HasStartOffset(const void *node) {
-  return ((Node *)node)->start_position.has_value();
+  return ((Node *)node)->start_position != NO_POSITION;
 }
 
 static uint32_t StartOffset(const void *node) {
-  std::optional<position> p = ((Node *)node)->start_position;
-  return p.has_value() ? p.value().offset : 0;
+  return ((Node *)node)->start_position.offset;
 }
 
 static bool HasStartLine(const void *node) {
-  return ((Node *)node)->start_position.has_value();
+  return ((Node *)node)->start_position != NO_POSITION;
 }
 
 static uint32_t StartLine(const void *node) {
-  std::optional<position> p = ((Node *)node)->start_position;
-  return p.has_value() ? p.value().line : 0;
+  return ((Node *)node)->start_position.line;
 }
 
 static bool HasStartCol(const void *node) {
-  return ((Node *)node)->start_position.has_value();
+  return ((Node *)node)->start_position != NO_POSITION;
 }
 
 static uint32_t StartCol(const void *node) {
-  std::optional<position> p = ((Node *)node)->start_position;
-  return p.has_value() ? p.value().col : 0;
+  return ((Node *)node)->start_position.col;
 }
 
 static bool HasEndOffset(const void *node) {
-  return ((Node *)node)->end_position.has_value();
+  return ((Node *)node)->end_position != NO_POSITION;
 }
 
 static uint32_t EndOffset(const void *node) {
-  std::optional<position> p = ((Node *)node)->end_position;
-  return p.has_value() ? p.value().offset : 0;
+  return ((Node *)node)->end_position.offset;
 }
 
 static bool HasEndLine(const void *node) {
-  return ((Node *)node)->end_position.has_value();
+  return ((Node *)node)->end_position != NO_POSITION;
 }
 
 static uint32_t EndLine(const void *node) {
-  std::optional<position> p = ((Node *)node)->end_position;
-  return p.has_value() ? p.value().line : 0;
+  return ((Node *)node)->end_position.line;
 }
 
 static bool HasEndCol(const void *node) {
-  return ((Node *)node)->end_position.has_value();
+  return ((Node *)node)->end_position != NO_POSITION;
 }
 
 static uint32_t EndCol(const void *node) {
-  std::optional<position> p = ((Node *)node)->end_position;
-  return p.has_value() ? p.value().col : 0;
+  return ((Node *)node)->end_position.col;
 }
 
 static NodeIface IfaceMock() {

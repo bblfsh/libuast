@@ -1,26 +1,7 @@
 language: c
-
-matrix:
-  include:
-    - compiler: gcc
-      env: CXX=g++-7
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-7
-
-    - compiler: clang
-      env: CXX=clang++-5.0
-      addons:
-        apt:
-          sources:
-            - llvm-toolchain-trusty-5.0
-          packages:
-            - clang-5.0
-  allow_failures:
-    - compiler: clang
+compiler:
+  - clang
+  - gcc
 
 before_install:
   - sudo apt-get update -qq
