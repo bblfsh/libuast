@@ -170,11 +170,12 @@ The API provides a UASTIterator type that can iterate over the UAST in
 pre-order, post-order or level-order.
 
 Example:
-```c
-UastIterator *iter = UastIteratorNew(uast, rootNode, PREORDER);
 
-void *node = NULL;
-while((node = UastIteratorNext(iter)) != NULL) {
+```c
+UastIterator *iter = UastIteratorNew(ctx, node, PREORDER);
+
+void *curNode = NULL;
+while((curNode = UastIteratorNext(iter)) != NULL) {
   // ... do something with the node
 }
 

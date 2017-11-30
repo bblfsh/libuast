@@ -1,10 +1,8 @@
 cmake_minimum_required (VERSION 2.6)
 cmake_policy(SET CMP0048 NEW)
-project (LIBUAST
-  VERSION 0.0.0
-  LANGUAGES CXX C)
+project (LIBUAST VERSION 0.0.0 LANGUAGES CXX C)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11" CACHE STRING "" FORCE)
+set (CMAKE_CXX_STANDARD 11)
 
 set(CMAKE_MACOSX_RPATH ON)  # fixes CMP0042
 
@@ -14,7 +12,6 @@ set(OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/lib")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 find_package(CUnit REQUIRED)
 find_package(LibXml2 REQUIRED)
-find_package(PkgConfig REQUIRED) 
 
 # Library name
 set(libname uast)
@@ -33,9 +30,7 @@ set(libinclude
 
 # Dependencies
 set(libdep ${LIBXML2_LIBRARIES})
-link_directories(
-  ${OUTPUT_PATH} 
-  )
+link_directories(${OUTPUT_PATH})
 
 # Include headers
 include_directories(

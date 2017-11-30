@@ -1,27 +1,25 @@
+#include "roles.h"
 #include "uast.h"
 #include "uast_private.h"
 
-extern "C" {
-
-#include "testing_tools.h"
+#include <cinttypes>
+#include <cstdarg>
+#include <cstdbool>
+#include <cstdint>
+#include <cstring>
+#include <deque>
+#include <new>
+#include <set>
+#include <vector>
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
+
+extern "C" {
+#include "testing_tools.h"
 }
-
-#include <cstring>
-#include <cstdarg>
-#include <cinttypes>
-#include <cstdint>
-#include <cstdbool>
-#include <deque>
-#include <set>
-#include <vector>
-#include <new>
-
-#include "roles.h"
 
 #define BUF_SIZE 256
 char error_message[BUF_SIZE];
