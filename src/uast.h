@@ -19,7 +19,7 @@ typedef struct Uast Uast;
 // with UastIteratorFree.
 typedef struct UastIterator UastIterator;
 
-typedef enum { PREORDER, POSTORDER, LEVELORDER } TreeOrder;
+typedef enum { PRE_ORDER, POST_ORDER, LEVEL_ORDER } TreeOrder;
 
 // Uast needs a node implementation in order to work. This is needed
 // because the data structure of the node itself is not defined by this
@@ -58,13 +58,13 @@ Nodes *UastFilter(const Uast *ctx, void *node, const char *query);
 // Create a new UastIterator pointer. This will allow you to traverse the UAST
 // calling UastIteratorNext. The node argument will be user as the root node of
 // the iteration. The TreeOrder argument specifies the traversal mode. It can be
-// PREORDER, POSTORDER or LEVELORDER. Once you've used the UastIterator, it must
+// PRE_ORDER, POST_ORDER or LEVEL_ORDER. Once you've used the UastIterator, it must
 // be frees using UastIteratorFree.
 //
 // Returns NULL and sets LastError if the UastIterator couldn't initialize.
 UastIterator *UastIteratorNew(const Uast *ctx, void *node, TreeOrder order);
 
-// Frees an used UastIterator.
+// Frees a UastIterator.
 void UastIteratorFree(UastIterator *iter);
 
 // Retrieve the next node of the traversal of an UAST tree or NULL if the

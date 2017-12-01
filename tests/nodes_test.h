@@ -240,7 +240,7 @@ void TestUastIteratorPreOrder() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
 
-  UastIterator *iter = UastIteratorNew(ctx, root, PREORDER);
+  UastIterator *iter = UastIteratorNew(ctx, root, PRE_ORDER);
   CU_ASSERT_FATAL(iter != NULL);
 
   Node *node = (Node *)UastIteratorNext(iter);
@@ -315,7 +315,7 @@ void TestUastIteratorLevelOrder() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
 
-  UastIterator *iter = UastIteratorNew(ctx, root, LEVELORDER);
+  UastIterator *iter = UastIteratorNew(ctx, root, LEVEL_ORDER);
   CU_ASSERT_FATAL(iter != NULL);
 
   Node *node = (Node *)UastIteratorNext(iter);
@@ -390,7 +390,7 @@ void TestUastIteratorPostOrder() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
 
-  UastIterator *iter = UastIteratorNew(ctx, root, POSTORDER);
+  UastIterator *iter = UastIteratorNew(ctx, root, POST_ORDER);
   CU_ASSERT_FATAL(iter != NULL);
 
   Node *node = (Node *)UastIteratorNext(iter);

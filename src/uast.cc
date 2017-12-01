@@ -1,4 +1,5 @@
 #include "roles.h"
+#include "testing_tools.h"
 #include "uast.h"
 #include "uast_private.h"
 
@@ -17,10 +18,6 @@
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 
-extern "C" {
-#include "testing_tools.h"
-}
-
 #define BUF_SIZE 256
 char error_message[BUF_SIZE];
 
@@ -31,8 +28,8 @@ struct Uast {
 struct UastIterator {
   const Uast *ctx;
   TreeOrder order;
-  std::deque<void *> dqueue;
-  std::set<void *> childrenAdded;
+  std::deque<void *> pending;
+  std::set<void *> visited;
 };
 
 struct Nodes {
@@ -46,9 +43,9 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node, xmlNodePtr parent);
 void Error(void *ctx, const char *msg, ...);
 // Adds the children of the node to the iterator queue and returns
 // if the node was already checked, which will happen with leaf nodes
-// or nodes which childs already processed. Used for the POSTORDER
+// or nodes which childs already processed. Used for the POST_ORDER
 // iterative traversal algorithm.
-static bool MaybeAddChildren(UastIterator *iter, void *node);
+static bool Visited(UastIterator *iter, void *node);
 // Get the next element in pre-order traversal mode.
 static void *PreOrderNext(UastIterator *iter);
 // Get the next element in level-order traversal mode.
@@ -110,14 +107,9 @@ UastIterator *UastIteratorNew(const Uast *ctx, void *node, TreeOrder order) {
     return nullptr;
   }
 
-  if (!iter) {
-    Error(nullptr, "Unable to get memory\n");
-    return nullptr;
-  }
-
   iter->order = order;
 
-  iter->dqueue.push_front(node);
+  iter->pending.push_front(node);
   iter->ctx = ctx;
   return iter;
 }
@@ -129,16 +121,14 @@ void UastIteratorFree(UastIterator *iter) {
 
 void *UastIteratorNext(UastIterator *iter) {
 
-  if (iter == nullptr || iter->dqueue.empty()) {
+  if (iter == nullptr || iter->pending.empty()) {
     return nullptr;
   }
 
-  void *retNode = nullptr;
-
   switch(iter->order) {
-    case LEVELORDER:
+    case LEVEL_ORDER:
       return LevelOrderNext(iter);
-    case POSTORDER:
+    case POST_ORDER:
       return PostOrderNext(iter);
     default:
       return PreOrderNext(iter);
@@ -222,6 +212,8 @@ char *LastError(void) {
 //////////////////////////////
 ///////// PRIVATE API ////////
 //////////////////////////////
+
+Nodes *NodesNew(void) { return new Nodes(); }
 
 int NodesSetSize(Nodes *nodes, int len) {
   if (len > nodes->cap) {
@@ -383,38 +375,38 @@ void Error(void *ctx, const char *msg, ...) {
    va_end(arg_ptr);
 }
 
-static bool MaybeAddChildren(UastIterator *iter, void *node) {
-  const bool checked = iter->childrenAdded.find(node) != iter->childrenAdded.end();
+static bool Visited(UastIterator *iter, void *node) {
+  const bool visited = iter->visited.find(node) != iter->visited.end();
 
-  if(!checked) {
+  if(!visited) {
     int children_size = iter->ctx->iface.ChildrenSize(node);
     for (int i = children_size - 1; i >= 0; i--) {
-      iter->dqueue.push_front(iter->ctx->iface.ChildAt(node, i));
+      iter->pending.push_front(iter->ctx->iface.ChildAt(node, i));
     }
-    iter->childrenAdded.insert(node);
+    iter->visited.insert(node);
   }
 
-  return checked;
+  return visited;
 }
 
 static void *PreOrderNext(UastIterator *iter) {
-  void *retNode = iter->dqueue.front();
-  iter->dqueue.pop_front();
+  void *retNode = iter->pending.front();
+  iter->pending.pop_front();
   if (retNode == nullptr) {
     return nullptr;
   }
 
   int children_size = iter->ctx->iface.ChildrenSize(retNode);
   for (int i = children_size - 1; i >= 0; i--) {
-    iter->dqueue.push_front(iter->ctx->iface.ChildAt(retNode, i));
+    iter->pending.push_front(iter->ctx->iface.ChildAt(retNode, i));
   }
 
   return retNode;
 }
 
 static void *LevelOrderNext(UastIterator *iter) {
-  void *retNode = iter->dqueue.front();
-  iter->dqueue.pop_front();
+  void *retNode = iter->pending.front();
+  iter->pending.pop_front();
 
   if (retNode == nullptr) {
     return nullptr;
@@ -422,24 +414,24 @@ static void *LevelOrderNext(UastIterator *iter) {
 
   int children_size = iter->ctx->iface.ChildrenSize(retNode);
   for (int i = 0; i < children_size; i++) {
-    iter->dqueue.push_back(iter->ctx->iface.ChildAt(retNode, i));
+    iter->pending.push_back(iter->ctx->iface.ChildAt(retNode, i));
   }
 
   return retNode;
 }
 
 static void *PostOrderNext(UastIterator *iter) {
-  void *curNode = iter->dqueue.front();
+  void *curNode = iter->pending.front();
   if (curNode == nullptr) {
     return nullptr;
   }
 
-  while(!MaybeAddChildren(iter, curNode)) {
-    curNode = iter->dqueue.front();
+  while(!Visited(iter, curNode)) {
+    curNode = iter->pending.front();
   }
 
-  curNode = iter->dqueue.front();
-  iter->dqueue.pop_front();
+  curNode = iter->pending.front();
+  iter->pending.pop_front();
   return curNode;
 }
 

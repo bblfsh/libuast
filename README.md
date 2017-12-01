@@ -172,7 +172,7 @@ pre-order, post-order or level-order.
 Example:
 
 ```c
-UastIterator *iter = UastIteratorNew(ctx, node, PREORDER);
+UastIterator *iter = UastIteratorNew(ctx, node, PRE_ORDER);
 
 void *curNode = NULL;
 while((curNode = UastIteratorNext(iter)) != NULL) {
