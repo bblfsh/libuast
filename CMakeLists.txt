@@ -1,17 +1,16 @@
 cmake_minimum_required (VERSION 2.6)
 cmake_policy(SET CMP0048 NEW)
-project (LIBUAST
-  VERSION 0.0.0
-  LANGUAGES C)
+project (LIBUAST VERSION 0.0.0 LANGUAGES CXX C)
 
-set(CMAKE_C_STANDARD 99)
+set (CMAKE_CXX_STANDARD 11)
+
 set(CMAKE_MACOSX_RPATH ON)  # fixes CMP0042
 
 set(OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/lib")
 
 # Required dependencies
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
-find_package (CUnit REQUIRED)
+find_package(CUnit REQUIRED)
 find_package(LibXml2 REQUIRED)
 
 # Library name
@@ -19,7 +18,7 @@ set(libname uast)
 
 # Source files
 set(libsrc
-  ${CMAKE_SOURCE_DIR}/src/uast.c
+  ${CMAKE_SOURCE_DIR}/src/uast.cc
   ${CMAKE_SOURCE_DIR}/src/roles.c)
 
 # Header files

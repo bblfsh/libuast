@@ -1,21 +1,22 @@
+#include "roles.h"
+#include "testing_tools.h"
 #include "uast.h"
 #include "uast_private.h"
 
-#include <inttypes.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cinttypes>
+#include <cstdarg>
+#include <cstdbool>
+#include <cstdint>
+#include <cstring>
+#include <deque>
+#include <new>
+#include <set>
+#include <vector>
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
-
-#include "roles.h"
-#include "testing_tools.h"
 
 #define BUF_SIZE 256
 char error_message[BUF_SIZE];
@@ -24,8 +25,15 @@ struct Uast {
   NodeIface iface;
 };
 
+struct UastIterator {
+  const Uast *ctx;
+  TreeOrder order;
+  std::deque<void *> pending;
+  std::set<void *> visited;
+};
+
 struct Nodes {
-  void **results;
+  std::vector<void *> results;
   int len;
   int cap;
 };
@@ -33,18 +41,25 @@ struct Nodes {
 static xmlDocPtr CreateDocument(const Uast *ctx, void *node);
 static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node, xmlNodePtr parent);
 void Error(void *ctx, const char *msg, ...);
+// Adds the children of the node to the iterator queue and returns
+// if the node was already checked, which will happen with leaf nodes
+// or nodes which childs already processed. Used for the POST_ORDER
+// iterative traversal algorithm.
+static bool Visited(UastIterator *iter, void *node);
+// Get the next element in pre-order traversal mode.
+static void *PreOrderNext(UastIterator *iter);
+// Get the next element in level-order traversal mode.
+static void *LevelOrderNext(UastIterator *iter);
+// Get the next element in post-order traversal mode.
+static void *PostOrderNext(UastIterator *iter);
 
 //////////////////////////////
 ///////// PUBLIC API /////////
 //////////////////////////////
 
-Nodes *NodesNew(void) { return calloc(1, sizeof(Nodes)); }
-
 void NodesFree(Nodes *nodes) {
-  if (nodes) {
-    free(nodes->results);
-    free(nodes);
-  }
+  if (nodes != nullptr)
+    delete nodes;
 }
 
 int NodesSize(const Nodes *nodes) { return nodes->len; }
@@ -53,15 +68,22 @@ void *NodeAt(const Nodes *nodes, int index) {
   if (index < nodes->len) {
     return nodes->results[index];
   }
-  return NULL;
+  return nullptr;
 }
 
 Uast *UastNew(NodeIface iface) {
-  memset(error_message, 0, BUF_SIZE);
-  Uast *ctx = calloc(1, sizeof(Uast));
+  Uast *ctx;
+
+  try {
+    ctx = new Uast();
+  } catch (std::bad_alloc) {
+    Error(nullptr, "Unable to get memory\n");
+    return nullptr;
+  }
+
   if (!ctx) {
-    Error(NULL, "Unable to get memory\n");
-    return NULL;
+    Error(nullptr, "Unable to get memory\n");
+    return nullptr;
   }
   xmlInitParser();
   ctx->iface = iface;
@@ -69,33 +91,79 @@ Uast *UastNew(NodeIface iface) {
 }
 
 void UastFree(Uast *ctx) {
-  free(ctx);
+  if (ctx != nullptr)
+    delete ctx;
+
   xmlCleanupParser();
+}
+
+UastIterator *UastIteratorNew(const Uast *ctx, void *node, TreeOrder order) {
+  UastIterator *iter;
+
+  try {
+    iter = new UastIterator();
+  } catch (std::bad_alloc) {
+    Error(nullptr, "Unable to get memory\n");
+    return nullptr;
+  }
+
+  iter->order = order;
+
+  iter->pending.push_front(node);
+  iter->ctx = ctx;
+  return iter;
+}
+
+void UastIteratorFree(UastIterator *iter) {
+  if (iter != nullptr)
+    delete iter;
+}
+
+void *UastIteratorNext(UastIterator *iter) {
+
+  if (iter == nullptr || iter->pending.empty()) {
+    return nullptr;
+  }
+
+  switch(iter->order) {
+    case LEVEL_ORDER:
+      return LevelOrderNext(iter);
+    case POST_ORDER:
+      return PostOrderNext(iter);
+    default:
+      return PreOrderNext(iter);
+  }
 }
 
 NodeIface UastGetIface(const Uast *ctx) { return ctx->iface; }
 
 Nodes *UastFilter(const Uast *ctx, void *node, const char *query) {
-  xmlDocPtr doc = NULL;
-  xmlXPathContextPtr xpathCtx = NULL;
-  xmlXPathObjectPtr xpathObj = NULL;
+  xmlDocPtr doc = nullptr;
+  xmlXPathContextPtr xpathCtx = nullptr;
+  xmlXPathObjectPtr xpathObj = nullptr;
   bool ok = false;
+  int size = 0;
+  xmlNodeSetPtr result = nullptr;
+  xmlNodePtr *results = nullptr;
+  xmlGenericErrorFunc handler;
 
-  Nodes *nodes = NodesNew();
-  if (!nodes) {
-    Error(NULL, "Unable to get memory\n");
-    return NULL;
+  Nodes *nodes;
+  try {
+    nodes = new Nodes();
+  } catch (std::bad_alloc) {
+    Error(nullptr, "Unable to get memory\n");
+    return nullptr;
   }
   doc = CreateDocument(ctx, node);
   if (!doc) {
     goto error1;
   }
-  xpathCtx = xmlXPathNewContext(doc);
+  xpathCtx = static_cast<xmlXPathContextPtr>(xmlXPathNewContext(doc));
   if (!xpathCtx) {
     goto error2;
   }
 
-  xmlGenericErrorFunc handler = (xmlGenericErrorFunc)Error;
+  handler = (xmlGenericErrorFunc)Error;
   initGenericErrorDefaultFunc(&handler);
 
   xpathObj = xmlXPathEvalExpression(BAD_CAST(query), xpathCtx);
@@ -104,16 +172,16 @@ Nodes *UastFilter(const Uast *ctx, void *node, const char *query) {
   }
 
   // Get array of results
-  xmlNodeSetPtr result = xpathObj->nodesetval;
+  result = xpathObj->nodesetval;
   if (!result) {
-    Error(NULL, "Unable to get array of results\n");
+    Error(nullptr, "Unable to get array of results\n");
     goto error3;
   }
-  xmlNodePtr *results = result->nodeTab;
-  int size = (result) ? result->nodeNr : 0;
+  results = result->nodeTab;
+  size = (result) ? result->nodeNr : 0;
 
   if (NodesSetSize(nodes, size) != 0) {
-    Error(NULL, "Unable to set nodes size\n");
+    Error(nullptr, "Unable to set nodes size\n");
     goto error3;
   }
 
@@ -132,7 +200,7 @@ error1:
 
   if (!ok) {
     NodesFree(nodes);
-    return NULL;
+    return nullptr;
   }
   return nodes;
 }
@@ -145,13 +213,11 @@ char *LastError(void) {
 ///////// PRIVATE API ////////
 //////////////////////////////
 
+Nodes *NodesNew(void) { return new Nodes(); }
+
 int NodesSetSize(Nodes *nodes, int len) {
   if (len > nodes->cap) {
-    nodes->results = realloc(nodes->results, len * sizeof(void *));
-    if (nodes->results == NULL) {
-      nodes->cap = nodes->len = 0;
-      return -1;
-    }
+    nodes->results.resize(len);
     nodes->cap = len;
   }
   nodes->len = len;
@@ -160,14 +226,16 @@ int NodesSetSize(Nodes *nodes, int len) {
 
 int NodesCap(const Nodes *nodes) { return nodes->cap; }
 
-void **NodesAll(const Nodes *nodes) { return nodes->results; }
-
 static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
                                 xmlNodePtr parent) {
   char buf[BUF_SIZE];
 
   const char *internal_type = ctx->iface.InternalType(node);
-  xmlNodePtr xmlNode = xmlNewNode(NULL, BAD_CAST(internal_type));
+  xmlNodePtr xmlNode = static_cast<xmlNodePtr>(xmlNewNode(nullptr, BAD_CAST(internal_type)));
+  int children_size = 0;
+  int roles_size = 0;
+  const char *token = nullptr;
+
   if (!xmlNode) {
     goto error;
   }
@@ -180,7 +248,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
   }
 
   // Token
-  const char *token = ctx->iface.Token(node);
+  token = ctx->iface.Token(node);
   if (token) {
     if (!xmlNewProp(xmlNode, BAD_CAST("token"), BAD_CAST(token))) {
       goto error;
@@ -188,12 +256,12 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
   }
 
   // Roles
-  int roles_size = ctx->iface.RolesSize(node);
+  roles_size = ctx->iface.RolesSize(node);
   for (int i = 0; i < roles_size; i++) {
     uint16_t role = ctx->iface.RoleAt(node, i);
     const char *role_name = RoleNameForId(role);
-    if (role_name != NULL) {
-      if (!xmlNewProp(xmlNode, BAD_CAST(role_name), NULL)) {
+    if (role_name != nullptr) {
+      if (!xmlNewProp(xmlNode, BAD_CAST(role_name), nullptr)) {
         goto error;
       }
     }
@@ -212,7 +280,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
   if (ctx->iface.HasStartOffset(node)) {
     int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.StartOffset(node));
     if (ret < 0 || ret >= BUF_SIZE) {
-      Error(NULL, "Unable to set start offset\n");
+      Error(nullptr, "Unable to set start offset\n");
       goto error;
     }
     if (!xmlNewProp(xmlNode, BAD_CAST "startOffset", BAD_CAST buf)) {
@@ -222,7 +290,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
   if (ctx->iface.HasStartLine(node)) {
     int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.StartLine(node));
     if (ret < 0 || ret >= BUF_SIZE) {
-      Error(NULL, "Unable to set start line\n");
+      Error(nullptr, "Unable to set start line\n");
       goto error;
     }
     if (!xmlNewProp(xmlNode, BAD_CAST "startLine", BAD_CAST buf)) {
@@ -232,7 +300,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
   if (ctx->iface.HasStartCol(node)) {
     int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.StartCol(node));
     if (ret < 0 || ret >= BUF_SIZE) {
-      Error(NULL, "Unable to set start column\n");
+      Error(nullptr, "Unable to set start column\n");
       goto error;
     }
     if (!xmlNewProp(xmlNode, BAD_CAST "startCol", BAD_CAST buf)) {
@@ -242,7 +310,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
   if (ctx->iface.HasEndOffset(node)) {
     int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.EndOffset(node));
     if (ret < 0 || ret >= BUF_SIZE) {
-      Error(NULL, "Unable to set end offset\n");
+      Error(nullptr, "Unable to set end offset\n");
       goto error;
     }
     if (!xmlNewProp(xmlNode, BAD_CAST "endOffset", BAD_CAST buf)) {
@@ -252,7 +320,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
   if (ctx->iface.HasEndLine(node)) {
     int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.EndLine(node));
     if (ret < 0 || ret >= BUF_SIZE) {
-      Error(NULL, "Unable to set end line\n");
+      Error(nullptr, "Unable to set end line\n");
       goto error;
     }
     if (!xmlNewProp(xmlNode, BAD_CAST "endLine", BAD_CAST buf)) {
@@ -262,7 +330,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
   if (ctx->iface.HasEndCol(node)) {
     int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.EndCol(node));
     if (ret < 0 || ret >= BUF_SIZE) {
-      Error(NULL, "Unable to set end column\n");
+      Error(nullptr, "Unable to set end column\n");
       goto error;
     }
     if (!xmlNewProp(xmlNode, BAD_CAST "endCol", BAD_CAST buf)) {
@@ -271,7 +339,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
   }
 
   // Recursivelly visit all children
-  int children_size = ctx->iface.ChildrenSize(node);
+  children_size = ctx->iface.ChildrenSize(node);
   for (int i = 0; i < children_size; i++) {
     void *child = ctx->iface.ChildAt(node, i);
     if (!CreateXmlNode(ctx, child, xmlNode)) {
@@ -282,18 +350,18 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
 
 error:
   xmlFreeNode(xmlNode);
-  return NULL;
+  return nullptr;
 }
 
 static xmlDocPtr CreateDocument(const Uast *ctx, void *node) {
-  xmlDocPtr doc = xmlNewDoc(BAD_CAST("1.0"));
+  xmlDocPtr doc = static_cast<xmlDocPtr>(xmlNewDoc(BAD_CAST("1.0")));
   if (!doc) {
-    return NULL;
+    return nullptr;
   }
-  xmlNodePtr xmlNode = CreateXmlNode(ctx, node, NULL);
+  xmlNodePtr xmlNode = CreateXmlNode(ctx, node, nullptr);
   if (!xmlNode) {
     xmlFreeDoc(doc);
-    return NULL;
+    return nullptr;
   }
   xmlDocSetRootElement(doc, xmlNode);
   return doc;
@@ -306,3 +374,64 @@ void Error(void *ctx, const char *msg, ...) {
    vsnprintf(error_message, BUF_SIZE, msg, arg_ptr);
    va_end(arg_ptr);
 }
+
+static bool Visited(UastIterator *iter, void *node) {
+  const bool visited = iter->visited.find(node) != iter->visited.end();
+
+  if(!visited) {
+    int children_size = iter->ctx->iface.ChildrenSize(node);
+    for (int i = children_size - 1; i >= 0; i--) {
+      iter->pending.push_front(iter->ctx->iface.ChildAt(node, i));
+    }
+    iter->visited.insert(node);
+  }
+
+  return visited;
+}
+
+static void *PreOrderNext(UastIterator *iter) {
+  void *retNode = iter->pending.front();
+  iter->pending.pop_front();
+  if (retNode == nullptr) {
+    return nullptr;
+  }
+
+  int children_size = iter->ctx->iface.ChildrenSize(retNode);
+  for (int i = children_size - 1; i >= 0; i--) {
+    iter->pending.push_front(iter->ctx->iface.ChildAt(retNode, i));
+  }
+
+  return retNode;
+}
+
+static void *LevelOrderNext(UastIterator *iter) {
+  void *retNode = iter->pending.front();
+  iter->pending.pop_front();
+
+  if (retNode == nullptr) {
+    return nullptr;
+  }
+
+  int children_size = iter->ctx->iface.ChildrenSize(retNode);
+  for (int i = 0; i < children_size; i++) {
+    iter->pending.push_back(iter->ctx->iface.ChildAt(retNode, i));
+  }
+
+  return retNode;
+}
+
+static void *PostOrderNext(UastIterator *iter) {
+  void *curNode = iter->pending.front();
+  if (curNode == nullptr) {
+    return nullptr;
+  }
+
+  while(!Visited(iter, curNode)) {
+    curNode = iter->pending.front();
+  }
+
+  curNode = iter->pending.front();
+  iter->pending.pop_front();
+  return curNode;
+}
+

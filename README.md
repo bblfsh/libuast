@@ -21,7 +21,7 @@ More features may be implemented in the future, like UAST iterators.
 #### Ubuntu instructions
 
 ```
-sudo apt install cmake libxml2 libxml2-dev libcunit1 libcunit1-dev
+sudo apt install build-essential cmake libxml2 libxml2-dev libcunit1 libcunit1-dev
 ```
 
 
@@ -162,6 +162,24 @@ if (nodes) {
 
 // do not forget to free the nodes afterwards.
 NodesFree(nodes);
+```
+
+#### UAST Iterators
+
+The API provides a UASTIterator type that can iterate over the UAST in
+pre-order, post-order or level-order.
+
+Example:
+
+```c
+UastIterator *iter = UastIteratorNew(ctx, node, PRE_ORDER);
+
+void *curNode = NULL;
+while((curNode = UastIteratorNext(iter)) != NULL) {
+  // ... do something with the node
+}
+
+UastIteratorFree(iter);
 ```
 
 ## Contribute

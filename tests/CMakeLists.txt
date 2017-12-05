@@ -7,7 +7,7 @@ enable_testing()
 include_directories(. ../src ${CHECK_INCLUDE_DIRS} ${CUNIT_INCLUDE_DIRS})
 
 add_definitions(-DTESTING)
-add_executable(testsuite main.cc ../src/testing_tools.c ${libsrc})
+add_executable(testsuite main.cc ../src/testing_tools.cc ${libsrc})
 target_link_libraries(testsuite ${CUNIT_LIBRARIES} ${libdep})
 
 add_test(testsuite ${CMAKE_CURRENT_BINARY_DIR}/testsuite)
