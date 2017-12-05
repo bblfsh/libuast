@@ -42,6 +42,7 @@ int main() {
   ADD_TEST(suite, "test of UastFilter() with end line", TestUastFilterEndLine);
   ADD_TEST(suite, "test of UastFilter() with end col", TestUastFilterEndCol);
   ADD_TEST(suite, "test of UastFilter() with position", TestUastFilterPosition);
+  ADD_TEST(suite, "test of UastFilter() with bad query", TestUastFilterBadQuery);
   ADD_TEST(suite, "test failing UastFilter() (bad Xpath)", TestXpath);
   ADD_TEST(suite, "test failing UastFilter() (bad xmlNewDoc)", TestXmlNewDoc);
   ADD_TEST(suite, "test failing UastFilter() (bad xmlNewNode)", TestXmlNewNode);

@@ -143,6 +143,8 @@ Nodes *UastFilter(const Uast *ctx, void *node, const char *query) {
   xmlXPathObjectPtr xpathObj = nullptr;
   bool ok = false;
   int size = 0;
+  int realSize = 0;
+  int nodeIdx = 0;
   xmlNodeSetPtr result = nullptr;
   xmlNodePtr *results = nullptr;
   xmlGenericErrorFunc handler;
@@ -180,14 +182,24 @@ Nodes *UastFilter(const Uast *ctx, void *node, const char *query) {
   results = result->nodeTab;
   size = (result) ? result->nodeNr : 0;
 
-  if (NodesSetSize(nodes, size) != 0) {
+  // Sometimes libxml return null results for some invalid queries; do
+  // a first pass to discard them and get the real size for the result
+  for (int i = 0; i < size; i++) {
+    if (results[i] != nullptr && results[i]->_private != nullptr) {
+      ++realSize;
+    }
+  }
+
+  if (NodesSetSize(nodes, realSize) != 0) {
     Error(nullptr, "Unable to set nodes size\n");
     goto error3;
   }
 
   // Populate array of results
   for (int i = 0; i < size; i++) {
-    nodes->results[i] = results[i]->_private;
+    if (results[i] != nullptr && results[i]->_private != nullptr) {
+      nodes->results[nodeIdx++] = results[i]->_private;
+    }
   }
   ok = true;
 
