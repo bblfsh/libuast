@@ -236,6 +236,14 @@ void TestUastFilterPosition() {
   CU_ASSERT_FATAL(NodesSize(nodes) == 7);
 }
 
+void TestUastFilterBadQuery() {
+  Uast *ctx = UastNew(IfaceMock());
+  Node *root = TreeMock();
+  Nodes *nodes = UastFilter(ctx, root, "//@roleModule");
+  CU_ASSERT_FATAL(nodes != NULL);
+  CU_ASSERT_FATAL(NodesSize(nodes) == 0);
+}
+
 void TestUastIteratorPreOrder() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
