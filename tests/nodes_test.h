@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include <iostream>  // XXX
+#include <cstdio> // XXX
 
 extern "C" {
 #include <CUnit/Basic.h>
@@ -234,6 +236,42 @@ void TestUastFilterPosition() {
   Nodes *nodes = UastFilter(ctx, root, "//*[@startOffset or @endOffset]");
   CU_ASSERT_FATAL(nodes != NULL);
   CU_ASSERT_FATAL(NodesSize(nodes) == 7);
+}
+
+void TestUastFunctionLast() {
+  Uast *ctx = UastNew(IfaceMock());
+  Node *root = TreeMock();
+  Nodes *nodes = UastFilter(ctx, root, "//*[last()=@startOffset or @endOffset]");
+  CU_ASSERT_FATAL(nodes != NULL);
+  CU_ASSERT_FATAL(NodesSize(nodes) == 1);
+}
+
+void TestUastFunctionBoolTrue() {
+  Uast *ctx = UastNew(IfaceMock());
+  Node *root = TreeMock();
+  int res = UastFilterBool(ctx, root, "boolean(//*[@startOffset or @endOffset])");
+  CU_ASSERT_FATAL(res == 1);
+}
+
+void TestUastFunctionBoolFalse() {
+  Uast *ctx = UastNew(IfaceMock());
+  Node *root = TreeMock();
+  int res = UastFilterBool(ctx, root, "boolean(//*[@blah])");
+  CU_ASSERT_FATAL(res == 0);
+}
+
+void TestUastFunctionBoolError() {
+  Uast *ctx = UastNew(IfaceMock());
+  Node *root = TreeMock();
+  int res = UastFilterBool(ctx, root, "//*");
+  CU_ASSERT_FATAL(res == -1);
+}
+
+void TestUastFunctionNumber() {
+  Uast *ctx = UastNew(IfaceMock());
+  Node *root = TreeMock();
+  double res = UastFilterNumber(ctx, root, "count(//*)");
+  CU_ASSERT_FATAL(static_cast<int>(res) == 14);
 }
 
 void TestUastFilterBadQuery() {

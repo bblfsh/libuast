@@ -42,15 +42,19 @@ int main() {
   ADD_TEST(suite, "test of UastFilter() with end line", TestUastFilterEndLine);
   ADD_TEST(suite, "test of UastFilter() with end col", TestUastFilterEndCol);
   ADD_TEST(suite, "test of UastFilter() with position", TestUastFilterPosition);
+  ADD_TEST(suite, "test of UastFilter() with last() function", TestUastFunctionLast);
+  ADD_TEST(suite, "test of UastFilter() with true bool result", TestUastFunctionBoolTrue);
+  ADD_TEST(suite, "test of UastFilter() with false bool result", TestUastFunctionBoolFalse);
+  ADD_TEST(suite, "test of UastFilter() with error type result", TestUastFunctionBoolError);
+  ADD_TEST(suite, "test of UastFilter() with numeric result", TestUastFunctionNumber);
+  // XXX string test
   ADD_TEST(suite, "test of UastFilter() with bad query", TestUastFilterBadQuery);
   ADD_TEST(suite, "test failing UastFilter() (bad Xpath)", TestXpath);
   ADD_TEST(suite, "test failing UastFilter() (bad xmlNewDoc)", TestXmlNewDoc);
   ADD_TEST(suite, "test failing UastFilter() (bad xmlNewNode)", TestXmlNewNode);
   ADD_TEST(suite, "test failing UastFilter() (bad xmlNewProc)", TestXmlNewProc);
-  ADD_TEST(suite, "test failing UastFilter() (bad xmlAddChild)",
-           TestXmlAddChild);
-  ADD_TEST(suite, "test failing UastFilter() (bad xmlNewContext)",
-           TestXmlNewContext);
+  ADD_TEST(suite, "test failing UastFilter() (bad xmlAddChild)", TestXmlAddChild);
+  ADD_TEST(suite, "test failing UastFilter() (bad xmlNewContext)", TestXmlNewContext);
   ADD_TEST(suite, "test empty UastFilter() result", TestEmptyResult);
 
   // run all tests using the CUnit Basic interface
