@@ -277,9 +277,9 @@ void TestUastFunctionNumber() {
 void TestUastFunctionString() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
-  const char *res = UastFilterString(ctx, root, "name(//*)[0]");
-  printf("XXX res: %s\n", res);
-  //CU_ASSERT_FATAL(static_cast<int>(res) == 14);
+  const char *res = UastFilterString(ctx, root, "name(//*[1])");
+  CU_ASSERT_FATAL(res != NULL);
+  CU_ASSERT_FATAL(!strcmp(res, "Module"));
 }
 
 void TestUastFilterBadQuery() {

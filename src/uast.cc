@@ -14,6 +14,7 @@
 #include <set>
 #include <type_traits>
 #include <typeinfo>
+#include <unordered_map>
 #include <vector>
 
 #include <cstdio>  // XXX
@@ -41,6 +42,32 @@ struct Nodes {
   std::vector<void *> results;
   int len;
   int cap;
+};
+
+enum XPathType {
+  XPATHTYPE_UNDEFINED = 0,
+  XPATHTYPE_NODESET = 1,
+  XPATHTYPE_BOOLEAN = 2,
+  XPATHTYPE_NUMBER = 3,
+  XPATHTYPE_STRING = 4,
+  XPATHTYPE_POINT = 5,
+  XPATHTYPE_RANGE = 6,
+  XPATHTYPE_LOCATIONSET = 7,
+  XPATHTYPE_USERS = 8,
+  XPATHTYPE_XSLT_TREE = 9,
+};
+
+static const std::unordered_map<XPathType, const char*> Type2Str {
+  {XPATHTYPE_UNDEFINED, "UNDEFINED"},
+  {XPATHTYPE_NODESET, "NODESET"},
+  {XPATHTYPE_BOOLEAN, "BOOLEAN"},
+  {XPATHTYPE_NUMBER, "NUMBER"},
+  {XPATHTYPE_STRING, "STRING"},
+  {XPATHTYPE_POINT, "POINT"},
+  {XPATHTYPE_RANGE, "RANGE"},
+  {XPATHTYPE_LOCATIONSET, "LOCATIONSET"},
+  {XPATHTYPE_USERS, "USERS"},
+  {XPATHTYPE_XSLT_TREE, "XSLT_TREE"},
 };
 
 // XXX doc, user own nodesVal or stringVal must take ownership and free after use
@@ -73,6 +100,8 @@ static void *LevelOrderNext(UastIterator *iter);
 static void *PostOrderNext(UastIterator *iter);
 // Get the results of a query with a TypedResult template class instance
 UastTypedResult UastFilterTyped(const Uast *ctx, void *node, const char *query);
+
+static const char *GetTypeStr(XPathType type);
 
 class QueryResult {
   xmlXPathContextPtr xpathCtx;
@@ -222,7 +251,8 @@ Nodes *UastFilter(const Uast *ctx, void *node, const char *query) {
   }
 
   if (result.type != XPATHTYPE_NODESET) {
-    Error(nullptr, "Result of UastFilter[Nodes] if not a node set\n");
+    Error(nullptr, "Result of UastFilter[Nodes] if not a node set (type: %s\n",
+        Type2Str.find(result.type));
   }
 
   return result.nodesVal;
@@ -232,7 +262,8 @@ int UastFilterBool(const Uast *ctx, void *node, const char *query) {
   auto result = UastFilterTyped(ctx, node, query);
 
   if (result.type != XPATHTYPE_BOOLEAN) {
-    Error(nullptr, "Result of UastFilterBool is not boolean\n");
+    Error(nullptr, "Result of UastFilterBool is not boolean (type: %s)\n",
+        Type2Str.find(result.type));
     result.boolVal = -1;
   }
 
@@ -243,7 +274,8 @@ double UastFilterNumber(const Uast *ctx, void *node, const char *query) {
   auto result = UastFilterTyped(ctx, node, query);
 
   if (result.type != XPATHTYPE_NUMBER) {
-    Error(nullptr, "Result of UastFilterNumber is not numeric\n");
+    Error(nullptr, "Result of UastFilterNumber is not numeric (type: %s)\n",
+        Type2Str.find(result.type));
     result.numberVal = -1;
   }
 
@@ -254,7 +286,8 @@ const char *UastFilterString(const Uast *ctx, void *node, const char *query) {
   auto result = UastFilterTyped(ctx, node, query);
 
   if (result.type != XPATHTYPE_STRING) {
-    Error(nullptr, "Result of UastFilterNumber is not a string\n");
+    Error(nullptr, "Result of UastFilterString is not a string (type: %s)\n",
+        GetTypeStr(result.type));
   }
 
   return result.stringVal;
@@ -340,6 +373,13 @@ UastTypedResult UastFilterTyped(const Uast *ctx, void *node, const char *query) 
           }
         }
         break;
+
+      // XXX
+      case XPATH_POINT:
+      case XPATH_RANGE:
+      case XPATH_LOCATIONSET:
+      case XPATH_USERS:
+      case XPATHTYPE_XSLT_TREE:
 
       default:
         {
@@ -583,4 +623,13 @@ static void *PostOrderNext(UastIterator *iter) {
   curNode = iter->pending.front();
   iter->pending.pop_front();
   return curNode;
+}
+
+static const char *GetTypeStr(XPathType type) {
+  auto typeIt = Type2Str.find(type);
+  if (typeIt == Type2Str.end()) {
+    return "UNDEFINED";
+  }
+
+  return typeIt->second;
 }

@@ -19,19 +19,6 @@ typedef struct Uast Uast;
 // with UastIteratorFree.
 typedef struct UastIterator UastIterator;
 
-typedef enum XPathType {
-  XPATHTYPE_UNDEFINED = 0,
-  XPATHTYPE_NODESET = 1,
-  XPATHTYPE_BOOLEAN = 2,
-  XPATHTYPE_NUMBER = 3,
-  XPATHTYPE_STRING = 4,
-  XPATHTYPE_POINT = 5,
-  XPATHTYPE_RANGE = 6,
-  XPATHTYPE_LOCATIONSET = 7,
-  XPATHTYPE_USERS = 8,
-  XPATHTYPE_XSLT_TREE = 9
-} XPathType;
-
 typedef enum { PRE_ORDER, POST_ORDER, LEVEL_ORDER } TreeOrder;
 
 // Uast needs a node implementation in order to work. This is needed
