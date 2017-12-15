@@ -74,6 +74,8 @@ Nodes *UastFilter2(const Uast *ctx, void *node, const char *query);
 int UastFilterBool(const Uast *ctx, void *node, const char *query);
 // XXX docs
 double UastFilterNumber(const Uast *ctx, void *node, const char *query);
+// XXX docs
+const char *UastFilterString(const Uast *ctx, void *node, const char *query);
 
 // Create a new UastIterator pointer. This will allow you to traverse the UAST
 // calling UastIteratorNext. The node argument will be user as the root node of

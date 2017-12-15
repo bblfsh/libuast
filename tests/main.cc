@@ -47,7 +47,7 @@ int main() {
   ADD_TEST(suite, "test of UastFilter() with false bool result", TestUastFunctionBoolFalse);
   ADD_TEST(suite, "test of UastFilter() with error type result", TestUastFunctionBoolError);
   ADD_TEST(suite, "test of UastFilter() with numeric result", TestUastFunctionNumber);
-  // XXX string test
+  ADD_TEST(suite, "test of UastFilter() with string result", TestUastFunctionString);
   ADD_TEST(suite, "test of UastFilter() with bad query", TestUastFilterBadQuery);
   ADD_TEST(suite, "test failing UastFilter() (bad Xpath)", TestXpath);
   ADD_TEST(suite, "test failing UastFilter() (bad xmlNewDoc)", TestXmlNewDoc);

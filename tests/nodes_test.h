@@ -274,6 +274,14 @@ void TestUastFunctionNumber() {
   CU_ASSERT_FATAL(static_cast<int>(res) == 14);
 }
 
+void TestUastFunctionString() {
+  Uast *ctx = UastNew(IfaceMock());
+  Node *root = TreeMock();
+  const char *res = UastFilterString(ctx, root, "name(//*)[0]");
+  printf("XXX res: %s\n", res);
+  //CU_ASSERT_FATAL(static_cast<int>(res) == 14);
+}
+
 void TestUastFilterBadQuery() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();

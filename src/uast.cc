@@ -43,8 +43,8 @@ struct Nodes {
   int cap;
 };
 
-// XXX doc, user must take ownership of nodesVal and stringVal
-struct UastTypedResult {
+// XXX doc, user own nodesVal or stringVal must take ownership and free after use
+typedef struct UastTypedResult {
   bool hasError;
   XPathType type;
   Nodes *nodesVal;
@@ -53,9 +53,9 @@ struct UastTypedResult {
   char *stringVal;
 
   UastTypedResult(): hasError(false), type(XPATHTYPE_UNDEFINED), nodesVal(nullptr),
-                     numberVal(-1), stringVal(nullptr);
+                     numberVal(-1), stringVal(nullptr) {}
   // XXX check: (void *) user, user2, (int) index, index2
-}
+} UastTypedResult;
 
 static xmlDocPtr CreateDocument(const Uast *ctx, void *node);
 static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node, xmlNodePtr parent);
@@ -108,6 +108,16 @@ class QueryResult {
     if (xpathCtx) xmlXPathFreeContext(xpathCtx);
     if (doc) xmlFreeDoc(doc);
   }
+};
+
+
+class CreateXMLNodeException: public std::runtime_error {
+  public:
+  CreateXMLNodeException(const char *msg): runtime_error(msg) {
+    Error(nullptr, msg);
+  }
+  // Keeps LastError
+  CreateXMLNodeException(): std::runtime_error("") {}
 };
 
 //////////////////////////////
@@ -240,8 +250,17 @@ double UastFilterNumber(const Uast *ctx, void *node, const char *query) {
   return result.numberVal;
 }
 
+const char *UastFilterString(const Uast *ctx, void *node, const char *query) {
+  auto result = UastFilterTyped(ctx, node, query);
+
+  if (result.type != XPATHTYPE_STRING) {
+    Error(nullptr, "Result of UastFilterNumber is not a string\n");
+  }
+
+  return result.stringVal;
+}
+
 UastTypedResult UastFilterTyped(const Uast *ctx, void *node, const char *query) {
-  // XXX use UastTypedResultNew/Free or constructor
   UastTypedResult ret;
 
   try {
@@ -254,7 +273,6 @@ UastTypedResult UastFilterTyped(const Uast *ctx, void *node, const char *query) 
 
     switch (qobject.xpathObj->type) {
       case XPATH_BOOLEAN:
-
 
         ret.boolVal = qobject.xpathObj->boolval;
         break;
@@ -271,13 +289,13 @@ UastTypedResult UastFilterTyped(const Uast *ctx, void *node, const char *query) 
             ret.hasError = true;
             break;
           }
+          // XXX needed?
           ret.stringVal = strdup(cstr);
         }
         break;
 
       case XPATH_NODESET:
         {
-          // XXX move to a function
           if (!qobject.xpathObj->nodesetval) {
             Error(nullptr, "Unable to get array of result nodes");
             ret.hasError = true;
@@ -324,10 +342,12 @@ UastTypedResult UastFilterTyped(const Uast *ctx, void *node, const char *query) 
         break;
 
       default:
-        char msg[128];
-        snprintf(msg, 128, "Unsupported return type (%d)\n", qobject.xpathObj->type);
-        Error(nullptr, msg);
-        ret.hasError = true;
+        {
+          char msg[128];
+          snprintf(msg, 128, "Unsupported return type (%d)\n", qobject.xpathObj->type);
+          Error(nullptr, msg);
+          ret.hasError = true;
+        }
     }
 
     if (ret.hasError == true && ret.nodesVal) {
@@ -369,120 +389,117 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
   int roles_size = 0;
   const char *token = nullptr;
 
-  if (!xmlNode) {
-    goto error;
-  }
-
-  xmlNode->_private = node;
-  if (parent) {
-    if (!xmlAddChild(parent, xmlNode)) {
-      goto error;
+  try {
+    if (!xmlNode) {
+      throw CreateXMLNodeException();
     }
-  }
 
-  // Token
-  token = ctx->iface.Token(node);
-  if (token) {
-    if (!xmlNewProp(xmlNode, BAD_CAST("token"), BAD_CAST(token))) {
-      goto error;
-    }
-  }
-
-  // Roles
-  roles_size = ctx->iface.RolesSize(node);
-  for (int i = 0; i < roles_size; i++) {
-    uint16_t role = ctx->iface.RoleAt(node, i);
-    const char *role_name = RoleNameForId(role);
-    if (role_name != nullptr) {
-      if (!xmlNewProp(xmlNode, BAD_CAST(role_name), nullptr)) {
-        goto error;
+    xmlNode->_private = node;
+    if (parent) {
+      if (!xmlAddChild(parent, xmlNode)) {
+        throw CreateXMLNodeException();
       }
     }
+
+    // Token
+    token = ctx->iface.Token(node);
+    if (token) {
+      if (!xmlNewProp(xmlNode, BAD_CAST("token"), BAD_CAST(token))) {
+        throw CreateXMLNodeException();
+      }
+    }
+
+    // Roles
+    roles_size = ctx->iface.RolesSize(node);
+    for (int i = 0; i < roles_size; i++) {
+      uint16_t role = ctx->iface.RoleAt(node, i);
+      const char *role_name = RoleNameForId(role);
+      if (role_name != nullptr) {
+        if (!xmlNewProp(xmlNode, BAD_CAST(role_name), nullptr)) {
+          throw CreateXMLNodeException();
+        }
+      }
+    }
+
+    // Properties
+    for (int i = 0; i < ctx->iface.PropertiesSize(node); i++) {
+      const char *key = ctx->iface.PropertyKeyAt(node, i);
+      const char *value = ctx->iface.PropertyValueAt(node, i);
+      if (!xmlNewProp(xmlNode, BAD_CAST(key), BAD_CAST(value))) {
+        throw CreateXMLNodeException();
+      }
+    }
+
+    // Position
+    if (ctx->iface.HasStartOffset(node)) {
+      int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.StartOffset(node));
+      if (ret < 0 || ret >= BUF_SIZE) {
+        throw CreateXMLNodeException("Unable to set start offset\n");
+      }
+      if (!xmlNewProp(xmlNode, BAD_CAST "startOffset", BAD_CAST buf)) {
+        throw CreateXMLNodeException();
+      }
+    }
+    if (ctx->iface.HasStartLine(node)) {
+      int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.StartLine(node));
+      if (ret < 0 || ret >= BUF_SIZE) {
+        throw CreateXMLNodeException("Unable to start line\n");
+      }
+      if (!xmlNewProp(xmlNode, BAD_CAST "startLine", BAD_CAST buf)) {
+        throw CreateXMLNodeException();
+      }
+    }
+    if (ctx->iface.HasStartCol(node)) {
+      int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.StartCol(node));
+      if (ret < 0 || ret >= BUF_SIZE) {
+        throw CreateXMLNodeException("Unable to start column\n");
+      }
+      if (!xmlNewProp(xmlNode, BAD_CAST "startCol", BAD_CAST buf)) {
+        throw CreateXMLNodeException();
+      }
+    }
+    if (ctx->iface.HasEndOffset(node)) {
+      int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.EndOffset(node));
+      if (ret < 0 || ret >= BUF_SIZE) {
+        throw CreateXMLNodeException("Unable to set end offset\n");
+      }
+      if (!xmlNewProp(xmlNode, BAD_CAST "endOffset", BAD_CAST buf)) {
+        throw CreateXMLNodeException();
+      }
+    }
+    if (ctx->iface.HasEndLine(node)) {
+      int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.EndLine(node));
+      if (ret < 0 || ret >= BUF_SIZE) {
+        Error(nullptr, "Unable to set end line\n");
+        throw CreateXMLNodeException();
+      }
+      if (!xmlNewProp(xmlNode, BAD_CAST "endLine", BAD_CAST buf)) {
+        throw CreateXMLNodeException();
+      }
+    }
+    if (ctx->iface.HasEndCol(node)) {
+      int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.EndCol(node));
+      if (ret < 0 || ret >= BUF_SIZE) {
+        throw CreateXMLNodeException("Unable to set end column\n");
+      }
+      if (!xmlNewProp(xmlNode, BAD_CAST "endCol", BAD_CAST buf)) {
+        throw CreateXMLNodeException();
+      }
+    }
+
+    // Recursivelly visit all children
+    children_size = ctx->iface.ChildrenSize(node);
+    for (int i = 0; i < children_size; i++) {
+      void *child = ctx->iface.ChildAt(node, i);
+      if (!CreateXmlNode(ctx, child, xmlNode)) {
+        throw CreateXMLNodeException();
+      }
+    }
+    return xmlNode;
+  } catch (CreateXMLNodeException &e) {
+    xmlFreeNode(xmlNode);
   }
 
-  // Properties
-  for (int i = 0; i < ctx->iface.PropertiesSize(node); i++) {
-    const char *key = ctx->iface.PropertyKeyAt(node, i);
-    const char *value = ctx->iface.PropertyValueAt(node, i);
-    if (!xmlNewProp(xmlNode, BAD_CAST(key), BAD_CAST(value))) {
-      goto error;
-    }
-  }
-
-  // Position
-  if (ctx->iface.HasStartOffset(node)) {
-    int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.StartOffset(node));
-    if (ret < 0 || ret >= BUF_SIZE) {
-      Error(nullptr, "Unable to set start offset\n");
-      goto error;
-    }
-    if (!xmlNewProp(xmlNode, BAD_CAST "startOffset", BAD_CAST buf)) {
-      goto error;
-    }
-  }
-  if (ctx->iface.HasStartLine(node)) {
-    int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.StartLine(node));
-    if (ret < 0 || ret >= BUF_SIZE) {
-      Error(nullptr, "Unable to set start line\n");
-      goto error;
-    }
-    if (!xmlNewProp(xmlNode, BAD_CAST "startLine", BAD_CAST buf)) {
-      goto error;
-    }
-  }
-  if (ctx->iface.HasStartCol(node)) {
-    int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.StartCol(node));
-    if (ret < 0 || ret >= BUF_SIZE) {
-      Error(nullptr, "Unable to set start column\n");
-      goto error;
-    }
-    if (!xmlNewProp(xmlNode, BAD_CAST "startCol", BAD_CAST buf)) {
-      goto error;
-    }
-  }
-  if (ctx->iface.HasEndOffset(node)) {
-    int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.EndOffset(node));
-    if (ret < 0 || ret >= BUF_SIZE) {
-      Error(nullptr, "Unable to set end offset\n");
-      goto error;
-    }
-    if (!xmlNewProp(xmlNode, BAD_CAST "endOffset", BAD_CAST buf)) {
-      goto error;
-    }
-  }
-  if (ctx->iface.HasEndLine(node)) {
-    int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.EndLine(node));
-    if (ret < 0 || ret >= BUF_SIZE) {
-      Error(nullptr, "Unable to set end line\n");
-      goto error;
-    }
-    if (!xmlNewProp(xmlNode, BAD_CAST "endLine", BAD_CAST buf)) {
-      goto error;
-    }
-  }
-  if (ctx->iface.HasEndCol(node)) {
-    int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.EndCol(node));
-    if (ret < 0 || ret >= BUF_SIZE) {
-      Error(nullptr, "Unable to set end column\n");
-      goto error;
-    }
-    if (!xmlNewProp(xmlNode, BAD_CAST "endCol", BAD_CAST buf)) {
-      goto error;
-    }
-  }
-
-  // Recursivelly visit all children
-  children_size = ctx->iface.ChildrenSize(node);
-  for (int i = 0; i < children_size; i++) {
-    void *child = ctx->iface.ChildAt(node, i);
-    if (!CreateXmlNode(ctx, child, xmlNode)) {
-      goto error;
-    }
-  }
-  return xmlNode;
-
-error:
-  xmlFreeNode(xmlNode);
   return nullptr;
 }
 
