@@ -290,6 +290,22 @@ void TestUastFilterBadQuery() {
   CU_ASSERT_FATAL(NodesSize(nodes) == 0);
 }
 
+void TestUastFilterXPathFuncCeiling() {
+  Uast *ctx = UastNew(IfaceMock());
+  Node *root = TreeMock();
+  int res = UastFilterNumber(ctx, root, "ceiling(//*[1]/@endOffset)");
+  CU_ASSERT_FATAL(res == 2813);
+}
+
+void TestUastFilterXPathFuncChoose() {
+  Uast *ctx = UastNew(IfaceMock());
+  Node *root = TreeMock();
+  int res = UastFilterBool(ctx, root, "ceiling(true, 1, 2)");
+  printf("XXX res: %d\n", res);
+  printf("XXX lastError: %s\n", LastError());
+  //CU_ASSERT_FATAL(res == 2813);
+}
+
 void TestUastIteratorPreOrder() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();

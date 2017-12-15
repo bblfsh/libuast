@@ -43,11 +43,13 @@ int main() {
   ADD_TEST(suite, "test of UastFilter() with end col", TestUastFilterEndCol);
   ADD_TEST(suite, "test of UastFilter() with position", TestUastFilterPosition);
   ADD_TEST(suite, "test of UastFilter() with last() function", TestUastFunctionLast);
-  ADD_TEST(suite, "test of UastFilter() with true bool result", TestUastFunctionBoolTrue);
-  ADD_TEST(suite, "test of UastFilter() with false bool result", TestUastFunctionBoolFalse);
-  ADD_TEST(suite, "test of UastFilter() with error type result", TestUastFunctionBoolError);
-  ADD_TEST(suite, "test of UastFilter() with numeric result", TestUastFunctionNumber);
-  ADD_TEST(suite, "test of UastFilter() with string result", TestUastFunctionString);
+  ADD_TEST(suite, "test of UastFilterBool() with true result", TestUastFunctionBoolTrue);
+  ADD_TEST(suite, "test of UastFilterBool() with false result", TestUastFunctionBoolFalse);
+  ADD_TEST(suite, "test of UastFilterBool() with error type result", TestUastFunctionBoolError);
+  ADD_TEST(suite, "test of UastFilterNumber()", TestUastFunctionNumber);
+  ADD_TEST(suite, "test of UastFilterString()", TestUastFunctionString);
+  ADD_TEST(suite, "test of UastFilter() with celing() XPath call", TestUastFilterXPathFuncCeiling);
+  ADD_TEST(suite, "test of UastFilter() with choose() XPath call", TestUastFilterXPathFuncChoose);
   ADD_TEST(suite, "test of UastFilter() with bad query", TestUastFilterBadQuery);
   ADD_TEST(suite, "test failing UastFilter() (bad Xpath)", TestXpath);
   ADD_TEST(suite, "test failing UastFilter() (bad xmlNewDoc)", TestXmlNewDoc);

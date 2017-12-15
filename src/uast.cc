@@ -102,6 +102,7 @@ static void *PostOrderNext(UastIterator *iter);
 UastTypedResult UastFilterTyped(const Uast *ctx, void *node, const char *query);
 
 static const char *GetTypeStr(XPathType type);
+static bool checkResult(const UastTypedResult&, XPathType, const char *);
 
 class QueryResult {
   xmlXPathContextPtr xpathCtx;
@@ -246,13 +247,8 @@ char *LastError(void) {
 Nodes *UastFilter(const Uast *ctx, void *node, const char *query) {
   auto result = UastFilterTyped(ctx, node, query);
 
-  if (result.hasError == 1) {
+  if (!checkResult(result, XPATHTYPE_NODESET, "UastFilter")) {
     return nullptr;
-  }
-
-  if (result.type != XPATHTYPE_NODESET) {
-    Error(nullptr, "Result of UastFilter[Nodes] if not a node set (type: %s\n",
-        Type2Str.find(result.type));
   }
 
   return result.nodesVal;
@@ -261,10 +257,8 @@ Nodes *UastFilter(const Uast *ctx, void *node, const char *query) {
 int UastFilterBool(const Uast *ctx, void *node, const char *query) {
   auto result = UastFilterTyped(ctx, node, query);
 
-  if (result.type != XPATHTYPE_BOOLEAN) {
-    Error(nullptr, "Result of UastFilterBool is not boolean (type: %s)\n",
-        Type2Str.find(result.type));
-    result.boolVal = -1;
+  if (!checkResult(result, XPATHTYPE_BOOLEAN, "UastFilterBoolean")) {
+    return -1;
   }
 
   return result.boolVal;
@@ -273,10 +267,8 @@ int UastFilterBool(const Uast *ctx, void *node, const char *query) {
 double UastFilterNumber(const Uast *ctx, void *node, const char *query) {
   auto result = UastFilterTyped(ctx, node, query);
 
-  if (result.type != XPATHTYPE_NUMBER) {
-    Error(nullptr, "Result of UastFilterNumber is not numeric (type: %s)\n",
-        Type2Str.find(result.type));
-    result.numberVal = -1;
+  if (!checkResult(result, XPATHTYPE_NUMBER, "UastFilterNumber")) {
+    return -1;
   }
 
   return result.numberVal;
@@ -285,9 +277,8 @@ double UastFilterNumber(const Uast *ctx, void *node, const char *query) {
 const char *UastFilterString(const Uast *ctx, void *node, const char *query) {
   auto result = UastFilterTyped(ctx, node, query);
 
-  if (result.type != XPATHTYPE_STRING) {
-    Error(nullptr, "Result of UastFilterString is not a string (type: %s)\n",
-        GetTypeStr(result.type));
+  if (!checkResult(result, XPATHTYPE_STRING, "UastFilterString")) {
+    return nullptr;
   }
 
   return result.stringVal;
@@ -632,4 +623,19 @@ static const char *GetTypeStr(XPathType type) {
   }
 
   return typeIt->second;
+}
+
+static bool checkResult(const UastTypedResult& result, XPathType expectedType,
+                        const char *funcName) {
+  if (result.hasError == 1) {
+    return false;
+  } else if (result.type != expectedType) {
+    char msg[128];
+    snprintf(msg, 128, "Result of %s is not %s (is: %s)\n", funcName,
+             GetTypeStr(expectedType), GetTypeStr(result.type));
+    Error(nullptr, msg);
+    return false;
+  }
+
+  return true;
 }
