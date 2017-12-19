@@ -55,7 +55,7 @@ enum XPathType {
   XPATHTYPE_XSLT_TREE = 9,
 };
 
-static const std::unordered_map<XPathType, const char*> Type2Str {
+const std::unordered_map<XPathType, const char*> Type2Str {
   {XPATHTYPE_UNDEFINED, "UNDEFINED"},
   {XPATHTYPE_NODESET, "NODESET"},
   {XPATHTYPE_BOOLEAN, "BOOLEAN"},
@@ -69,7 +69,7 @@ static const std::unordered_map<XPathType, const char*> Type2Str {
 };
 
 // TODO: doc, user own nodesVal or stringVal must take ownership and free after use
-typedef struct UastTypedResult {
+struct UastTypedResult {
   bool hasError;
   XPathType type;
   Nodes *nodesVal;
@@ -79,7 +79,7 @@ typedef struct UastTypedResult {
 
   UastTypedResult(): hasError(false), type(XPATHTYPE_UNDEFINED), nodesVal(nullptr),
                      numberVal(-1), stringVal(nullptr) {}
-} UastTypedResult;
+};
 
 static xmlDocPtr CreateDocument(const Uast *ctx, void *node);
 static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node, xmlNodePtr parent);
@@ -140,7 +140,7 @@ class QueryResult {
 
 class CreateXMLNodeException: public std::runtime_error {
   public:
-  CreateXMLNodeException(const char *msg): runtime_error(msg) {
+  explicit CreateXMLNodeException(const char *msg): runtime_error(msg) {
     Error(nullptr, msg);
   }
   // Keeps LastError
@@ -172,7 +172,7 @@ Uast *UastNew(NodeIface iface) {
 
   try {
     ctx = new Uast();
-  } catch (std::bad_alloc) {
+  } catch (const std::bad_alloc&) {
     Error(nullptr, "Unable to get memory\n");
     return nullptr;
   }
@@ -200,7 +200,7 @@ UastIterator *UastIteratorNew(const Uast *ctx, void *node, TreeOrder order) {
 
   try {
     iter = new UastIterator();
-  } catch (std::bad_alloc) {
+  } catch (const std::bad_alloc&) {
     Error(nullptr, "Unable to get memory\n");
     return nullptr;
   }
@@ -286,15 +286,14 @@ UastTypedResult UastFilterTyped(const Uast *ctx, void *node, const char *query) 
 
   try {
 
-    auto handler = (xmlGenericErrorFunc)Error;
+    auto handler = static_cast<xmlGenericErrorFunc>(Error);
     initGenericErrorDefaultFunc(&handler);
 
-    auto qobject = QueryResult(ctx, node, query);
+    QueryResult qobject(ctx, node, query);
     ret.type = static_cast<XPathType>(qobject.xpathObj->type);
 
     switch (qobject.xpathObj->type) {
       case XPATH_BOOLEAN:
-
         ret.boolVal = qobject.xpathObj->boolval;
         break;
 
@@ -304,7 +303,7 @@ UastTypedResult UastFilterTyped(const Uast *ctx, void *node, const char *query) 
 
       case XPATH_STRING:
         {
-          auto cstr = reinterpret_cast<char *>(qobject.xpathObj->stringval);
+          char *cstr = reinterpret_cast<char *>(qobject.xpathObj->stringval);
           if (!cstr) {
             Error(nullptr, "string query returned null string\n");
             ret.hasError = true;
@@ -324,7 +323,7 @@ UastTypedResult UastFilterTyped(const Uast *ctx, void *node, const char *query) 
 
           try {
             ret.nodesVal = new Nodes();
-          } catch (std::bad_alloc) {
+          } catch (const std::bad_alloc&) {
             Error(nullptr, "Unable to get memory\n");
             ret.hasError = true;
             break;
@@ -370,7 +369,7 @@ UastTypedResult UastFilterTyped(const Uast *ctx, void *node, const char *query) 
         }
     }
 
-    if (ret.hasError == true && ret.nodesVal) {
+    if (ret.hasError && ret.nodesVal) {
       NodesFree(ret.nodesVal);
       ret.nodesVal = nullptr;
     }
@@ -386,7 +385,7 @@ UastTypedResult UastFilterTyped(const Uast *ctx, void *node, const char *query) 
 ///////// PRIVATE API ////////
 //////////////////////////////
 
-Nodes *NodesNew(void) { return new Nodes(); }
+Nodes *NodesNew() { return new Nodes(); }
 
 int NodesSetSize(Nodes *nodes, int len) {
   if (len > nodes->cap) {
@@ -524,7 +523,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
 }
 
 static xmlDocPtr CreateDocument(const Uast *ctx, void *node) {
-  xmlDocPtr doc = static_cast<xmlDocPtr>(xmlNewDoc(BAD_CAST("1.0")));
+  auto doc = static_cast<xmlDocPtr>(xmlNewDoc(BAD_CAST("1.0")));
   if (!doc) {
     return nullptr;
   }
@@ -616,7 +615,7 @@ static const char *GetTypeStr(XPathType type) {
 
 static bool checkResult(const UastTypedResult& result, XPathType expectedType,
                         const char *funcName) {
-  if (result.hasError == 1) {
+  if (result.hasError) {
     return false;
   } else if (result.type != expectedType) {
     char msg[128];

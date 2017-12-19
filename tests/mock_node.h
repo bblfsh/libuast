@@ -57,21 +57,23 @@ static const char *Token(const void *node) {
 }
 
 static int ChildrenSize(const void *node) {
-  return ((Node *)node)->children.size();
+  return static_cast<int>(((Node *)node)->children.size());
 }
 
 static void *ChildAt(const void *node, int index) {
   return ((Node *)node)->children.at(index);
 }
 
-static int RolesSize(const void *node) { return ((Node *)node)->roles.size(); }
+static int RolesSize(const void *node) {
+  return static_cast<int>(((Node *)node)->roles.size());
+}
 
 static uint16_t RoleAt(const void *node, int index) {
   return ((Node *)node)->roles.at(index);
 }
 
 static int PropertiesSize(const void *node) {
-  return ((Node *)node)->properties.size();
+  return static_cast<int>(((Node *)node)->properties.size());
 }
 
 static const char *PropertyKeyAt(const void *node, int index) {

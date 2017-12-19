@@ -309,7 +309,7 @@ void TestUastFilterBadQuery() {
 void TestUastFilterXPathFuncCeiling() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
-  int res = UastFilterNumber(ctx, root, "ceiling(//*[1]/@endOffset)");
+  int res = static_cast<int>(UastFilterNumber(ctx, root, "ceiling(//*[1]/@endOffset)"));
   CU_ASSERT_FATAL(res == 2813);
 
   UastFree(ctx);
