@@ -8,9 +8,6 @@
 #include <string>
 #include <vector>
 
-#include <iostream>  // XXX
-#include <cstdio> // XXX
-
 extern "C" {
 #include <CUnit/Basic.h>
 }
@@ -20,8 +17,6 @@ extern "C" {
 #include "testing_tools.h"
 #include "uast.h"
 #include "uast_private.h"
-
-// XXX UastFree(ctx) NodesFree(nodes)
 
 bool EqualNodes(const Nodes *n1, const Nodes *n2) {
   if (NodesSize(n1) != NodesSize(n2)) {

@@ -17,8 +17,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include <cstdio>  // XXX
-
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
@@ -70,7 +68,7 @@ static const std::unordered_map<XPathType, const char*> Type2Str {
   {XPATHTYPE_XSLT_TREE, "XSLT_TREE"},
 };
 
-// XXX doc, user own nodesVal or stringVal must take ownership and free after use
+// TODO: doc, user own nodesVal or stringVal must take ownership and free after use
 typedef struct UastTypedResult {
   bool hasError;
   XPathType type;
@@ -81,7 +79,6 @@ typedef struct UastTypedResult {
 
   UastTypedResult(): hasError(false), type(XPATHTYPE_UNDEFINED), nodesVal(nullptr),
                      numberVal(-1), stringVal(nullptr) {}
-  // XXX check: (void *) user, user2, (int) index, index2
 } UastTypedResult;
 
 static xmlDocPtr CreateDocument(const Uast *ctx, void *node);
@@ -313,7 +310,6 @@ UastTypedResult UastFilterTyped(const Uast *ctx, void *node, const char *query) 
             ret.hasError = true;
             break;
           }
-          // XXX needed?
           ret.stringVal = strdup(cstr);
         }
         break;
@@ -364,13 +360,6 @@ UastTypedResult UastFilterTyped(const Uast *ctx, void *node, const char *query) 
           }
         }
         break;
-
-      // XXX
-      case XPATH_POINT:
-      case XPATH_RANGE:
-      case XPATH_LOCATIONSET:
-      case XPATH_USERS:
-      case XPATHTYPE_XSLT_TREE:
 
       default:
         {

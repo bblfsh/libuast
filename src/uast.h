@@ -54,14 +54,12 @@ void UastFree(Uast *ctx);
 // <NumLiteral token="2" roleLiteral roleSimpleIdentifier></NumLiteral>
 // ```
 Nodes *UastFilter(const Uast *ctx, void *node, const char *query);
-// XXX remove
-Nodes *UastFilter2(const Uast *ctx, void *node, const char *query);
 
-// XXX docs
+// TODO: docs
 int UastFilterBool(const Uast *ctx, void *node, const char *query);
-// XXX docs
+// TODO: docs
 double UastFilterNumber(const Uast *ctx, void *node, const char *query);
-// XXX docs
+// TODO: docs
 const char *UastFilterString(const Uast *ctx, void *node, const char *query);
 
 // Create a new UastIterator pointer. This will allow you to traverse the UAST
