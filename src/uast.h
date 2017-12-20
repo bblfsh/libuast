@@ -53,13 +53,27 @@ void UastFree(Uast *ctx);
 // ```
 // <NumLiteral token="2" roleLiteral roleSimpleIdentifier></NumLiteral>
 // ```
+//
+// It will return an error if the query has a return type that is not a
+// node list. In that case, you should use one of the typed filter functions
+// (`UastFilterBool`, `UastFilterNumber` or `UastFilterString`).
+//
 Nodes *UastFilter(const Uast *ctx, void *node, const char *query);
 
-// TODO: docs
+// Returns a integer value as result of executing the XPath query with bool result,
+// with `1` meaning `true` and `0` false. It returns -1 if there is any error.
+// The parameters have the same meaning as `UastFilter`.
+//
 int UastFilterBool(const Uast *ctx, void *node, const char *query);
-// TODO: docs
+
+// Returns a `double` value as result of executing the XPath query with number result.
+// The parameters have the same meaning as `UastFilter`.
+//
 double UastFilterNumber(const Uast *ctx, void *node, const char *query);
-// TODO: docs
+
+// Returns a `const char*` value as result of executing the XPath query with
+// a string result. The parameters have the same meaning as `UastFilter`.
+//
 const char *UastFilterString(const Uast *ctx, void *node, const char *query);
 
 // Create a new UastIterator pointer. This will allow you to traverse the UAST

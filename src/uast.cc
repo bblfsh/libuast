@@ -74,7 +74,8 @@ const std::unordered_map<XPathType, const char*, HashXPathType> Type2Str {
   {XPATHTYPE_XSLT_TREE, "XSLT_TREE"},
 };
 
-// TODO: doc, user own nodesVal or stringVal must take ownership and free after use
+// Result from the UastFilterTyped call. Only one of the <type>Val
+// values will be set, which the type field indicating which one.
 struct UastTypedResult {
   bool hasError;
   XPathType type;
