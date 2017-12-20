@@ -55,7 +55,13 @@ enum XPathType {
   XPATHTYPE_XSLT_TREE = 9,
 };
 
-const std::unordered_map<XPathType, const char*> Type2Str {
+struct HashXPathType {
+  long operator()(const XPathType& xtype) const {
+    return static_cast<long>(xtype);
+  }
+};
+
+const std::unordered_map<XPathType, const char*, HashXPathType> Type2Str {
   {XPATHTYPE_UNDEFINED, "UNDEFINED"},
   {XPATHTYPE_NODESET, "NODESET"},
   {XPATHTYPE_BOOLEAN, "BOOLEAN"},
