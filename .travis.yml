@@ -1,7 +1,27 @@
-language: c
-compiler:
-  - clang
-  - gcc
+sudo: required
+language: generic # using C will override the specified compilers with trusty's default
+
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-6
+            - g++-6
+      env: CC='gcc-6' CXX='g++-6'
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-6 # for newer libs that clang'll use
+            - g++-6
+            - clang
+      env: CC='clang' CXX='clang++'
 
 before_install:
   - sudo apt-get update -qq
