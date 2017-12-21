@@ -14,7 +14,6 @@
 #include <set>
 #include <type_traits>
 #include <typeinfo>
-#include <unordered_map>
 #include <vector>
 
 #include <libxml/parser.h>
@@ -80,14 +79,14 @@ class QueryResult {
   QueryResult(const Uast *ctx, void *node, const char *query,
               xmlXPathObjectType expected) {
 
+    auto handler = (xmlGenericErrorFunc)Error;
+    initGenericErrorDefaultFunc(&handler);
+
     doc = CreateDocument(ctx, node);
     if (!doc) {
       xmlFreeDoc(doc);
       throw std::runtime_error(LastError());
     }
-
-    auto handler = (xmlGenericErrorFunc)Error;
-    initGenericErrorDefaultFunc(&handler);
 
     xpathCtx = static_cast<xmlXPathContextPtr>(xmlXPathNewContext(doc));
     if (!xpathCtx) {
@@ -276,22 +275,28 @@ Nodes *UastFilter(const Uast *ctx, void *node, const char *query) {
   return nullptr;
 }
 
-int UastFilterBool(const Uast *ctx, void *node, const char *query) {
+bool UastFilterBool(const Uast *ctx, void *node, const char *query,
+                    bool *ok) {
   try {
     QueryResult queryResult(ctx, node, query, XPATH_BOOLEAN);
+    *ok = true;
     return queryResult.xpathObj->boolval;
   } catch (std::runtime_error&) {}
 
-  return -1;
+  *ok = false;
+  return false;
 }
 
-double UastFilterNumber(const Uast *ctx, void *node, const char *query) {
+double UastFilterNumber(const Uast *ctx, void *node, const char *query,
+                        bool *ok) {
   try {
     QueryResult queryResult(ctx, node, query, XPATH_NUMBER);
+    *ok = true;
     return queryResult.xpathObj->floatval;
   } catch (std::runtime_error&) {}
 
-  return -1;
+  *ok = false;
+  return 0;
 }
 
 const char *UastFilterString(const Uast *ctx, void *node, const char *query) {

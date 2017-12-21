@@ -53,6 +53,8 @@ int main() {
   ADD_TEST(suite, "test of UastFilterBool() with error type result",
            TestUastFunctionBoolError);
   ADD_TEST(suite, "test of UastFilterNumber()", TestUastFunctionNumber);
+  ADD_TEST(suite, "test of UastFilterNumber() with error",
+           TestUastFunctionNumberError);
   ADD_TEST(suite, "test of UastFilterString()", TestUastFunctionString);
   ADD_TEST(suite, "test of UastFilter() with celing() XPath call",
            TestUastFilterXPathFuncCeiling);

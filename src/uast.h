@@ -60,17 +60,19 @@ void UastFree(Uast *ctx);
 Nodes *UastFilter(const Uast *ctx, void *node, const char *query);
 
 // Returns a integer value as result of executing the XPath query with bool result,
-// with `1` meaning `true` and `0` false. It returns -1 if there is any error.
-// The parameters have the same meaning as `UastFilter`.
-int UastFilterBool(const Uast *ctx, void *node, const char *query);
+// with `1` meaning `true` and `0` false. If there is any error, the flag `ok` will
+// be set to false. The parameters have the same meaning as `UastFilter`.
+bool UastFilterBool(const Uast *ctx, void *node, const char *query, bool *ok);
 
 // Returns a `double` value as result of executing the XPath query with number result.
-// The parameters have the same meaning as `UastFilter`.
-double UastFilterNumber(const Uast *ctx, void *node, const char *query);
+// The parameters have the same meaning as `UastFilter`. If there is any error,
+// the flag `ok` will be set to false.
+double UastFilterNumber(const Uast *ctx, void *node, const char *query, bool *ok);
 
 // Returns a `const char*` value as result of executing the XPath query with
 // a string result. The parameters have the same meaning as `UastFilter`. The user
 // takes ownership of the returned `const char *` and thus must free it.
+// If there is any error, the return value will be `NULL`.
 const char *UastFilterString(const Uast *ctx, void *node, const char *query);
 
 // Create a new UastIterator pointer. This will allow you to traverse the UAST
