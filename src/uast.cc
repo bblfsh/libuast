@@ -78,8 +78,8 @@ struct UastTypedResult {
   double numberVal;
   char *stringVal;
 
-  UastTypedResult(): hasError(false), type(XPATHTYPE_UNDEFINED), nodesVal(nullptr),
-                     numberVal(-1), stringVal(nullptr) {}
+  UastTypedResult(): hasError(false), type(XPATHTYPE_UNDEFINED),
+                     nodesVal(nullptr), numberVal(-1), stringVal(nullptr) {}
 };
 
 static xmlDocPtr CreateDocument(const Uast *ctx, void *node);
@@ -237,10 +237,6 @@ void *UastIteratorNext(UastIterator *iter) {
 
 NodeIface UastGetIface(const Uast *ctx) { return ctx->iface; }
 
-char *LastError(void) {
-  return strndup(error_message, BUF_SIZE);
-}
-
 Nodes *UastFilter(const Uast *ctx, void *node, const char *query) {
   auto result = UastFilterTyped(ctx, node, query);
 
@@ -281,6 +277,14 @@ const char *UastFilterString(const Uast *ctx, void *node, const char *query) {
   return result.stringVal;
 }
 
+char *LastError(void) {
+  return strndup(error_message, BUF_SIZE);
+}
+
+//////////////////////////////
+///////// PRIVATE API ////////
+//////////////////////////////
+
 UastTypedResult UastFilterTyped(const Uast *ctx, void *node, const char *query) {
   UastTypedResult ret;
 
@@ -289,21 +293,21 @@ UastTypedResult UastFilterTyped(const Uast *ctx, void *node, const char *query) 
     auto handler = static_cast<xmlGenericErrorFunc>(Error);
     initGenericErrorDefaultFunc(&handler);
 
-    QueryResult qobject(ctx, node, query);
-    ret.type = static_cast<XPathType>(qobject.xpathObj->type);
+    QueryResult queryResult(ctx, node, query);
+    ret.type = static_cast<XPathType>(queryResult.xpathObj->type);
 
-    switch (qobject.xpathObj->type) {
+    switch (queryResult.xpathObj->type) {
       case XPATH_BOOLEAN:
-        ret.boolVal = qobject.xpathObj->boolval;
+        ret.boolVal = queryResult.xpathObj->boolval;
         break;
 
       case XPATH_NUMBER:
-        ret.numberVal = qobject.xpathObj->floatval;
+        ret.numberVal = queryResult.xpathObj->floatval;
         break;
 
       case XPATH_STRING:
         {
-          char *cstr = reinterpret_cast<char *>(qobject.xpathObj->stringval);
+          char *cstr = reinterpret_cast<char *>(queryResult.xpathObj->stringval);
           if (!cstr) {
             Error(nullptr, "string query returned null string\n");
             ret.hasError = true;
@@ -315,7 +319,7 @@ UastTypedResult UastFilterTyped(const Uast *ctx, void *node, const char *query) 
 
       case XPATH_NODESET:
         {
-          if (!qobject.xpathObj->nodesetval) {
+          if (!queryResult.xpathObj->nodesetval) {
             Error(nullptr, "Unable to get array of result nodes");
             ret.hasError = true;
             break;
@@ -328,14 +332,14 @@ UastTypedResult UastFilterTyped(const Uast *ctx, void *node, const char *query) 
             ret.hasError = true;
             break;
           }
-          if (!qobject.xpathObj->nodesetval) {
+          if (!queryResult.xpathObj->nodesetval) {
             Error(nullptr, "Unable to get array of results\n");
             ret.hasError = true;
             break;
           }
 
-          auto results = qobject.xpathObj->nodesetval->nodeTab;
-          auto size = qobject.xpathObj->nodesetval->nodeNr;
+          auto results = queryResult.xpathObj->nodesetval->nodeTab;
+          auto size = queryResult.xpathObj->nodesetval->nodeNr;
           int realSize = 0;
 
           for (int i = 0; i < size; i++) {
@@ -362,9 +366,8 @@ UastTypedResult UastFilterTyped(const Uast *ctx, void *node, const char *query) 
 
       default:
         {
-          char msg[128];
-          snprintf(msg, 128, "Unsupported return type (%d)\n", qobject.xpathObj->type);
-          Error(nullptr, msg);
+          Error(nullptr, "Unsupported return type (%d)\n",
+                queryResult.xpathObj->type);
           ret.hasError = true;
         }
     }
@@ -380,10 +383,6 @@ UastTypedResult UastFilterTyped(const Uast *ctx, void *node, const char *query) 
 
   return ret;
 }
-
-//////////////////////////////
-///////// PRIVATE API ////////
-//////////////////////////////
 
 Nodes *NodesNew() { return new Nodes(); }
 
@@ -609,10 +608,8 @@ static bool checkResult(const UastTypedResult& result, XPathType expectedType,
   if (result.hasError) {
     return false;
   } else if (result.type != expectedType) {
-    char msg[128];
-    snprintf(msg, 128, "Result of %s is not %s (is: %s)\n", funcName,
+    Error(nullptr, "Result of %s is not %s (is: %s)\n", funcName,
              Type2Str[expectedType], Type2Str[result.type]);
-    Error(nullptr, msg);
     return false;
   }
 
