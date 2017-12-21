@@ -69,7 +69,8 @@ int UastFilterBool(const Uast *ctx, void *node, const char *query);
 double UastFilterNumber(const Uast *ctx, void *node, const char *query);
 
 // Returns a `const char*` value as result of executing the XPath query with
-// a string result. The parameters have the same meaning as `UastFilter`.
+// a string result. The parameters have the same meaning as `UastFilter`. The user
+// takes ownership of the returned `const char *` and thus must free it.
 const char *UastFilterString(const Uast *ctx, void *node, const char *query);
 
 // Create a new UastIterator pointer. This will allow you to traverse the UAST
