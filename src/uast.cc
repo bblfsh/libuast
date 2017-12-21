@@ -55,20 +55,6 @@ const std::vector<const char *> Type2Str = {
   "XSLT_TREE"
 };
 
-// Result from the UastFilterTyped call. Only one of the <type>Val
-// values will be set, which the type field indicating which one.
-struct UastTypedResult {
-  bool hasError;
-  xmlXPathObjectType type;
-  Nodes *nodesVal;
-  int boolVal;
-  double numberVal;
-  char *stringVal;
-
-  UastTypedResult(): hasError(false), type(XPATH_UNDEFINED),
-                     nodesVal(nullptr), numberVal(-1), stringVal(nullptr) {}
-};
-
 static xmlDocPtr CreateDocument(const Uast *ctx, void *node);
 static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node, xmlNodePtr parent);
 void Error(void *ctx, const char *msg, ...);
@@ -83,10 +69,6 @@ static void *PreOrderNext(UastIterator *iter);
 static void *LevelOrderNext(UastIterator *iter);
 // Get the next element in post-order traversal mode.
 static void *PostOrderNext(UastIterator *iter);
-// Get the results of a query with a TypedResult template class instance
-UastTypedResult UastFilterTyped(const Uast *ctx, void *node, const char *query);
-
-static bool checkResult(const UastTypedResult&, xmlXPathObjectType, const char *);
 
 class QueryResult {
   xmlXPathContextPtr xpathCtx;
@@ -95,23 +77,36 @@ class QueryResult {
   public:
   xmlXPathObjectPtr xpathObj;
 
-  QueryResult(const Uast *ctx, void *node, const char *query)
-  {
+  QueryResult(const Uast *ctx, void *node, const char *query,
+              xmlXPathObjectType expected) {
+
     doc = CreateDocument(ctx, node);
     if (!doc) {
       xmlFreeDoc(doc);
       throw std::runtime_error(LastError());
     }
 
+    auto handler = (xmlGenericErrorFunc)Error;
+    initGenericErrorDefaultFunc(&handler);
+
     xpathCtx = static_cast<xmlXPathContextPtr>(xmlXPathNewContext(doc));
     if (!xpathCtx) {
       xmlXPathFreeContext(xpathCtx);
+      xmlFreeDoc(doc);
       throw std::runtime_error(LastError());
     }
 
     xpathObj = xmlXPathEvalExpression(BAD_CAST(query), xpathCtx);
     if (!xpathObj) {
       xmlXPathFreeObject(xpathObj);
+      xmlXPathFreeContext(xpathCtx);
+      xmlFreeDoc(doc);
+      throw std::runtime_error(LastError());
+    }
+
+    if (xpathObj->type != expected) {
+      Error(nullptr, "Result of expression is not %s (is: %s)\n",
+            Type2Str[expected], Type2Str[xpathObj->type]);
       throw std::runtime_error(LastError());
     }
   }
@@ -225,43 +220,92 @@ void *UastIteratorNext(UastIterator *iter) {
 NodeIface UastGetIface(const Uast *ctx) { return ctx->iface; }
 
 Nodes *UastFilter(const Uast *ctx, void *node, const char *query) {
-  auto result = UastFilterTyped(ctx, node, query);
 
-  if (!checkResult(result, XPATH_NODESET, "UastFilter")) {
+  Nodes *nodes;
+  try {
+    nodes = new Nodes();
+  } catch(const std::bad_alloc&) {
+    Error(nullptr, "Unable to get memory for nodes\n");
     return nullptr;
   }
 
-  return result.nodesVal;
+  try {
+    QueryResult queryResult(ctx, node, query, XPATH_NODESET);
+
+    auto nodeset = queryResult.xpathObj->nodesetval;
+    if (!nodeset) {
+        Error(nullptr, "Unable to get array of result nodes\n");
+        throw std::runtime_error(LastError());
+    }
+
+    try {
+      nodes = new Nodes();
+    } catch(const std::bad_alloc&) {
+      Error(nullptr, "Unable to get memory for nodes\n");
+      throw std::runtime_error(LastError());
+    }
+
+    auto results = nodeset->nodeTab;
+    auto size = nodeset->nodeNr;
+    size_t realSize = 0;
+
+    for (int i = 0; i < size; i++) {
+      if (results[i] != nullptr && results[i]->_private != nullptr) {
+        ++realSize;
+      }
+    }
+
+    if (NodesSetSize(nodes, realSize) != 0) {
+      Error(nullptr, "Unable to set nodes size\n");
+      throw std::runtime_error(LastError());
+    }
+
+    // Populate array of results
+    size_t nodeIdx = 0;
+    for (int i = 0; i < size; i++) {
+      if (results[i] != nullptr && results[i]->_private != nullptr) {
+        nodes->results[nodeIdx++] = results[i]->_private;
+      }
+    }
+
+    return nodes;
+  } catch (std::runtime_error&) {
+    NodesFree(nodes);
+  }
+
+  return nullptr;
 }
 
 int UastFilterBool(const Uast *ctx, void *node, const char *query) {
-  auto result = UastFilterTyped(ctx, node, query);
+  try {
+    QueryResult queryResult(ctx, node, query, XPATH_BOOLEAN);
+    return queryResult.xpathObj->boolval;
+  } catch (std::runtime_error&) {}
 
-  if (!checkResult(result, XPATH_BOOLEAN, "UastFilterBoolean")) {
-    return -1;
-  }
-
-  return result.boolVal;
+  return -1;
 }
 
 double UastFilterNumber(const Uast *ctx, void *node, const char *query) {
-  auto result = UastFilterTyped(ctx, node, query);
+  try {
+    QueryResult queryResult(ctx, node, query, XPATH_NUMBER);
+    return queryResult.xpathObj->floatval;
+  } catch (std::runtime_error&) {}
 
-  if (!checkResult(result, XPATH_NUMBER, "UastFilterNumber")) {
-    return -1;
-  }
-
-  return result.numberVal;
+  return -1;
 }
 
 const char *UastFilterString(const Uast *ctx, void *node, const char *query) {
-  auto result = UastFilterTyped(ctx, node, query);
+  try {
+    QueryResult queryResult(ctx, node, query, XPATH_STRING);
+    char *cstr = reinterpret_cast<char *>(queryResult.xpathObj->stringval);
+    if (!cstr) {
+      Error(nullptr, "string query returned null string\n");
+      return nullptr;
+    }
+    return strdup(cstr);
+  } catch (std::runtime_error&) {}
 
-  if (!checkResult(result, XPATH_STRING, "UastFilterString")) {
-    return nullptr;
-  }
-
-  return result.stringVal;
+  return nullptr;
 }
 
 char *LastError(void) {
@@ -271,105 +315,6 @@ char *LastError(void) {
 //////////////////////////////
 ///////// PRIVATE API ////////
 //////////////////////////////
-
-UastTypedResult UastFilterTyped(const Uast *ctx, void *node, const char *query) {
-  UastTypedResult ret;
-
-  try {
-
-    auto handler = static_cast<xmlGenericErrorFunc>(Error);
-    initGenericErrorDefaultFunc(&handler);
-
-    QueryResult queryResult(ctx, node, query);
-    ret.type = queryResult.xpathObj->type;
-
-    switch (queryResult.xpathObj->type) {
-      case XPATH_BOOLEAN:
-        ret.boolVal = queryResult.xpathObj->boolval;
-        break;
-
-      case XPATH_NUMBER:
-        ret.numberVal = queryResult.xpathObj->floatval;
-        break;
-
-      case XPATH_STRING:
-        {
-          char *cstr = reinterpret_cast<char *>(queryResult.xpathObj->stringval);
-          if (!cstr) {
-            Error(nullptr, "string query returned null string\n");
-            ret.hasError = true;
-            break;
-          }
-          ret.stringVal = strdup(cstr);
-        }
-        break;
-
-      case XPATH_NODESET:
-        {
-          if (!queryResult.xpathObj->nodesetval) {
-            Error(nullptr, "Unable to get array of result nodes");
-            ret.hasError = true;
-            break;
-          }
-
-          try {
-            ret.nodesVal = new Nodes();
-          } catch (const std::bad_alloc&) {
-            Error(nullptr, "Unable to get memory\n");
-            ret.hasError = true;
-            break;
-          }
-          if (!queryResult.xpathObj->nodesetval) {
-            Error(nullptr, "Unable to get array of results\n");
-            ret.hasError = true;
-            break;
-          }
-
-          auto results = queryResult.xpathObj->nodesetval->nodeTab;
-          auto size = queryResult.xpathObj->nodesetval->nodeNr;
-          int realSize = 0;
-
-          for (int i = 0; i < size; i++) {
-            if (results[i] != nullptr && results[i]->_private != nullptr) {
-              ++realSize;
-            }
-          }
-
-          if (NodesSetSize(ret.nodesVal, realSize) != 0) {
-            Error(nullptr, "Unable to set nodes size\n");
-            ret.hasError = true;
-            break;
-          }
-
-          // Populate array of results
-          int nodeIdx = 0;
-          for (int i = 0; i < size; i++) {
-            if (results[i] != nullptr && results[i]->_private != nullptr) {
-              ret.nodesVal->results[nodeIdx++] = results[i]->_private;
-            }
-          }
-        }
-        break;
-
-      default:
-        {
-          Error(nullptr, "Unsupported return type (%d)\n",
-                queryResult.xpathObj->type);
-          ret.hasError = true;
-        }
-    }
-
-    if (ret.hasError && ret.nodesVal) {
-      NodesFree(ret.nodesVal);
-      ret.nodesVal = nullptr;
-    }
-
-  } catch (std::runtime_error &e) {
-    ret.hasError = true;
-  }
-
-  return ret;
-}
 
 Nodes *NodesNew() { return new Nodes(); }
 
@@ -501,7 +446,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
       }
     }
     return xmlNode;
-  } catch (CreateXMLNodeException &e) {
+  } catch (CreateXMLNodeException&) {
     xmlFreeNode(xmlNode);
   }
 
@@ -588,18 +533,4 @@ static void *PostOrderNext(UastIterator *iter) {
   curNode = iter->pending.front();
   iter->pending.pop_front();
   return curNode;
-}
-
-static bool checkResult(const UastTypedResult& result,
-                        xmlXPathObjectType expectedType,
-                        const char *funcName) {
-  if (result.hasError) {
-    return false;
-  } else if (result.type != expectedType) {
-    Error(nullptr, "Result of %s is not %s (is: %s)\n", funcName,
-             Type2Str[expectedType], Type2Str[result.type]);
-    return false;
-  }
-
-  return true;
 }

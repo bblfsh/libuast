@@ -292,6 +292,7 @@ void TestUastFunctionString() {
   CU_ASSERT_FATAL(res != NULL);
   CU_ASSERT_FATAL(!strcmp(res, "Module"));
 
+  free((char*)res);
   UastFree(ctx);
 }
 
@@ -322,6 +323,7 @@ void TestUastFilterXPathFuncConcat() {
   CU_ASSERT_FATAL(res != NULL);
   CU_ASSERT_FATAL(!strcmp(res, "abc"));
 
+  free((char *)res);
   UastFree(ctx);
 }
 
@@ -341,6 +343,8 @@ void TestUastFilterXPathFuncLocalName() {
   const char *localName = UastFilterString(ctx, root, "local-name(//*[1])");
 
   CU_ASSERT_FATAL(!strcmp(localName, "Module"));
+
+  free((char *)localName);
   UastFree(ctx);
 }
 
@@ -351,6 +355,7 @@ void TestUastFilterXPathFuncString() {
 
   CU_ASSERT_FATAL(!strcmp(countStr, "14"));
   UastFree(ctx);
+  free((char *)countStr);
 }
 
 void TestUastFilterXPathFuncSubstring() {
@@ -360,6 +365,7 @@ void TestUastFilterXPathFuncSubstring() {
 
   CU_ASSERT_FATAL(!strcmp(res, "Mod"));
   UastFree(ctx);
+  free((char *)res);
 }
 
 void TestUastFilterXPathFuncSubstringBefore() {
@@ -369,6 +375,7 @@ void TestUastFilterXPathFuncSubstringBefore() {
 
   CU_ASSERT_FATAL(!strcmp(res, "Mod"));
   UastFree(ctx);
+  free((char *)res);
 }
 
 void TestUastFilterXPathFuncSubstringAfter() {
@@ -378,6 +385,7 @@ void TestUastFilterXPathFuncSubstringAfter() {
 
   CU_ASSERT_FATAL(!strcmp(res, "ule"));
   UastFree(ctx);
+  free((char *)res);
 }
 
 void TestUastFilterXPathFuncStringLength() {
@@ -405,6 +413,7 @@ void TestUastFilterXPathFuncNormalizeSpace() {
 
   CU_ASSERT_FATAL(!strcmp(res, "something"));
   UastFree(ctx);
+  free((char *)res);
 }
 
 void TestUastFilterXPathFuncTranslate() {
@@ -414,6 +423,7 @@ void TestUastFilterXPathFuncTranslate() {
 
   CU_ASSERT_FATAL(!strcmp(res, "Paxule"));
   UastFree(ctx);
+  free((char *)res);
 }
 
 void TestUastFilterXPathFuncNot() {
