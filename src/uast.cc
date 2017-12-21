@@ -42,19 +42,6 @@ struct Nodes {
   int cap;
 };
 
-enum XPathType {
-  XPATHTYPE_UNDEFINED = 0,
-  XPATHTYPE_NODESET = 1,
-  XPATHTYPE_BOOLEAN = 2,
-  XPATHTYPE_NUMBER = 3,
-  XPATHTYPE_STRING = 4,
-  XPATHTYPE_POINT = 5,
-  XPATHTYPE_RANGE = 6,
-  XPATHTYPE_LOCATIONSET = 7,
-  XPATHTYPE_USERS = 8,
-  XPATHTYPE_XSLT_TREE = 9,
-};
-
 const std::vector<const char *> Type2Str = {
   "UNDEFINED",
   "NODESET",
@@ -72,13 +59,13 @@ const std::vector<const char *> Type2Str = {
 // values will be set, which the type field indicating which one.
 struct UastTypedResult {
   bool hasError;
-  XPathType type;
+  xmlXPathObjectType type;
   Nodes *nodesVal;
   int boolVal;
   double numberVal;
   char *stringVal;
 
-  UastTypedResult(): hasError(false), type(XPATHTYPE_UNDEFINED),
+  UastTypedResult(): hasError(false), type(XPATH_UNDEFINED),
                      nodesVal(nullptr), numberVal(-1), stringVal(nullptr) {}
 };
 
@@ -99,7 +86,7 @@ static void *PostOrderNext(UastIterator *iter);
 // Get the results of a query with a TypedResult template class instance
 UastTypedResult UastFilterTyped(const Uast *ctx, void *node, const char *query);
 
-static bool checkResult(const UastTypedResult&, XPathType, const char *);
+static bool checkResult(const UastTypedResult&, xmlXPathObjectType, const char *);
 
 class QueryResult {
   xmlXPathContextPtr xpathCtx;
@@ -240,7 +227,7 @@ NodeIface UastGetIface(const Uast *ctx) { return ctx->iface; }
 Nodes *UastFilter(const Uast *ctx, void *node, const char *query) {
   auto result = UastFilterTyped(ctx, node, query);
 
-  if (!checkResult(result, XPATHTYPE_NODESET, "UastFilter")) {
+  if (!checkResult(result, XPATH_NODESET, "UastFilter")) {
     return nullptr;
   }
 
@@ -250,7 +237,7 @@ Nodes *UastFilter(const Uast *ctx, void *node, const char *query) {
 int UastFilterBool(const Uast *ctx, void *node, const char *query) {
   auto result = UastFilterTyped(ctx, node, query);
 
-  if (!checkResult(result, XPATHTYPE_BOOLEAN, "UastFilterBoolean")) {
+  if (!checkResult(result, XPATH_BOOLEAN, "UastFilterBoolean")) {
     return -1;
   }
 
@@ -260,7 +247,7 @@ int UastFilterBool(const Uast *ctx, void *node, const char *query) {
 double UastFilterNumber(const Uast *ctx, void *node, const char *query) {
   auto result = UastFilterTyped(ctx, node, query);
 
-  if (!checkResult(result, XPATHTYPE_NUMBER, "UastFilterNumber")) {
+  if (!checkResult(result, XPATH_NUMBER, "UastFilterNumber")) {
     return -1;
   }
 
@@ -270,7 +257,7 @@ double UastFilterNumber(const Uast *ctx, void *node, const char *query) {
 const char *UastFilterString(const Uast *ctx, void *node, const char *query) {
   auto result = UastFilterTyped(ctx, node, query);
 
-  if (!checkResult(result, XPATHTYPE_STRING, "UastFilterString")) {
+  if (!checkResult(result, XPATH_STRING, "UastFilterString")) {
     return nullptr;
   }
 
@@ -294,7 +281,7 @@ UastTypedResult UastFilterTyped(const Uast *ctx, void *node, const char *query) 
     initGenericErrorDefaultFunc(&handler);
 
     QueryResult queryResult(ctx, node, query);
-    ret.type = static_cast<XPathType>(queryResult.xpathObj->type);
+    ret.type = queryResult.xpathObj->type;
 
     switch (queryResult.xpathObj->type) {
       case XPATH_BOOLEAN:
@@ -603,7 +590,8 @@ static void *PostOrderNext(UastIterator *iter) {
   return curNode;
 }
 
-static bool checkResult(const UastTypedResult& result, XPathType expectedType,
+static bool checkResult(const UastTypedResult& result,
+                        xmlXPathObjectType expectedType,
                         const char *funcName) {
   if (result.hasError) {
     return false;
