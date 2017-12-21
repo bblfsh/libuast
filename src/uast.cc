@@ -55,23 +55,17 @@ enum XPathType {
   XPATHTYPE_XSLT_TREE = 9,
 };
 
-struct HashXPathType {
-  long operator()(const XPathType& xtype) const {
-    return static_cast<long>(xtype);
-  }
-};
-
-const std::unordered_map<XPathType, const char*, HashXPathType> Type2Str {
-  {XPATHTYPE_UNDEFINED, "UNDEFINED"},
-  {XPATHTYPE_NODESET, "NODESET"},
-  {XPATHTYPE_BOOLEAN, "BOOLEAN"},
-  {XPATHTYPE_NUMBER, "NUMBER"},
-  {XPATHTYPE_STRING, "STRING"},
-  {XPATHTYPE_POINT, "POINT"},
-  {XPATHTYPE_RANGE, "RANGE"},
-  {XPATHTYPE_LOCATIONSET, "LOCATIONSET"},
-  {XPATHTYPE_USERS, "USERS"},
-  {XPATHTYPE_XSLT_TREE, "XSLT_TREE"},
+const std::vector<const char *> Type2Str = {
+  "UNDEFINED",
+  "NODESET",
+  "BOOLEAN",
+  "NUMBER",
+  "STRING",
+  "POINT",
+  "RANGE",
+  "LOCATIONSET",
+  "USERS",
+  "XSLT_TREE"
 };
 
 // Result from the UastFilterTyped call. Only one of the <type>Val
@@ -105,7 +99,6 @@ static void *PostOrderNext(UastIterator *iter);
 // Get the results of a query with a TypedResult template class instance
 UastTypedResult UastFilterTyped(const Uast *ctx, void *node, const char *query);
 
-static const char *GetTypeStr(XPathType type);
 static bool checkResult(const UastTypedResult&, XPathType, const char *);
 
 class QueryResult {
@@ -611,15 +604,6 @@ static void *PostOrderNext(UastIterator *iter) {
   return curNode;
 }
 
-static const char *GetTypeStr(XPathType type) {
-  auto typeIt = Type2Str.find(type);
-  if (typeIt == Type2Str.end()) {
-    return "UNDEFINED";
-  }
-
-  return typeIt->second;
-}
-
 static bool checkResult(const UastTypedResult& result, XPathType expectedType,
                         const char *funcName) {
   if (result.hasError) {
@@ -627,7 +611,7 @@ static bool checkResult(const UastTypedResult& result, XPathType expectedType,
   } else if (result.type != expectedType) {
     char msg[128];
     snprintf(msg, 128, "Result of %s is not %s (is: %s)\n", funcName,
-             GetTypeStr(expectedType), GetTypeStr(result.type));
+             Type2Str[expectedType], Type2Str[result.type]);
     Error(nullptr, msg);
     return false;
   }
