@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stddef.h>
 
 // This interface must be implemented to create a Uast context.
 typedef struct NodeIface {
@@ -10,15 +11,15 @@ typedef struct NodeIface {
   const char *(*Token)(const void *);
 
   // Children
-  int (*ChildrenSize)(const void *);
+  size_t (*ChildrenSize)(const void *);
   void *(*ChildAt)(const void *, int);
 
   // Roles
-  int (*RolesSize)(const void *);
+  size_t (*RolesSize)(const void *);
   uint16_t (*RoleAt)(const void *, int);
 
   // Properties
-  int (*PropertiesSize)(const void *);
+  size_t (*PropertiesSize)(const void *);
   const char *(*PropertyKeyAt)(const void *, int);
   const char *(*PropertyValueAt)(const void *, int);
 
