@@ -49,20 +49,23 @@ static const char *Token(const void *node) {
   return ((Node *)node)->token.data();
 }
 
-static int ChildrenSize(const void *node) {
-  return ((Node *)node)->children.size();}
+static size_t ChildrenSize(const void *node) {
+  return ((Node *)node)->children.size();
+}
 
 static void *ChildAt(const void *node, int index) {
   return ((Node *)node)->children.at(index);
 }
 
-static int RolesSize(const void *node) { return ((Node *)node)->roles.size(); }
+static size_t RolesSize(const void *node) {
+  return ((Node *)node)->roles.size();
+}
 
 static uint16_t RoleAt(const void *node, int index) {
   return ((Node *)node)->roles.at(index);
 }
 
-static int PropertiesSize(const void *node) {
+static size_t PropertiesSize(const void *node) {
   return ((Node *)node)->properties.size();
 }
 
@@ -122,7 +125,7 @@ static uint32_t EndCol(const void *node) {
   return ((Node *)node)->end_position.col;
 }
 
-int main(int argc, char **argv) {
+int main() {
   Node root = Node("compilation_unit");
   root.AddRole(2);
 

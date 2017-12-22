@@ -17,15 +17,15 @@ static void TestRoleNameForId(void) {
   CU_ASSERT_FATAL(strcmp(RoleNameForId(1), "roleIdentifier") == 0);
 
   // Automatically test the rest of names
-  int nu_roles = 117;
-  for (int i = 0; i < nu_roles; i++) {
+  uint16_t nu_roles = 117;
+  for (uint16_t i = 0; i < nu_roles; i++) {
     const char *role = RoleNameForId(i);
     CU_ASSERT_FATAL(strlen(role) > 4);
     CU_ASSERT_FATAL(strncmp(role, "role", 4) == 0);
   }
 
   // Test out of bounds roles
-  for (int i = nu_roles; i < nu_roles + 10; i++) {
+  for (uint16_t i = nu_roles; i < nu_roles + 10; i++) {
     const char *role = RoleNameForId(i);
     CU_ASSERT_FATAL(role == NULL);
   }
