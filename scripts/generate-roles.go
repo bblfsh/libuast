@@ -27,7 +27,7 @@ static const char *id_to_roles[] = {`)
 	}
 	fmt.Println("};")
 
-	fmt.Println("#define TOTAL_ROLES", lastRole)
+	fmt.Println("#define TOTAL_ROLES", lastRole+1)
 
 	fmt.Println(`
 const char *RoleNameForId(uint16_t id) {
