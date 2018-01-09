@@ -277,6 +277,7 @@ void TestUastFunctionBoolError() {
   bool ok;
   int res = UastFilterBool(ctx, root, "//*", &ok);
   CU_ASSERT_FATAL(!ok);
+  CU_ASSERT_FATAL(strcmp(LastError(), ""));
 
   UastFree(ctx);
 }
@@ -297,6 +298,7 @@ void TestUastFunctionNumberError() {
   bool ok;
   double res = UastFilterNumber(ctx, root, "concat(//*)", &ok);
   CU_ASSERT_FATAL(!ok);
+  CU_ASSERT_FATAL(strcmp(LastError(), ""));
 
   UastFree(ctx);
 }
