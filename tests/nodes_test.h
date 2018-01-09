@@ -277,6 +277,7 @@ void TestUastFunctionBoolError() {
   bool ok;
   int res = UastFilterBool(ctx, root, "//*", &ok);
   CU_ASSERT_FATAL(!ok);
+  CU_ASSERT_FATAL(strcmp(LastError(), ""));
 
   UastFree(ctx);
 }
@@ -296,13 +297,9 @@ void TestUastFunctionNumberError() {
   Node *root = TreeMock();
   bool ok;
   double res = UastFilterNumber(ctx, root, "concat(//*)", &ok);
-
   CU_ASSERT_FATAL(!ok);
-  char* error = LastError();
+  CU_ASSERT_FATAL(strcmp(LastError(), ""));
 
-  CU_ASSERT_FATAL(!strcmp(error, "Invalid expression\n"));
-
-  free(error);
   UastFree(ctx);
 }
 
