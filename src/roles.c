@@ -126,7 +126,7 @@ static const char *id_to_roles[] = {
     "roleRelational",
     "roleVariable",
 };
-#define TOTAL_ROLES 117
+#define TOTAL_ROLES 118
 
 const char *RoleNameForId(uint16_t id) {
   if (id >= TOTAL_ROLES) {

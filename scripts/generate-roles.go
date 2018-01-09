@@ -16,10 +16,10 @@ func main() {
 static const char *id_to_roles[] = {`)
 
 	var lastRole int
-	for i := 0;; i++ {
+	for i := 0; ; i++ {
 		role := uast.Role(i).String()
 		if role == fmt.Sprintf("Role(%d)", i) {
-			break;
+			break
 		}
 		lastRole = i
 		name := "role" + role
@@ -27,7 +27,7 @@ static const char *id_to_roles[] = {`)
 	}
 	fmt.Println("};")
 
-	fmt.Println("#define TOTAL_ROLES", lastRole)
+	fmt.Println("#define TOTAL_ROLES", lastRole+1)
 
 	fmt.Println(`
 const char *RoleNameForId(uint16_t id) {
