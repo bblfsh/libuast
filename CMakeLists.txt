@@ -10,7 +10,7 @@ set(OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/lib")
 
 # Required dependencies
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
-find_package(CUnit REQUIRED)
+find_package(CUnit)
 find_package(LibXml2 REQUIRED)
 
 # Library name
@@ -73,8 +73,16 @@ install(
 )
 
 # Adds examples
+if(NOT DISABLE_EXAMPLES)
 add_subdirectory(examples)
+else()
+message(STATUS "Skipped building examples")
+endif()
 
 # Add tests
+if(CUnit_FOUND)
 enable_testing()
 add_subdirectory(tests)
+else()
+message(WARNING "Tests will not be built because CUnit is missing")
+endif()
