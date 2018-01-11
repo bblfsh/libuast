@@ -85,14 +85,14 @@ class QueryResult {
     doc = CreateDocument(ctx, node);
     if (!doc) {
       xmlFreeDoc(doc);
-      throw std::runtime_error(LastError());
+      throw std::runtime_error("");
     }
 
     xpathCtx = static_cast<xmlXPathContextPtr>(xmlXPathNewContext(doc));
     if (!xpathCtx) {
       xmlXPathFreeContext(xpathCtx);
       xmlFreeDoc(doc);
-      throw std::runtime_error(LastError());
+      throw std::runtime_error("");
     }
 
     xpathObj = xmlXPathEvalExpression(BAD_CAST(query), xpathCtx);
@@ -100,13 +100,13 @@ class QueryResult {
       xmlXPathFreeObject(xpathObj);
       xmlXPathFreeContext(xpathCtx);
       xmlFreeDoc(doc);
-      throw std::runtime_error(LastError());
+      throw std::runtime_error("");
     }
 
     if (xpathObj->type != expected) {
       Error(nullptr, "Result of expression is not %s (is: %s)\n",
             Type2Str[expected], Type2Str[xpathObj->type]);
-      throw std::runtime_error(LastError());
+      throw std::runtime_error("");
     }
   }
 
@@ -234,14 +234,14 @@ Nodes *UastFilter(const Uast *ctx, void *node, const char *query) {
     auto nodeset = queryResult.xpathObj->nodesetval;
     if (!nodeset) {
         Error(nullptr, "Unable to get array of result nodes\n");
-        throw std::runtime_error(LastError());
+        throw std::runtime_error("");
     }
 
     try {
       nodes = new Nodes();
     } catch(const std::bad_alloc&) {
       Error(nullptr, "Unable to get memory for nodes\n");
-      throw std::runtime_error(LastError());
+      throw std::runtime_error("");
     }
 
     auto results = nodeset->nodeTab;
@@ -256,7 +256,7 @@ Nodes *UastFilter(const Uast *ctx, void *node, const char *query) {
 
     if (NodesSetSize(nodes, realSize) != 0) {
       Error(nullptr, "Unable to set nodes size\n");
-      throw std::runtime_error(LastError());
+      throw std::runtime_error("");
     }
 
     // Populate array of results
