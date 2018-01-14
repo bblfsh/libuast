@@ -4,16 +4,12 @@
 #include "uast_private.h"
 
 #include <cinttypes>
-#include <cstdarg>
 #include <cstdbool>
-#include <cstdint>
 #include <cstring>
 #include <deque>
 #include <memory>
 #include <new>
 #include <set>
-#include <type_traits>
-#include <typeinfo>
 #include <vector>
 
 #include <libxml/parser.h>
@@ -33,6 +29,7 @@ struct UastIterator {
   TreeOrder order;
   std::deque<void *> pending;
   std::set<void *> visited;
+  void* (*nodeTransform)(void*);
 };
 
 struct Nodes {
@@ -128,6 +125,22 @@ class CreateXMLNodeException: public std::runtime_error {
   CreateXMLNodeException(): std::runtime_error("") {}
 };
 
+static UastIterator *UastIteratorNewBase(const Uast *ctx, void *node, TreeOrder order) {
+
+  UastIterator *iter;
+
+  try {
+    iter = new UastIterator();
+  } catch (const std::bad_alloc&) {
+    Error(nullptr, "Unable to get memory\n");
+    return nullptr;
+  }
+
+  iter->ctx = ctx;
+  iter->order = order;
+  return iter;
+}
+
 //////////////////////////////
 ///////// PUBLIC API /////////
 //////////////////////////////
@@ -177,19 +190,10 @@ void UastFree(Uast *ctx) {
 }
 
 UastIterator *UastIteratorNew(const Uast *ctx, void *node, TreeOrder order) {
-  UastIterator *iter;
 
-  try {
-    iter = new UastIterator();
-  } catch (const std::bad_alloc&) {
-    Error(nullptr, "Unable to get memory\n");
-    return nullptr;
-  }
-
-  iter->order = order;
-
+  UastIterator *iter = UastIteratorNewBase(ctx, node, order);
   iter->pending.push_front(node);
-  iter->ctx = ctx;
+  iter->nodeTransform = nullptr;
   return iter;
 }
 
@@ -200,9 +204,21 @@ void UastIteratorFree(UastIterator *iter) {
   }
 }
 
+UastIterator *UastIteratorNewWithTransformer(const Uast *ctx, void *node,
+                                             TreeOrder order, void*(*transform)(void*)) {
+
+  UastIterator *iter = UastIteratorNewBase(ctx, node, order);
+  iter->pending.push_front(transform(node));
+  iter->nodeTransform = transform;
+  return iter;
+}
+
 void *UastIteratorNext(UastIterator *iter) {
 
   if (iter == nullptr || iter->pending.empty()) {
+    if (iter == nullptr) {
+    } else if (iter->pending.empty()) {
+    }
     return nullptr;
   }
 
@@ -377,7 +393,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
     }
 
     // Properties
-    for (int i = 0; i < ctx->iface.PropertiesSize(node); i++) {
+    for (size_t i = 0; i < ctx->iface.PropertiesSize(node); i++) {
       const char *key = ctx->iface.PropertyKeyAt(node, i);
       const char *value = ctx->iface.PropertyValueAt(node, i);
       if (!xmlNewProp(xmlNode, BAD_CAST(key), BAD_CAST(value))) {
@@ -480,13 +496,18 @@ void Error(void *ctx, const char *msg, ...) {
    va_end(arg_ptr);
 }
 
+static void *transformChildAt(UastIterator *iter, void *parent, size_t pos) {
+  auto child = iter->ctx->iface.ChildAt(parent, pos);
+  return iter->nodeTransform ? iter->nodeTransform(child): child;
+}
+
 static bool Visited(UastIterator *iter, void *node) {
   const bool visited = iter->visited.find(node) != iter->visited.end();
 
   if(!visited) {
     int children_size = iter->ctx->iface.ChildrenSize(node);
     for (int i = children_size - 1; i >= 0; i--) {
-      iter->pending.push_front(iter->ctx->iface.ChildAt(node, i));
+      iter->pending.push_front(transformChildAt(iter, node, i));
     }
     iter->visited.insert(node);
   }
@@ -497,13 +518,14 @@ static bool Visited(UastIterator *iter, void *node) {
 static void *PreOrderNext(UastIterator *iter) {
   void *retNode = iter->pending.front();
   iter->pending.pop_front();
+
   if (retNode == nullptr) {
     return nullptr;
   }
 
   int children_size = iter->ctx->iface.ChildrenSize(retNode);
   for (int i = children_size - 1; i >= 0; i--) {
-    iter->pending.push_front(iter->ctx->iface.ChildAt(retNode, i));
+    iter->pending.push_front(transformChildAt(iter, retNode, i));
   }
 
   return retNode;
@@ -511,7 +533,6 @@ static void *PreOrderNext(UastIterator *iter) {
 
 static void *LevelOrderNext(UastIterator *iter) {
   void *retNode = iter->pending.front();
-  iter->pending.pop_front();
 
   if (retNode == nullptr) {
     return nullptr;
@@ -519,9 +540,10 @@ static void *LevelOrderNext(UastIterator *iter) {
 
   int children_size = iter->ctx->iface.ChildrenSize(retNode);
   for (int i = 0; i < children_size; i++) {
-    iter->pending.push_back(iter->ctx->iface.ChildAt(retNode, i));
+    iter->pending.push_back(transformChildAt(iter, retNode, i));
   }
 
+  iter->pending.pop_front();
   return retNode;
 }
 
