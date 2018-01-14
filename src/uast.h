@@ -8,8 +8,6 @@ extern "C" {
 #include "node_iface.h"
 #include "nodes.h"
 
-#include <jni.h> // XXX
-
 // Uast stores the general context required for library functions.
 // It must be initialized with `UastNew` passing a valid implementation of the
 // `NodeIface` interface.
