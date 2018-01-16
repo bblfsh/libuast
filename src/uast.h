@@ -85,6 +85,13 @@ EXPORT const char *UastFilterString(const Uast *ctx, void *node, const char *que
 // Returns NULL and sets LastError if the UastIterator couldn't initialize.
 EXPORT UastIterator *UastIteratorNew(const Uast *ctx, void *node, TreeOrder order);
 
+// Same as UastIteratorNew, but also allows to specify a transform function taking a node
+// and returning it. This is specially useful when the bindings need to do operations like
+// increasing / decreasing the language reference count when new nodes are added to the
+// iterator internal data structures.
+UastIterator *UastIteratorNewWithTransformer(const Uast *ctx, void *node,
+                                             TreeOrder order, void*(*transform)(void*));
+
 // Frees a UastIterator.
 EXPORT void UastIteratorFree(UastIterator *iter);
 
@@ -101,5 +108,4 @@ EXPORT char *LastError(void);
 #ifdef __cplusplus
 }  // extern "C"
 #endif
-
 #endif  // LIBUAST_UAST_H_

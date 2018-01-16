@@ -29,6 +29,7 @@ int main() {
   ADD_TEST(suite, "test of RoleNameForId()", TestRoleNameForId);
   ADD_TEST(suite, "test of UastNew()", TestUastNew);
   ADD_TEST(suite, "test of UastFilter() pointers", TestUastFilterPointers);
+  ADD_TEST(suite, "test iterator transform func", TestUastIteratorTransformFunc);
   ADD_TEST(suite, "test iteration", TestUastIteratorPreOrder);
   ADD_TEST(suite, "test iteration", TestUastIteratorLevelOrder);
   ADD_TEST(suite, "test iteration", TestUastIteratorPostOrder);
