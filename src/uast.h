@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 
+#include "export.h"
 #include "node_iface.h"
 #include "nodes.h"
 
@@ -30,10 +31,10 @@ typedef enum { PRE_ORDER, POST_ORDER, LEVEL_ORDER } TreeOrder;
 // data structures.
 //
 // Returns NULL and sets LastError if the Uast couldn't initialize.
-Uast *UastNew(NodeIface iface);
+EXPORT Uast *UastNew(NodeIface iface);
 
 // Releases Uast resources.
-void UastFree(Uast *ctx);
+EXPORT void UastFree(Uast *ctx);
 
 // Returns the list of native root nodes that satisfy the xpath query,
 // or NULL if there was any error.
@@ -57,23 +58,23 @@ void UastFree(Uast *ctx);
 // It will return an error if the query has a return type that is not a
 // node list. In that case, you should use one of the typed filter functions
 // (`UastFilterBool`, `UastFilterNumber` or `UastFilterString`).
-Nodes *UastFilter(const Uast *ctx, void *node, const char *query);
+EXPORT Nodes *UastFilter(const Uast *ctx, void *node, const char *query);
 
 // Returns a integer value as result of executing the XPath query with bool result,
 // with `1` meaning `true` and `0` false. If there is any error, the flag `ok` will
 // be set to false. The parameters have the same meaning as `UastFilter`.
-bool UastFilterBool(const Uast *ctx, void *node, const char *query, bool *ok);
+EXPORT bool UastFilterBool(const Uast *ctx, void *node, const char *query, bool *ok);
 
 // Returns a `double` value as result of executing the XPath query with number result.
 // The parameters have the same meaning as `UastFilter`. If there is any error,
 // the flag `ok` will be set to false.
-double UastFilterNumber(const Uast *ctx, void *node, const char *query, bool *ok);
+EXPORT double UastFilterNumber(const Uast *ctx, void *node, const char *query, bool *ok);
 
 // Returns a `const char*` value as result of executing the XPath query with
 // a string result. The parameters have the same meaning as `UastFilter`. The user
 // takes ownership of the returned `const char *` and thus must free it.
 // If there is any error, the return value will be `NULL`.
-const char *UastFilterString(const Uast *ctx, void *node, const char *query);
+EXPORT const char *UastFilterString(const Uast *ctx, void *node, const char *query);
 
 // Create a new UastIterator pointer. This will allow you to traverse the UAST
 // calling UastIteratorNext. The node argument will be user as the root node of
@@ -82,20 +83,20 @@ const char *UastFilterString(const Uast *ctx, void *node, const char *query);
 // be frees using UastIteratorFree.
 //
 // Returns NULL and sets LastError if the UastIterator couldn't initialize.
-UastIterator *UastIteratorNew(const Uast *ctx, void *node, TreeOrder order);
+EXPORT UastIterator *UastIteratorNew(const Uast *ctx, void *node, TreeOrder order);
 
 // Frees a UastIterator.
-void UastIteratorFree(UastIterator *iter);
+EXPORT void UastIteratorFree(UastIterator *iter);
 
 // Retrieve the next node of the traversal of an UAST tree or NULL if the
 // traversal has finished.
-void *UastIteratorNext(UastIterator *iter);
+EXPORT void *UastIteratorNext(UastIterator *iter);
 
 // Returns a string with the latest error.
 // It may be an empty string if there's been no error.
 //
 // Memory for the string is obtained with malloc, and can be freed with free.
-char *LastError(void);
+EXPORT char *LastError(void);
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -21,6 +21,8 @@
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 
+#define _CRT_NONSTDC_NO_DEPRECATE
+
 #define BUF_SIZE 256
 char error_message[BUF_SIZE];
 
@@ -314,7 +316,7 @@ const char *UastFilterString(const Uast *ctx, void *node, const char *query) {
 }
 
 char *LastError(void) {
-  return strndup(error_message, BUF_SIZE);
+  return strdup(error_message);
 }
 
 //////////////////////////////
@@ -377,7 +379,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
     }
 
     // Properties
-    for (int i = 0; i < ctx->iface.PropertiesSize(node); i++) {
+    for (size_t i = 0; i < ctx->iface.PropertiesSize(node); i++) {
       const char *key = ctx->iface.PropertyKeyAt(node, i);
       const char *value = ctx->iface.PropertyValueAt(node, i);
       if (!xmlNewProp(xmlNode, BAD_CAST(key), BAD_CAST(value))) {
