@@ -545,6 +545,44 @@ void TestUastFilterXPathFuncContains() {
   UastFree(ctx);
 }
 
+static int calls = 0;
+
+void* transformTest(void *node) {
+  ++calls;
+  return node;
+}
+
+void TestUastIteratorTransformFunc() {
+  Uast *ctx = UastNew(IfaceMock());
+  Node *root = TreeMock();
+
+  UastIterator *iter = UastIteratorNewWithTransformer(ctx, root, PRE_ORDER, transformTest);
+  CU_ASSERT_FATAL(iter != NULL);
+  CU_ASSERT_FATAL(calls == 1);
+  UastIteratorNext(iter);
+  CU_ASSERT_FATAL(calls == 4);
+  UastIteratorFree(iter);
+
+  calls = 0;
+  iter = UastIteratorNewWithTransformer(ctx, root, POST_ORDER, transformTest);
+  CU_ASSERT_FATAL(iter != NULL);
+  CU_ASSERT_FATAL(calls == 1);
+  UastIteratorNext(iter);
+  CU_ASSERT_FATAL(calls == 6);
+  UastIteratorFree(iter);
+
+  calls = 0;
+  iter = UastIteratorNewWithTransformer(ctx, root, LEVEL_ORDER, transformTest);
+  CU_ASSERT_FATAL(iter != NULL);
+  CU_ASSERT_FATAL(calls == 1);
+  UastIteratorNext(iter);
+  CU_ASSERT_FATAL(calls == 4);
+  UastIteratorFree(iter);
+
+  UastFree(ctx);
+}
+
+
 void TestUastIteratorPreOrder() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
