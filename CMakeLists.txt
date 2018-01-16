@@ -73,6 +73,7 @@ install(
   ARCHIVE       DESTINATION lib
   LIBRARY       DESTINATION lib
   PUBLIC_HEADER DESTINATION include/libuast
+  RUNTIME       DESTINATION bin
 )
 
 # Adds examples
