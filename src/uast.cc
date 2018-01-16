@@ -236,9 +236,6 @@ void *UastIteratorNext(UastIterator *iter) {
   assert(iter);
 
   if (iter == nullptr || iter->pending.empty()) {
-    if (iter == nullptr) {
-    } else if (iter->pending.empty()) {
-    }
     return nullptr;
   }
 
