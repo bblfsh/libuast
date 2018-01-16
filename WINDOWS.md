@@ -16,7 +16,7 @@ MinGW or Visual Studio.
 You may choose to install everything through [MSYS2](http://www.msys2.org/)
 or download just the needed software:
 
-* [tdm-gcc](http://tdm-gcc.tdragon.net)
+* [tdm-gcc](http://tdm-gcc.tdragon.net) or any other MinGW
 * [GNU make](http://www.equation.com/servlet/equation.cmd?fa=make)
 
 In the latter case, all the commands are supposed to be run in "MinGW Command Prompt".
