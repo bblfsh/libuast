@@ -536,8 +536,6 @@ static xmlDocPtr CreateDocument(const Uast *ctx, void *node) {
 }
 
 void Error(void *ctx, const char *msg, ...) {
-  assert(ctx);
-
   va_list arg_ptr;
 
   va_start(arg_ptr, msg);
