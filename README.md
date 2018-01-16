@@ -11,13 +11,15 @@ Currently only xpath querying is implemented, it allows to filter branches of th
 
 More features may be implemented in the future, like UAST iterators.
 
+Supports Linux, Darwin and Windows.
+
 ## Installation
 
 ### Dependencies
 
 - cmake
 - libxml2
-- libcunit1
+- libcunit1 (optional, for tests)
 
 #### Ubuntu instructions
 
@@ -25,6 +27,9 @@ More features may be implemented in the future, like UAST iterators.
 sudo apt install build-essential cmake libxml2 libxml2-dev libcunit1 libcunit1-dev
 ```
 
+### Windows instructions
+
+[WINDOWS.md](WINDOWS.md)
 
 ### Build/Install C API
 
