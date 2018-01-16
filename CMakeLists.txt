@@ -8,6 +8,9 @@ set(CMAKE_MACOSX_RPATH ON)  # fixes CMP0042
 
 set(OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/lib")
 
+# Required on Windows to build DLL properly
+add_definitions(-DLIBUAST_BUILD)
+
 # Required dependencies
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 find_package(CUnit)
