@@ -21,6 +21,11 @@ typedef struct UastIterator UastIterator;
 
 typedef enum { PRE_ORDER, POST_ORDER, LEVEL_ORDER } TreeOrder;
 
+// void*(void*) function used as argument to UastIteratorNewWithTransform to transform
+// the nodes (increase references for the local bindings, typically) before
+// being added to the internal iterator data structures.
+typedef void*(*TransformFunc)(void*);
+
 // Uast needs a node implementation in order to work. This is needed
 // because the data structure of the node itself is not defined by this
 // library, instead it provides an interface that is expected to be satisfied by

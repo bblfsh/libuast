@@ -29,7 +29,7 @@ struct UastIterator {
   TreeOrder order;
   std::deque<void *> pending;
   std::set<void *> visited;
-  void* (*nodeTransform)(void*);
+  TransformFunc nodeTransform;
 };
 
 struct Nodes {
@@ -205,7 +205,7 @@ void UastIteratorFree(UastIterator *iter) {
 }
 
 UastIterator *UastIteratorNewWithTransformer(const Uast *ctx, void *node,
-                                             TreeOrder order, void*(*transform)(void*)) {
+                                             TreeOrder order, TransformFunc transform) {
 
   UastIterator *iter = UastIteratorNewBase(ctx, node, order);
   iter->pending.push_front(transform(node));
