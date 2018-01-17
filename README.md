@@ -1,4 +1,5 @@
-# libuast [![Build Status](https://travis-ci.org/bblfsh/libuast.svg?branch=master)](https://travis-ci.org/bblfsh/libuast) [![codecov](https://codecov.io/gh/bblfsh/libuast/branch/master/graph/badge.svg)](https://codecov.io/gh/bblfsh/libuast)
+# libuast [![Build Status](https://travis-ci.org/bblfsh/libuast.svg?branch=master)](https://travis-ci.org/bblfsh/libuast) [![codecov](https://codecov.io/gh/bblfsh/libuast/branch/master/graph/badge.svg)](https://codecov.io/gh/bblfsh/libuast) [![Build status](https://ci.appveyor.com/api/projects/status/hq2o0qcw81q9eys7?svg=true)](https://ci.appveyor.com/project/mcuadros/libuast)
+
 
 Libuast is a C library that implements different algorithms that consume the babelfish's UAST in order to query, inspect and process it.
 
