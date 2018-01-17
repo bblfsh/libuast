@@ -26,6 +26,7 @@ set(libsrc
 
 # Header files
 set(libinclude
+  ${CMAKE_SOURCE_DIR}/src/export.h
   ${CMAKE_SOURCE_DIR}/src/uast.h
   ${CMAKE_SOURCE_DIR}/src/roles.h
   ${CMAKE_SOURCE_DIR}/src/node_iface.h
@@ -73,6 +74,7 @@ install(
   ARCHIVE       DESTINATION lib
   LIBRARY       DESTINATION lib
   PUBLIC_HEADER DESTINATION include/libuast
+  RUNTIME       DESTINATION bin
 )
 
 # Adds examples
