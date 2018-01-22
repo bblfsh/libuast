@@ -5,11 +5,25 @@ compiler:
 
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -qq libcunit1 libcunit1-doc libcunit1-dev
+  - sudo apt-get install -qq libcunit1 libcunit1-doc libcunit1-dev lcov
 
 script:
-  - mkdir -p ../libuast-build && cd ../libuast-build && cmake ../libuast && make && make test
+  - mkdir -p ../libuast-build
+  - cd ../libuast-build
+  - cmake -DCMAKE_BUILD_TYPE=Debug ../libuast
+  - make
+  - make test
+  - cmake -DCMAKE_BUILD_TYPE=Release ../libuast
+  - make clean
+  - make
   - cd $TRAVIS_BUILD_DIR
+
+after_success:
+  - cd $TRAVIS_BUILD_DIR/../libuast-build
+  - lcov --directory . --capture --output-file coverage.info
+  - lcov --remove coverage.info '/usr/*' --output-file coverage.info
+  - lcov --list coverage.info
+  - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
 
 before_deploy:
   - sh scripts/update-version.sh

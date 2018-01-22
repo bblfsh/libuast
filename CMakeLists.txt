@@ -8,6 +8,20 @@ set(CMAKE_MACOSX_RPATH ON)  # fixes CMP0042
 
 set(OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/lib")
 
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
+if(NOT ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug") AND NOT ("${CMAKE_BUILD_TYPE}" STREQUAL "Release"))
+    set(CMAKE_BUILD_TYPE "Release")
+endif()
+
+if(${CMAKE_COMPILER_IS_GNUCXX} AND (${CMAKE_BUILD_TYPE} STREQUAL "Debug"))
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -fprofile-arcs -ftest-coverage")
+    include(CodeCoverage)
+    setup_target_for_coverage(${PROJECT_NAME}_coverage tests coverage)
+endif()
+if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+endif()
+
 # Required on Windows to build DLL properly
 add_definitions(-DLIBUAST_BUILD)
 
