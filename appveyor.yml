@@ -46,7 +46,7 @@ deploy:
   release: $(APPVEYOR_REPO_TAG_NAME)
   provider: GitHub
   auth_token:
-    secure: $(GITHUB_TOKEN)
+    secure: VpD/GgDpwbXoeBSIhbd4SKSLE9mFOcGralubWHKTb8npuh9B7imjfGdpW7W3c857
   artifact: binaries.win64.$(BUILD).zip
   on:
     branch: master
