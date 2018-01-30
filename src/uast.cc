@@ -278,13 +278,6 @@ Nodes *UastFilter(const Uast *ctx, void *node, const char *query) {
         throw std::runtime_error("");
     }
 
-    try {
-      nodes = new Nodes();
-    } catch(const std::bad_alloc&) {
-      Error(nullptr, "Unable to get memory for nodes\n");
-      throw std::runtime_error("");
-    }
-
     auto results = nodeset->nodeTab;
     auto size = nodeset->nodeNr;
     size_t realSize = 0;
