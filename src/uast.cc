@@ -3,6 +3,7 @@
 #include "uast.h"
 #include "uast_private.h"
 
+#include <algorithm>
 #include <cassert>
 #include <cinttypes>
 #include <cstdbool>
@@ -33,6 +34,7 @@ struct UastIterator {
   std::deque<void *> pending;
   std::set<void *> visited;
   void* (*nodeTransform)(void*);
+  bool preloaded;
 };
 
 struct Nodes {
@@ -68,6 +70,8 @@ static void *PreOrderNext(UastIterator *iter);
 static void *LevelOrderNext(UastIterator *iter);
 // Get the next element in post-order traversal mode.
 static void *PostOrderNext(UastIterator *iter);
+// Get the next element in position-order traversal mode.
+static void *PositionOrderNext(UastIterator *iter);
 
 class QueryResult {
   xmlXPathContextPtr xpathCtx;
@@ -147,6 +151,7 @@ static UastIterator *UastIteratorNewBase(const Uast *ctx, void *node, TreeOrder 
 
   iter->ctx = ctx;
   iter->order = order;
+  iter->preloaded = false;
   return iter;
 }
 
@@ -246,6 +251,8 @@ void *UastIteratorNext(UastIterator *iter) {
       return LevelOrderNext(iter);
     case POST_ORDER:
       return PostOrderNext(iter);
+    case POSITION_ORDER:
+      return PositionOrderNext(iter);
     default:
       return PreOrderNext(iter);
   }
@@ -592,8 +599,8 @@ static void *LevelOrderNext(UastIterator *iter) {
 
   int children_size = iter->ctx->iface.ChildrenSize(retNode);
   for (int i = 0; i < children_size; i++) {
-    iter->pending.push_back(transformChildAt(iter, retNode, i));
-  }
+  iter->pending.push_back(transformChildAt(iter, retNode, i));
+}
 
   iter->pending.pop_front();
   return retNode;
@@ -614,4 +621,53 @@ static void *PostOrderNext(UastIterator *iter) {
   curNode = iter->pending.front();
   iter->pending.pop_front();
   return curNode;
+}
+
+static void sortPendingByPosition(UastIterator *iter) {
+    auto root = iter->pending.front();
+    iter->pending.pop_front();
+
+    UastIterator *subiter = UastIteratorNew(iter->ctx, root, PRE_ORDER);
+    void *curNode = nullptr;
+    while ((curNode = UastIteratorNext(subiter)) != nullptr) {
+      iter->pending.push_back(curNode);
+    }
+    UastIteratorFree(subiter);
+
+    std::sort(iter->pending.begin(), iter->pending.end(), [&iter](void *i, void *j) {
+      auto ic = iter->ctx->iface;
+      if (ic.HasStartOffset(i) && ic.HasStartOffset(j)) {
+        return ic.StartOffset(i) <= ic.StartOffset(j);
+      }
+
+      // Continue: some didn't have offset, check by line/col
+      auto firstLine  = ic.HasStartLine(i) ? ic.StartLine(i) : 0;
+      auto firstCol   = ic.HasStartCol(i)  ? ic.StartCol(i)  : 0;
+      auto secondLine = ic.HasStartLine(j) ? ic.StartLine(j) : 0;
+      auto secondCol  = ic.HasStartCol(j)  ? ic.StartCol(j)  : 0;
+
+      if (firstLine == secondLine) {
+        return firstCol <= secondCol;
+      }
+
+      return firstLine <= secondLine;
+    });
+}
+
+static void *PositionOrderNext(UastIterator *iter) {
+  assert(iter);
+
+  if (!iter->preloaded) {
+    // First iteration on preorder, storing the nodes in the deque, then sort by pos
+    sortPendingByPosition(iter);
+    iter->preloaded = true;
+  }
+
+  void *retNode = iter->pending.front();
+  if (retNode == nullptr) {
+    return nullptr;
+  }
+
+  iter->pending.pop_front();
+  return retNode;
 }
