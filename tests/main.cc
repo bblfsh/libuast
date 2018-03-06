@@ -30,9 +30,13 @@ int main() {
   ADD_TEST(suite, "test of UastNew()", TestUastNew);
   ADD_TEST(suite, "test of UastFilter() pointers", TestUastFilterPointers);
   ADD_TEST(suite, "test iterator transform func", TestUastIteratorTransformFunc);
-  ADD_TEST(suite, "test iteration", TestUastIteratorPreOrder);
-  ADD_TEST(suite, "test iteration", TestUastIteratorLevelOrder);
-  ADD_TEST(suite, "test iteration", TestUastIteratorPostOrder);
+  ADD_TEST(suite, "test iteration (preorder)", TestUastIteratorPreOrder);
+  ADD_TEST(suite, "test iteration (level-order)", TestUastIteratorLevelOrder);
+  ADD_TEST(suite, "test iteration (position-order by offset)",
+      TestUastIteratorPositionOrderByOffset);
+  ADD_TEST(suite, "test iteration (position-order by line and col)",
+      TestUastIteratorPositionOrderByLineCol);
+  ADD_TEST(suite, "test iteration (post-order)", TestUastIteratorPostOrder);
   ADD_TEST(suite, "test of UastFilter() counting", TestUastFilterCount);
   ADD_TEST(suite, "test of UastFilter() with tokens", TestUastFilterToken);
   ADD_TEST(suite, "test of UastFilter() with properties",
@@ -44,7 +48,6 @@ int main() {
   ADD_TEST(suite, "test of UastFilter() with end offset", TestUastFilterEndOffset);
   ADD_TEST(suite, "test of UastFilter() with end line", TestUastFilterEndLine);
   ADD_TEST(suite, "test of UastFilter() with end col", TestUastFilterEndCol);
-  ADD_TEST(suite, "test of UastFilter() with position", TestUastFilterPosition);
   ADD_TEST(suite, "test of UastFilter() with last() function",
            TestUastFunctionLast);
   ADD_TEST(suite, "test of UastFilterBool() with true result",

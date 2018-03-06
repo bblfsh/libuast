@@ -20,7 +20,7 @@ typedef struct Uast Uast;
 // with UastIteratorFree.
 typedef struct UastIterator UastIterator;
 
-typedef enum { PRE_ORDER, POST_ORDER, LEVEL_ORDER } TreeOrder;
+typedef enum { PRE_ORDER, POST_ORDER, LEVEL_ORDER, POSITION_ORDER } TreeOrder;
 
 // Uast needs a node implementation in order to work. This is needed
 // because the data structure of the node itself is not defined by this

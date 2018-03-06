@@ -227,17 +227,6 @@ void TestUastFilterEndCol() {
   UastFree(ctx);
 }
 
-void TestUastFilterPosition() {
-  Uast *ctx = UastNew(IfaceMock());
-  Node *root = TreeMock();
-  Nodes *nodes = UastFilter(ctx, root, "//*[@startOffset or @endOffset]");
-  CU_ASSERT_FATAL(nodes != NULL);
-  CU_ASSERT_FATAL(NodesSize(nodes) == 7);
-
-  NodesFree(nodes);
-  UastFree(ctx);
-}
-
 void TestUastFunctionLast() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
@@ -803,6 +792,109 @@ void TestUastIteratorPostOrder() {
   node = (Node *)UastIteratorNext(iter);
   CU_ASSERT_FATAL(node != NULL);
   CU_ASSERT_FATAL(node->internal_type == "Module");
+
+  UastIteratorFree(iter);
+  UastFree(ctx);
+}
+
+void TestUastIteratorPositionOrderByOffset() {
+  Uast *ctx = UastNew(IfaceMock());
+
+  Node *module = ModuleMock();
+  module->SetStartPosition({0, -1, -1});
+
+  Node *assign = AssignMock();
+  assign->SetStartPosition({5, -1, -1});
+
+  Node *literal = LiteralMock("42");
+  literal->SetStartPosition({3, -1, -1});
+
+  Node *sum = SumMock();
+  sum->SetStartPosition({10, -1, -1});
+
+  Node *mult = MultMock();
+  mult->SetStartPosition({10, -1, -1});
+
+  module->AddChild(assign);
+  module->AddChild(literal);
+  module->AddChild(sum);
+  module->AddChild(mult);
+
+  UastIterator *iter = UastIteratorNew(ctx, module, POSITION_ORDER);
+  CU_ASSERT_FATAL(iter != NULL);
+
+  Node *node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Module");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "NumLiteral");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Assign");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Sum" || node->internal_type == "Mult");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Sum" || node->internal_type == "Mult");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node == NULL);
+
+  UastIteratorFree(iter);
+  UastFree(ctx);
+}
+
+void TestUastIteratorPositionOrderByLineCol() {
+  Uast *ctx = UastNew(IfaceMock());
+
+  Node *module = ModuleMock();
+  module->SetStartPosition({-1, 0, 0});
+
+  Node *assign = AssignMock();
+  assign->SetStartPosition({-1, 0, 10});
+
+  Node *literal = LiteralMock("42");
+  literal->SetStartPosition({-1, 0, 0});
+
+  Node *sum = SumMock();
+  sum->SetStartPosition({-1, 1, 10});
+
+  Node *mult = MultMock();
+  mult->SetStartPosition({-1, 1, 0});
+
+  module->AddChild(assign);
+  module->AddChild(literal);
+  module->AddChild(sum);
+  module->AddChild(mult);
+
+  UastIterator *iter = UastIteratorNew(ctx, module, POSITION_ORDER);
+  CU_ASSERT_FATAL(iter != NULL);
+
+  Node *node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Module" || node->internal_type == "NumLiteral");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Module" || node->internal_type == "NumLiteral");
+  node = (Node *)UastIteratorNext(iter);
+
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Assign");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Mult");
+
+  node = (Node *)UastIteratorNext(iter);
+  CU_ASSERT_FATAL(node != NULL);
+  CU_ASSERT_FATAL(node->internal_type == "Sum");
 
   UastIteratorFree(iter);
   UastFree(ctx);

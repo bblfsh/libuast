@@ -11,16 +11,16 @@
 #include "node_iface.h"
 
 struct position {
-  uint32_t offset;
-  uint32_t line;
-  uint32_t col;
+  int offset;
+  int line;
+  int col;
 
   bool operator!=(const position& other) {
     return offset != other.offset || line != other.line || col != other.col;
   }
 };
 
-const position NO_POSITION = {0, 0, 0};
+const position NO_POSITION = {-1, -1, -1};
 
 class Node {
  public:
@@ -85,7 +85,7 @@ static const char *PropertyValueAt(const void *node, int index) {
 }
 
 static bool HasStartOffset(const void *node) {
-  return ((Node *)node)->start_position != NO_POSITION;
+  return ((Node *)node)->start_position.offset != -1;
 }
 
 static uint32_t StartOffset(const void *node) {
@@ -93,7 +93,7 @@ static uint32_t StartOffset(const void *node) {
 }
 
 static bool HasStartLine(const void *node) {
-  return ((Node *)node)->start_position != NO_POSITION;
+  return ((Node *)node)->start_position.line != -1;
 }
 
 static uint32_t StartLine(const void *node) {
@@ -101,7 +101,7 @@ static uint32_t StartLine(const void *node) {
 }
 
 static bool HasStartCol(const void *node) {
-  return ((Node *)node)->start_position != NO_POSITION;
+  return ((Node *)node)->start_position.col != -1;
 }
 
 static uint32_t StartCol(const void *node) {
