@@ -172,7 +172,8 @@ NodesFree(nodes);
 #### UAST Iterators
 
 The API provides a UASTIterator type that can iterate over the UAST in
-pre-order, post-order or level-order.
+pre-order, post-order, level-order and position-order (the last one is by the 
+node `StartOffset/StartLine/StartLine`).
 
 Example:
 
@@ -189,4 +190,5 @@ UastIteratorFree(iter);
 
 ## Contribute
 
-Please follow [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html).
+Please follow [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html) 
+for naming and whitespace.
