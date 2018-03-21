@@ -637,7 +637,7 @@ static void sortPendingByPosition(UastIterator *iter) {
     std::sort(iter->pending.begin(), iter->pending.end(), [&iter](void *i, void *j) {
       auto ic = iter->ctx->iface;
       if (ic.HasStartOffset(i) && ic.HasStartOffset(j)) {
-        return ic.StartOffset(i) <= ic.StartOffset(j);
+        return ic.StartOffset(i) < ic.StartOffset(j);
       }
 
       // Continue: some didn't have offset, check by line/col
@@ -647,10 +647,10 @@ static void sortPendingByPosition(UastIterator *iter) {
       auto secondCol  = ic.HasStartCol(j)  ? ic.StartCol(j)  : 0;
 
       if (firstLine == secondLine) {
-        return firstCol <= secondCol;
+        return firstCol < secondCol;
       }
 
-      return firstLine <= secondLine;
+      return firstLine < secondLine;
     });
 }
 
