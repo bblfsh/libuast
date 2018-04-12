@@ -13,7 +13,7 @@ if(NOT ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug") AND NOT ("${CMAKE_BUILD_TYPE}" S
     set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-if(${CMAKE_COMPILER_IS_GNUCXX} AND (${CMAKE_BUILD_TYPE} STREQUAL "Debug"))
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" AND (${CMAKE_BUILD_TYPE} STREQUAL "Debug"))
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -fprofile-arcs -ftest-coverage")
     include(CodeCoverage)
     setup_target_for_coverage(${PROJECT_NAME}_coverage tests coverage)
