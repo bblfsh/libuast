@@ -4,10 +4,6 @@ image:
   - Visual Studio 2015
   - Visual Studio 2017
 
-matrix:
-  allow_failures:
-    - platform: x64
-
 clone_folder: c:\libuast
 
 environment:
