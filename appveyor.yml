@@ -1,10 +1,8 @@
 version: "{build}"
 platform: x64
-image: Visual Studio 2017
-
-matrix:
-  allow_failures:
-    - platform: x64
+image:
+  - Visual Studio 2015
+  - Visual Studio 2017
 
 clone_folder: c:\libuast
 
@@ -15,26 +13,34 @@ environment:
     - BUILD: mingw
     - BUILD: msvc
 
+matrix:
+  exclude:
+    - image: Visual Studio 2017
+      BUILD: mingw
+    - image: Visual Studio 2015
+      BUILD: msvc
+
 install:
   - git clone --depth 1 https://github.com/GNOME/libxml2 c:\libxml2
-  - if %BUILD% == mingw c:\msys64\usr\bin\pacman --noconfirm --needed -S mingw-w64-x86_64-toolchain
-  - if %BUILD% == mingw choco install make
+  # Use preinstalled mingw 6.3.0, note that using 7.3.0 causes problems with
+  # the compiled libraries when linking against them, at least when cross-compiling
+  # from older GCC. Test these scenarios if you consider upgrading mingw here.
+  - if %BUILD% == mingw set PATH=C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\mingw64\bin;%PATH%
   - if %BUILD% == msvc call "%VS150COMNTOOLS%\..\..\VC\Auxiliary\Build\vcvarsall.bat" amd64
 
 build_script:
-  - if %BUILD% == mingw set PATH=C:\msys64\mingw64\bin;%PATH%
   # Workaround for CMake+MinGW conflicting with sh.exe in PATH
   - if %BUILD% == mingw set PATH=%PATH:C:\Program Files\Git\usr\bin;=%
   - cd c:\libxml2\win32
   - cscript configure.js ftp=no http=no c14n=no docb=no iconv=no legacy=no prefix=%PREFIX% compiler=%BUILD%
-  - if %BUILD% == mingw make -f Makefile.mingw install
+  - if %BUILD% == mingw mingw32-make -f Makefile.mingw install
   - if %BUILD% == msvc nmake /f Makefile.msvc install
   - cd c:\libuast
   - mkdir build
   - cd build
   - if %BUILD% == mingw cmake -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX=%PREFIX% -DLIBXML2_LIBRARY=%PREFIX%\lib\libxml2.a -DLIBXML2_INCLUDE_DIR=%PREFIX%\include\libxml2 -DDISABLE_EXAMPLES=1 ..
   - if %BUILD% == msvc cmake -DCMAKE_GENERATOR_PLATFORM=x64 -DCMAKE_INSTALL_PREFIX=%PREFIX% -DLIBXML2_LIBRARY=%PREFIX%\lib\libxml2.lib -DLIBXML2_INCLUDE_DIR=%PREFIX%\include\libxml2 -DDISABLE_EXAMPLES=1 ..
-  - if %BUILD% == mingw make install
+  - if %BUILD% == mingw mingw32-make install
   - if %BUILD% == msvc cmake --build . --target install --config Release
   - 7z a c:\libuast\binaries.win64.%BUILD%.zip %PREFIX%\*
 
