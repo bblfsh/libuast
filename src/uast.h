@@ -1,13 +1,63 @@
 #ifndef LIBUAST_UAST_H_
 #define LIBUAST_UAST_H_
 
+#include "export.h"
+
+#include <stdbool.h>
+#include <stdint.h>
+#include <stddef.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "export.h"
-#include "node_iface.h"
-#include "nodes.h"
+typedef uintptr_t NodeHandle;
+
+// This interface must be implemented to create a Uast context.
+typedef struct NodeIface {
+  const char *(*InternalType)(NodeHandle);
+  const char *(*Token)(NodeHandle);
+
+  // Children
+  size_t (*ChildrenSize)(NodeHandle);
+  NodeHandle (*ChildAt)(NodeHandle, int);
+
+  // Roles
+  size_t (*RolesSize)(NodeHandle);
+  uint16_t (*RoleAt)(NodeHandle, int);
+
+  // Properties
+  size_t (*PropertiesSize)(NodeHandle);
+  const char *(*PropertyKeyAt)(NodeHandle, int);
+  const char *(*PropertyValueAt)(NodeHandle, int);
+
+  // Postion
+  bool (*HasStartOffset)(NodeHandle);
+  uint32_t (*StartOffset)(NodeHandle);
+  bool (*HasStartLine)(NodeHandle);
+  uint32_t (*StartLine)(NodeHandle);
+  bool (*HasStartCol)(NodeHandle);
+  uint32_t (*StartCol)(NodeHandle);
+
+  bool (*HasEndOffset)(NodeHandle);
+  uint32_t (*EndOffset)(NodeHandle);
+  bool (*HasEndLine)(NodeHandle);
+  uint32_t (*EndLine)(NodeHandle);
+  bool (*HasEndCol)(NodeHandle);
+  uint32_t (*EndCol)(NodeHandle);
+
+} NodeIface;
+
+typedef struct Nodes Nodes;
+
+// Returns the amount of nodes
+EXPORT int NodesSize(const Nodes *nodes);
+
+// Returns the node at the given index.
+EXPORT NodeHandle NodeAt(const Nodes *nodes, int index);
+
+// Releases the resources associated with nodes
+EXPORT void NodesFree(Nodes *nodes);
 
 // Uast stores the general context required for library functions.
 // It must be initialized with `UastNew` passing a valid implementation of the

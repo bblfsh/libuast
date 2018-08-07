@@ -8,7 +8,7 @@
 #include <tuple>
 #include <vector>
 
-#include "node_iface.h"
+#include "uast.h"
 
 struct position {
   int offset;
