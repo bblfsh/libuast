@@ -11,40 +11,46 @@
 extern "C" {
 #endif
 
+// Uast stores the general context required for library functions.
+// It must be initialized with `UastNew` passing a valid implementation of the
+// `NodeIface` interface.
+// Once it is not used anymore, it shall be released calling `UastFree`.
+typedef struct Uast Uast;
+
 typedef uintptr_t NodeHandle;
 
 // This interface must be implemented to create a Uast context.
 typedef struct NodeIface {
-  const char *(*InternalType)(NodeHandle);
-  const char *(*Token)(NodeHandle);
+  const char *(*InternalType)(const Uast*, NodeHandle);
+  const char *(*Token)(const Uast*, NodeHandle);
 
   // Children
-  size_t (*ChildrenSize)(NodeHandle);
-  NodeHandle (*ChildAt)(NodeHandle, int);
+  size_t (*ChildrenSize)(const Uast*, NodeHandle);
+  NodeHandle (*ChildAt)(const Uast*, NodeHandle, int);
 
   // Roles
-  size_t (*RolesSize)(NodeHandle);
-  uint16_t (*RoleAt)(NodeHandle, int);
+  size_t (*RolesSize)(const Uast*, NodeHandle);
+  uint16_t (*RoleAt)(const Uast*, NodeHandle, int);
 
   // Properties
-  size_t (*PropertiesSize)(NodeHandle);
-  const char *(*PropertyKeyAt)(NodeHandle, int);
-  const char *(*PropertyValueAt)(NodeHandle, int);
+  size_t (*PropertiesSize)(const Uast*, NodeHandle);
+  const char *(*PropertyKeyAt)(const Uast*, NodeHandle, int);
+  const char *(*PropertyValueAt)(const Uast*, NodeHandle, int);
 
   // Postion
-  bool (*HasStartOffset)(NodeHandle);
-  uint32_t (*StartOffset)(NodeHandle);
-  bool (*HasStartLine)(NodeHandle);
-  uint32_t (*StartLine)(NodeHandle);
-  bool (*HasStartCol)(NodeHandle);
-  uint32_t (*StartCol)(NodeHandle);
+  bool (*HasStartOffset)(const Uast*, NodeHandle);
+  uint32_t (*StartOffset)(const Uast*, NodeHandle);
+  bool (*HasStartLine)(const Uast*, NodeHandle);
+  uint32_t (*StartLine)(const Uast*, NodeHandle);
+  bool (*HasStartCol)(const Uast*, NodeHandle);
+  uint32_t (*StartCol)(const Uast*, NodeHandle);
 
-  bool (*HasEndOffset)(NodeHandle);
-  uint32_t (*EndOffset)(NodeHandle);
-  bool (*HasEndLine)(NodeHandle);
-  uint32_t (*EndLine)(NodeHandle);
-  bool (*HasEndCol)(NodeHandle);
-  uint32_t (*EndCol)(NodeHandle);
+  bool (*HasEndOffset)(const Uast*, NodeHandle);
+  uint32_t (*EndOffset)(const Uast*, NodeHandle);
+  bool (*HasEndLine)(const Uast*, NodeHandle);
+  uint32_t (*EndLine)(const Uast*, NodeHandle);
+  bool (*HasEndCol)(const Uast*, NodeHandle);
+  uint32_t (*EndCol)(const Uast*, NodeHandle);
 
 } NodeIface;
 
@@ -58,12 +64,6 @@ EXPORT NodeHandle NodeAt(const Nodes *nodes, int index);
 
 // Releases the resources associated with nodes
 EXPORT void NodesFree(Nodes *nodes);
-
-// Uast stores the general context required for library functions.
-// It must be initialized with `UastNew` passing a valid implementation of the
-// `NodeIface` interface.
-// Once it is not used anymore, it shall be released calling `UastFree`.
-typedef struct Uast Uast;
 
 // An UastIterator is used to keep the state of the current iteration over the tree.
 // It's initialized with UastIteratorNew, used with UastIteratorNext and freed

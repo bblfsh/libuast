@@ -48,87 +48,87 @@ class Node {
   void SetEndPosition(position p) { end_position = p; }
 };
 
-static const char *InternalType(NodeHandle node) {
+static const char *InternalType(const Uast* ctx, NodeHandle node) {
   return ((Node *)node)->internal_type.data();
 }
 
-static const char *Token(NodeHandle node) {
+static const char *Token(const Uast* ctx, NodeHandle node) {
   return ((Node *)node)->token.data();
 }
 
-static size_t ChildrenSize(NodeHandle node) {
+static size_t ChildrenSize(const Uast* ctx, NodeHandle node) {
   return ((Node *)node)->children.size();
 }
 
-static NodeHandle ChildAt(NodeHandle node, int index) {
+static NodeHandle ChildAt(const Uast* ctx, NodeHandle node, int index) {
   return (NodeHandle)(((Node *)node)->children.at(index));
 }
 
-static size_t RolesSize(NodeHandle node) {
+static size_t RolesSize(const Uast* ctx, NodeHandle node) {
   return ((Node *)node)->roles.size();
 }
 
-static uint16_t RoleAt(NodeHandle node, int index) {
+static uint16_t RoleAt(const Uast* ctx, NodeHandle node, int index) {
   return ((Node *)node)->roles.at(index);
 }
 
-static size_t PropertiesSize(NodeHandle node) {
+static size_t PropertiesSize(const Uast* ctx, NodeHandle node) {
   return ((Node *)node)->properties.size();
 }
 
-static const char *PropertyKeyAt(NodeHandle node, int index) {
+static const char *PropertyKeyAt(const Uast* ctx, NodeHandle node, int index) {
   return std::get<0>(((Node *)node)->properties.at(index)).data();
 }
 
-static const char *PropertyValueAt(NodeHandle node, int index) {
+static const char *PropertyValueAt(const Uast* ctx, NodeHandle node, int index) {
   return std::get<1>(((Node *)node)->properties.at(index)).data();
 }
 
-static bool HasStartOffset(NodeHandle node) {
+static bool HasStartOffset(const Uast* ctx, NodeHandle node) {
   return ((Node *)node)->start_position.offset != -1;
 }
 
-static uint32_t StartOffset(NodeHandle node) {
+static uint32_t StartOffset(const Uast* ctx, NodeHandle node) {
   return ((Node *)node)->start_position.offset;
 }
 
-static bool HasStartLine(NodeHandle node) {
+static bool HasStartLine(const Uast* ctx, NodeHandle node) {
   return ((Node *)node)->start_position.line != -1;
 }
 
-static uint32_t StartLine(NodeHandle node) {
+static uint32_t StartLine(const Uast* ctx, NodeHandle node) {
   return ((Node *)node)->start_position.line;
 }
 
-static bool HasStartCol(NodeHandle node) {
+static bool HasStartCol(const Uast* ctx, NodeHandle node) {
   return ((Node *)node)->start_position.col != -1;
 }
 
-static uint32_t StartCol(NodeHandle node) {
+static uint32_t StartCol(const Uast* ctx, NodeHandle node) {
   return ((Node *)node)->start_position.col;
 }
 
-static bool HasEndOffset(NodeHandle node) {
+static bool HasEndOffset(const Uast* ctx, NodeHandle node) {
   return ((Node *)node)->end_position != NO_POSITION;
 }
 
-static uint32_t EndOffset(NodeHandle node) {
+static uint32_t EndOffset(const Uast* ctx, NodeHandle node) {
   return ((Node *)node)->end_position.offset;
 }
 
-static bool HasEndLine(NodeHandle node) {
+static bool HasEndLine(const Uast* ctx, NodeHandle node) {
   return ((Node *)node)->end_position != NO_POSITION;
 }
 
-static uint32_t EndLine(NodeHandle node) {
+static uint32_t EndLine(const Uast* ctx, NodeHandle node) {
   return ((Node *)node)->end_position.line;
 }
 
-static bool HasEndCol(NodeHandle node) {
+static bool HasEndCol(const Uast* ctx, NodeHandle node) {
   return ((Node *)node)->end_position != NO_POSITION;
 }
 
-static uint32_t EndCol(NodeHandle node) {
+static uint32_t EndCol(const Uast* ctx, NodeHandle node) {
   return ((Node *)node)->end_position.col;
 }
 
