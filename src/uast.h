@@ -58,23 +58,23 @@ EXPORT void UastFree(Uast *ctx);
 // It will return an error if the query has a return type that is not a
 // node list. In that case, you should use one of the typed filter functions
 // (`UastFilterBool`, `UastFilterNumber` or `UastFilterString`).
-EXPORT Nodes *UastFilter(const Uast *ctx, void *node, const char *query);
+EXPORT Nodes *UastFilter(const Uast *ctx, NodeHandle node, const char *query);
 
 // Returns a integer value as result of executing the XPath query with bool result,
 // with `1` meaning `true` and `0` false. If there is any error, the flag `ok` will
 // be set to false. The parameters have the same meaning as `UastFilter`.
-EXPORT bool UastFilterBool(const Uast *ctx, void *node, const char *query, bool *ok);
+EXPORT bool UastFilterBool(const Uast *ctx, NodeHandle node, const char *query, bool *ok);
 
 // Returns a `double` value as result of executing the XPath query with number result.
 // The parameters have the same meaning as `UastFilter`. If there is any error,
 // the flag `ok` will be set to false.
-EXPORT double UastFilterNumber(const Uast *ctx, void *node, const char *query, bool *ok);
+EXPORT double UastFilterNumber(const Uast *ctx, NodeHandle node, const char *query, bool *ok);
 
 // Returns a `const char*` value as result of executing the XPath query with
 // a string result. The parameters have the same meaning as `UastFilter`. The user
 // takes ownership of the returned `const char *` and thus must free it.
 // If there is any error, the return value will be `NULL`.
-EXPORT const char *UastFilterString(const Uast *ctx, void *node, const char *query);
+EXPORT const char *UastFilterString(const Uast *ctx, NodeHandle node, const char *query);
 
 // Create a new UastIterator pointer. This will allow you to traverse the UAST
 // calling UastIteratorNext. The node argument will be user as the root node of
@@ -83,21 +83,21 @@ EXPORT const char *UastFilterString(const Uast *ctx, void *node, const char *que
 // be frees using UastIteratorFree.
 //
 // Returns NULL and sets LastError if the UastIterator couldn't initialize.
-EXPORT UastIterator *UastIteratorNew(const Uast *ctx, void *node, TreeOrder order);
+EXPORT UastIterator *UastIteratorNew(const Uast *ctx, NodeHandle node, TreeOrder order);
 
 // Same as UastIteratorNew, but also allows to specify a transform function taking a node
 // and returning it. This is specially useful when the bindings need to do operations like
 // increasing / decreasing the language reference count when new nodes are added to the
 // iterator internal data structures.
-UastIterator *UastIteratorNewWithTransformer(const Uast *ctx, void *node,
-                                             TreeOrder order, void*(*transform)(void*));
+UastIterator *UastIteratorNewWithTransformer(const Uast *ctx, NodeHandle node,
+                                             TreeOrder order, NodeHandle(*transform)(NodeHandle));
 
 // Frees a UastIterator.
 EXPORT void UastIteratorFree(UastIterator *iter);
 
 // Retrieve the next node of the traversal of an UAST tree or NULL if the
 // traversal has finished.
-EXPORT void *UastIteratorNext(UastIterator *iter);
+EXPORT NodeHandle UastIteratorNext(UastIterator *iter);
 
 // Returns a string with the latest error.
 // It may be an empty string if there's been no error.

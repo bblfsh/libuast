@@ -132,8 +132,8 @@ Once the `Uast` context is created, it can be easily used to run xpath queries a
 // creating a Uast as explained above
 Uast *ctx = CreateContextFromIface();
 
-// get a c pointer to the native node
-void *node = (void*)pointerToNativeNode;
+// get a handle or c pointer for the native node
+NodeHandle node = (NodeHandle)pointerToNativeNode;
 
 // consume the Uast API (xpath in this case)
 Nodes *nodes = UastFilter(ctx, node, "//NumLiteral")
@@ -160,7 +160,7 @@ Nodes *nodes = UastFilter(ctx, node, query);
 if (nodes) {
   // iterate over the results and print the nodes
   for (int i = 0; i < NodesSize(nodes); i++) {
-    void *node = NodeAt(nodes, i);
+    NodeHandle node = NodeAt(nodes, i);
     print_node(node);
   }
 }
@@ -180,8 +180,8 @@ Example:
 ```c
 UastIterator *iter = UastIteratorNew(ctx, node, PRE_ORDER);
 
-void *curNode = NULL;
-while((curNode = UastIteratorNext(iter)) != NULL) {
+NodeHandle curNode = 0;
+while((curNode = UastIteratorNext(iter)) != 0) {
   // ... do something with the node
 }
 

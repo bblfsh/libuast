@@ -41,87 +41,87 @@ class Node {
   void SetEndPosition(position p) { end_position = p; }
 };
 
-static const char *InternalType(const void *node) {
+static const char *InternalType(NodeHandle node) {
   return ((Node *)node)->internal_type.data();
 }
 
-static const char *Token(const void *node) {
+static const char *Token(NodeHandle node) {
   return ((Node *)node)->token.data();
 }
 
-static size_t ChildrenSize(const void *node) {
+static size_t ChildrenSize(NodeHandle node) {
   return ((Node *)node)->children.size();
 }
 
-static void *ChildAt(const void *node, int index) {
-  return ((Node *)node)->children.at(index);
+static NodeHandle ChildAt(NodeHandle node, int index) {
+  return (NodeHandle)(((Node *)node)->children.at(index));
 }
 
-static size_t RolesSize(const void *node) {
+static size_t RolesSize(NodeHandle node) {
   return ((Node *)node)->roles.size();
 }
 
-static uint16_t RoleAt(const void *node, int index) {
+static uint16_t RoleAt(NodeHandle node, int index) {
   return ((Node *)node)->roles.at(index);
 }
 
-static size_t PropertiesSize(const void *node) {
+static size_t PropertiesSize(NodeHandle node) {
   return ((Node *)node)->properties.size();
 }
 
-static const char *PropertyKeyAt(const void *node, int index) {
+static const char *PropertyKeyAt(NodeHandle node, int index) {
   return std::get<0>(((Node *)node)->properties.at(index)).data();
 }
 
-static const char *PropertyValueAt(const void *node, int index) {
+static const char *PropertyValueAt(NodeHandle node, int index) {
   return std::get<1>(((Node *)node)->properties.at(index)).data();
 }
 
-static bool HasStartOffset(const void *node) {
+static bool HasStartOffset(NodeHandle node) {
   return ((Node *)node)->start_position != NO_POSITION;
 }
 
-static uint32_t StartOffset(const void *node) {
+static uint32_t StartOffset(NodeHandle node) {
   return ((Node *)node)->start_position.offset;
 }
 
-static bool HasStartLine(const void *node) {
+static bool HasStartLine(NodeHandle node) {
   return ((Node *)node)->start_position != NO_POSITION;
 }
 
-static uint32_t StartLine(const void *node) {
+static uint32_t StartLine(NodeHandle node) {
   return ((Node *)node)->start_position.line;
 }
 
-static bool HasStartCol(const void *node) {
+static bool HasStartCol(NodeHandle node) {
   return ((Node *)node)->start_position != NO_POSITION;
 }
 
-static uint32_t StartCol(const void *node) {
+static uint32_t StartCol(NodeHandle node) {
   return ((Node *)node)->start_position.col;
 }
 
-static bool HasEndOffset(const void *node) {
+static bool HasEndOffset(NodeHandle node) {
   return ((Node *)node)->end_position != NO_POSITION;
 }
 
-static uint32_t EndOffset(const void *node) {
+static uint32_t EndOffset(NodeHandle node) {
   return ((Node *)node)->end_position.offset;
 }
 
-static bool HasEndLine(const void *node) {
+static bool HasEndLine(NodeHandle node) {
   return ((Node *)node)->end_position != NO_POSITION;
 }
 
-static uint32_t EndLine(const void *node) {
+static uint32_t EndLine(NodeHandle node) {
   return ((Node *)node)->end_position.line;
 }
 
-static bool HasEndCol(const void *node) {
+static bool HasEndCol(NodeHandle node) {
   return ((Node *)node)->end_position != NO_POSITION;
 }
 
-static uint32_t EndCol(const void *node) {
+static uint32_t EndCol(NodeHandle node) {
   return ((Node *)node)->end_position.col;
 }
 
@@ -179,7 +179,7 @@ int main() {
       .EndCol = EndCol,
   });
 
-  Nodes *nodes = UastFilter(ctx, &root, "/compilation_unit//identifier");
+  Nodes *nodes = UastFilter(ctx, NodeHandle(&root), "/compilation_unit//identifier");
   if (!nodes) {
     char *error = LastError();
     std::cerr << "libuast.find() failed: " << error;

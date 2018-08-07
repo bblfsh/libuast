@@ -5,38 +5,40 @@
 #include <stdint.h>
 #include <stddef.h>
 
+typedef uintptr_t NodeHandle;
+
 // This interface must be implemented to create a Uast context.
 typedef struct NodeIface {
-  const char *(*InternalType)(const void *);
-  const char *(*Token)(const void *);
+  const char *(*InternalType)(NodeHandle);
+  const char *(*Token)(NodeHandle);
 
   // Children
-  size_t (*ChildrenSize)(const void *);
-  void *(*ChildAt)(const void *, int);
+  size_t (*ChildrenSize)(NodeHandle);
+  NodeHandle (*ChildAt)(NodeHandle, int);
 
   // Roles
-  size_t (*RolesSize)(const void *);
-  uint16_t (*RoleAt)(const void *, int);
+  size_t (*RolesSize)(NodeHandle);
+  uint16_t (*RoleAt)(NodeHandle, int);
 
   // Properties
-  size_t (*PropertiesSize)(const void *);
-  const char *(*PropertyKeyAt)(const void *, int);
-  const char *(*PropertyValueAt)(const void *, int);
+  size_t (*PropertiesSize)(NodeHandle);
+  const char *(*PropertyKeyAt)(NodeHandle, int);
+  const char *(*PropertyValueAt)(NodeHandle, int);
 
   // Postion
-  bool (*HasStartOffset)(const void *);
-  uint32_t (*StartOffset)(const void *);
-  bool (*HasStartLine)(const void *);
-  uint32_t (*StartLine)(const void *);
-  bool (*HasStartCol)(const void *);
-  uint32_t (*StartCol)(const void *);
+  bool (*HasStartOffset)(NodeHandle);
+  uint32_t (*StartOffset)(NodeHandle);
+  bool (*HasStartLine)(NodeHandle);
+  uint32_t (*StartLine)(NodeHandle);
+  bool (*HasStartCol)(NodeHandle);
+  uint32_t (*StartCol)(NodeHandle);
 
-  bool (*HasEndOffset)(const void *);
-  uint32_t (*EndOffset)(const void *);
-  bool (*HasEndLine)(const void *);
-  uint32_t (*EndLine)(const void *);
-  bool (*HasEndCol)(const void *);
-  uint32_t (*EndCol)(const void *);
+  bool (*HasEndOffset)(NodeHandle);
+  uint32_t (*EndOffset)(NodeHandle);
+  bool (*HasEndLine)(NodeHandle);
+  uint32_t (*EndLine)(NodeHandle);
+  bool (*HasEndCol)(NodeHandle);
+  uint32_t (*EndCol)(NodeHandle);
 
 } NodeIface;
 
