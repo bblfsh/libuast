@@ -42,9 +42,7 @@ set(libsrc
 set(libinclude
   ${CMAKE_SOURCE_DIR}/src/export.h
   ${CMAKE_SOURCE_DIR}/src/uast.h
-  ${CMAKE_SOURCE_DIR}/src/roles.h
-  ${CMAKE_SOURCE_DIR}/src/node_iface.h
-  ${CMAKE_SOURCE_DIR}/src/nodes.h)
+  ${CMAKE_SOURCE_DIR}/src/roles.h)
 
 # Dependencies
 set(libdep ${LIBXML2_LIBRARIES})

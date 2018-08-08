@@ -400,7 +400,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, NodeHandle node,
 
   char buf[BUF_SIZE];
 
-  const char *internal_type = ctx->iface.InternalType(node);
+  const char *internal_type = ctx->iface.InternalType(ctx, node);
   xmlNodePtr xmlNode = static_cast<xmlNodePtr>(xmlNewNode(nullptr, BAD_CAST(internal_type)));
   int children_size = 0;
   int roles_size = 0;
@@ -419,7 +419,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, NodeHandle node,
     }
 
     // Token
-    token = ctx->iface.Token(node);
+    token = ctx->iface.Token(ctx, node);
     if (token) {
       if (!xmlNewProp(xmlNode, BAD_CAST("token"), BAD_CAST(token))) {
         throw CreateXMLNodeException();
@@ -427,9 +427,9 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, NodeHandle node,
     }
 
     // Roles
-    roles_size = ctx->iface.RolesSize(node);
+    roles_size = ctx->iface.RolesSize(ctx, node);
     for (int i = 0; i < roles_size; i++) {
-      uint16_t role = ctx->iface.RoleAt(node, i);
+      uint16_t role = ctx->iface.RoleAt(ctx, node, i);
       const char *role_name = RoleNameForId(role);
       if (role_name != nullptr) {
         if (!xmlNewProp(xmlNode, BAD_CAST(role_name), nullptr)) {
@@ -439,17 +439,17 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, NodeHandle node,
     }
 
     // Properties
-    for (size_t i = 0; i < ctx->iface.PropertiesSize(node); i++) {
-      const char *key = ctx->iface.PropertyKeyAt(node, i);
-      const char *value = ctx->iface.PropertyValueAt(node, i);
+    for (size_t i = 0; i < ctx->iface.PropertiesSize(ctx, node); i++) {
+      const char *key = ctx->iface.PropertyKeyAt(ctx, node, i);
+      const char *value = ctx->iface.PropertyValueAt(ctx, node, i);
       if (!xmlNewProp(xmlNode, BAD_CAST(key), BAD_CAST(value))) {
         throw CreateXMLNodeException();
       }
     }
 
     // Position
-    if (ctx->iface.HasStartOffset(node)) {
-      int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.StartOffset(node));
+    if (ctx->iface.HasStartOffset(ctx, node)) {
+      int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.StartOffset(ctx, node));
       if (ret < 0 || ret >= BUF_SIZE) {
         throw CreateXMLNodeException("Unable to set start offset\n");
       }
@@ -457,8 +457,8 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, NodeHandle node,
         throw CreateXMLNodeException();
       }
     }
-    if (ctx->iface.HasStartLine(node)) {
-      int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.StartLine(node));
+    if (ctx->iface.HasStartLine(ctx, node)) {
+      int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.StartLine(ctx, node));
       if (ret < 0 || ret >= BUF_SIZE) {
         throw CreateXMLNodeException("Unable to start line\n");
       }
@@ -466,8 +466,8 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, NodeHandle node,
         throw CreateXMLNodeException();
       }
     }
-    if (ctx->iface.HasStartCol(node)) {
-      int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.StartCol(node));
+    if (ctx->iface.HasStartCol(ctx, node)) {
+      int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.StartCol(ctx, node));
       if (ret < 0 || ret >= BUF_SIZE) {
         throw CreateXMLNodeException("Unable to start column\n");
       }
@@ -475,8 +475,8 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, NodeHandle node,
         throw CreateXMLNodeException();
       }
     }
-    if (ctx->iface.HasEndOffset(node)) {
-      int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.EndOffset(node));
+    if (ctx->iface.HasEndOffset(ctx, node)) {
+      int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.EndOffset(ctx, node));
       if (ret < 0 || ret >= BUF_SIZE) {
         throw CreateXMLNodeException("Unable to set end offset\n");
       }
@@ -484,8 +484,8 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, NodeHandle node,
         throw CreateXMLNodeException();
       }
     }
-    if (ctx->iface.HasEndLine(node)) {
-      int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.EndLine(node));
+    if (ctx->iface.HasEndLine(ctx, node)) {
+      int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.EndLine(ctx, node));
       if (ret < 0 || ret >= BUF_SIZE) {
         Error(nullptr, "Unable to set end line\n");
         throw CreateXMLNodeException();
@@ -494,8 +494,8 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, NodeHandle node,
         throw CreateXMLNodeException();
       }
     }
-    if (ctx->iface.HasEndCol(node)) {
-      int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.EndCol(node));
+    if (ctx->iface.HasEndCol(ctx, node)) {
+      int ret = snprintf(buf, BUF_SIZE, "%" PRIu32, ctx->iface.EndCol(ctx, node));
       if (ret < 0 || ret >= BUF_SIZE) {
         throw CreateXMLNodeException("Unable to set end column\n");
       }
@@ -505,9 +505,9 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, NodeHandle node,
     }
 
     // Recursivelly visit all children
-    children_size = ctx->iface.ChildrenSize(node);
+    children_size = ctx->iface.ChildrenSize(ctx, node);
     for (int i = 0; i < children_size; i++) {
-      NodeHandle child = ctx->iface.ChildAt(node, i);
+      NodeHandle child = ctx->iface.ChildAt(ctx, node, i);
       if (!CreateXmlNode(ctx, child, xmlNode)) {
         throw CreateXMLNodeException();
       }
@@ -549,7 +549,7 @@ static NodeHandle transformChildAt(UastIterator *iter, NodeHandle parent, size_t
   assert(iter);
   assert(parent);
 
-  auto child = iter->ctx->iface.ChildAt(parent, pos);
+  auto child = iter->ctx->iface.ChildAt(iter->ctx, parent, pos);
   return iter->nodeTransform ? iter->nodeTransform(child): child;
 }
 
@@ -560,7 +560,7 @@ static bool Visited(UastIterator *iter, NodeHandle node) {
   const bool visited = iter->visited.find(node) != iter->visited.end();
 
   if(!visited) {
-    int children_size = iter->ctx->iface.ChildrenSize(node);
+    int children_size = iter->ctx->iface.ChildrenSize(iter->ctx, node);
     for (int i = children_size - 1; i >= 0; i--) {
       iter->pending.push_front(transformChildAt(iter, node, i));
     }
@@ -580,7 +580,7 @@ static NodeHandle PreOrderNext(UastIterator *iter) {
     return 0;
   }
 
-  int children_size = iter->ctx->iface.ChildrenSize(retNode);
+  int children_size = iter->ctx->iface.ChildrenSize(iter->ctx, retNode);
   for (int i = children_size - 1; i >= 0; i--) {
     iter->pending.push_front(transformChildAt(iter, retNode, i));
   }
@@ -597,7 +597,7 @@ static NodeHandle LevelOrderNext(UastIterator *iter) {
     return 0;
   }
 
-  int children_size = iter->ctx->iface.ChildrenSize(retNode);
+  int children_size = iter->ctx->iface.ChildrenSize(iter->ctx, retNode);
   for (int i = 0; i < children_size; i++) {
   iter->pending.push_back(transformChildAt(iter, retNode, i));
 }
@@ -636,15 +636,15 @@ static void sortPendingByPosition(UastIterator *iter) {
 
     std::sort(iter->pending.begin(), iter->pending.end(), [&iter](NodeHandle i, NodeHandle j) {
       auto ic = iter->ctx->iface;
-      if (ic.HasStartOffset(i) && ic.HasStartOffset(j)) {
-        return ic.StartOffset(i) < ic.StartOffset(j);
+      if (ic.HasStartOffset(iter->ctx, i) && ic.HasStartOffset(iter->ctx, j)) {
+        return ic.StartOffset(iter->ctx, i) < ic.StartOffset(iter->ctx, j);
       }
 
       // Continue: some didn't have offset, check by line/col
-      auto firstLine  = ic.HasStartLine(i) ? ic.StartLine(i) : 0;
-      auto firstCol   = ic.HasStartCol(i)  ? ic.StartCol(i)  : 0;
-      auto secondLine = ic.HasStartLine(j) ? ic.StartLine(j) : 0;
-      auto secondCol  = ic.HasStartCol(j)  ? ic.StartCol(j)  : 0;
+      auto firstLine  = ic.HasStartLine(iter->ctx, i) ? ic.StartLine(iter->ctx, i) : 0;
+      auto firstCol   = ic.HasStartCol(iter->ctx, i)  ? ic.StartCol(iter->ctx, i)  : 0;
+      auto secondLine = ic.HasStartLine(iter->ctx, j) ? ic.StartLine(iter->ctx, j) : 0;
+      auto secondCol  = ic.HasStartCol(iter->ctx, j)  ? ic.StartCol(iter->ctx, j)  : 0;
 
       if (firstLine == secondLine) {
         return firstCol < secondCol;

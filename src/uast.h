@@ -1,19 +1,69 @@
 #ifndef LIBUAST_UAST_H_
 #define LIBUAST_UAST_H_
 
+#include "export.h"
+
+#include <stdbool.h>
+#include <stdint.h>
+#include <stddef.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include "export.h"
-#include "node_iface.h"
-#include "nodes.h"
 
 // Uast stores the general context required for library functions.
 // It must be initialized with `UastNew` passing a valid implementation of the
 // `NodeIface` interface.
 // Once it is not used anymore, it shall be released calling `UastFree`.
 typedef struct Uast Uast;
+
+typedef uintptr_t NodeHandle;
+
+// This interface must be implemented to create a Uast context.
+typedef struct NodeIface {
+  const char *(*InternalType)(const Uast*, NodeHandle);
+  const char *(*Token)(const Uast*, NodeHandle);
+
+  // Children
+  size_t (*ChildrenSize)(const Uast*, NodeHandle);
+  NodeHandle (*ChildAt)(const Uast*, NodeHandle, int);
+
+  // Roles
+  size_t (*RolesSize)(const Uast*, NodeHandle);
+  uint16_t (*RoleAt)(const Uast*, NodeHandle, int);
+
+  // Properties
+  size_t (*PropertiesSize)(const Uast*, NodeHandle);
+  const char *(*PropertyKeyAt)(const Uast*, NodeHandle, int);
+  const char *(*PropertyValueAt)(const Uast*, NodeHandle, int);
+
+  // Postion
+  bool (*HasStartOffset)(const Uast*, NodeHandle);
+  uint32_t (*StartOffset)(const Uast*, NodeHandle);
+  bool (*HasStartLine)(const Uast*, NodeHandle);
+  uint32_t (*StartLine)(const Uast*, NodeHandle);
+  bool (*HasStartCol)(const Uast*, NodeHandle);
+  uint32_t (*StartCol)(const Uast*, NodeHandle);
+
+  bool (*HasEndOffset)(const Uast*, NodeHandle);
+  uint32_t (*EndOffset)(const Uast*, NodeHandle);
+  bool (*HasEndLine)(const Uast*, NodeHandle);
+  uint32_t (*EndLine)(const Uast*, NodeHandle);
+  bool (*HasEndCol)(const Uast*, NodeHandle);
+  uint32_t (*EndCol)(const Uast*, NodeHandle);
+
+} NodeIface;
+
+typedef struct Nodes Nodes;
+
+// Returns the amount of nodes
+EXPORT int NodesSize(const Nodes *nodes);
+
+// Returns the node at the given index.
+EXPORT NodeHandle NodeAt(const Nodes *nodes, int index);
+
+// Releases the resources associated with nodes
+EXPORT void NodesFree(Nodes *nodes);
 
 // An UastIterator is used to keep the state of the current iteration over the tree.
 // It's initialized with UastIteratorNew, used with UastIteratorNext and freed

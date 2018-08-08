@@ -146,7 +146,7 @@ void TestUastFilterStartOffset() {
 
   Node *node = (Node *)NodeAt(nodes, 0);
   CU_ASSERT_FATAL(node->internal_type == "Module");
-  CU_ASSERT_FATAL(HasStartOffset(NodeHandle(node)));
+  CU_ASSERT_FATAL(HasStartOffset(ctx, NodeHandle(node)));
 
   NodesFree(nodes);
   UastFree(ctx);
@@ -161,7 +161,7 @@ void TestUastFilterStartLine() {
 
   Node *node = (Node *)NodeAt(nodes, 0);
   CU_ASSERT_FATAL(node->internal_type == "Module");
-  CU_ASSERT_FATAL(HasStartLine(NodeHandle(node)));
+  CU_ASSERT_FATAL(HasStartLine(ctx, NodeHandle(node)));
 
   NodesFree(nodes);
   UastFree(ctx);
@@ -176,7 +176,7 @@ void TestUastFilterStartCol() {
 
   Node *node = (Node *)NodeAt(nodes, 0);
   CU_ASSERT_FATAL(node->internal_type == "Module");
-  CU_ASSERT_FATAL(HasStartCol(NodeHandle(node)));
+  CU_ASSERT_FATAL(HasStartCol(ctx, NodeHandle(node)));
 
   NodesFree(nodes);
   UastFree(ctx);
@@ -191,7 +191,7 @@ void TestUastFilterEndOffset() {
 
   Node *node = (Node *)NodeAt(nodes, 0);
   CU_ASSERT_FATAL(node->internal_type == "Module");
-  CU_ASSERT_FATAL(HasEndOffset(NodeHandle(node)));
+  CU_ASSERT_FATAL(HasEndOffset(ctx, NodeHandle(node)));
 
   NodesFree(nodes);
   UastFree(ctx);
@@ -206,7 +206,7 @@ void TestUastFilterEndLine() {
 
   Node *node = (Node *)NodeAt(nodes, 0);
   CU_ASSERT_FATAL(node->internal_type == "Module");
-  CU_ASSERT_FATAL(HasEndLine(NodeHandle(node)));
+  CU_ASSERT_FATAL(HasEndLine(ctx, NodeHandle(node)));
 
   NodesFree(nodes);
   UastFree(ctx);
@@ -221,7 +221,7 @@ void TestUastFilterEndCol() {
 
   Node *node = (Node *)NodeAt(nodes, 0);
   CU_ASSERT_FATAL(node->internal_type == "Module");
-  CU_ASSERT_FATAL(HasEndCol(NodeHandle(node)));
+  CU_ASSERT_FATAL(HasEndCol(ctx, NodeHandle(node)));
 
   NodesFree(nodes);
   UastFree(ctx);
