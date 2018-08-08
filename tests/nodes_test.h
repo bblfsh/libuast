@@ -52,12 +52,12 @@ void TestUastFilterPointers() {
   module.AddChild(&assign_1);
   module.AddChild(&assign_2);
 
-  Nodes *nodes = UastFilter(ctx, &module, "/Module/*");
+  Nodes *nodes = UastFilter(ctx, NodeHandle(&module), "/Module/*");
   CU_ASSERT_FATAL(nodes != NULL);
   CU_ASSERT_FATAL(NodesSize(nodes) == 3);
-  CU_ASSERT_FATAL(NodeAt(nodes, 0) == &assign_0);
-  CU_ASSERT_FATAL(NodeAt(nodes, 1) == &assign_1);
-  CU_ASSERT_FATAL(NodeAt(nodes, 2) == &assign_2);
+  CU_ASSERT_FATAL(NodeAt(nodes, 0) == NodeHandle(&assign_0));
+  CU_ASSERT_FATAL(NodeAt(nodes, 1) == NodeHandle(&assign_1));
+  CU_ASSERT_FATAL(NodeAt(nodes, 2) == NodeHandle(&assign_2));
 
   NodesFree(nodes);
   UastFree(ctx);
@@ -68,25 +68,25 @@ void TestUastFilterCount() {
 
   Node *root = TreeMock();
   // Total number of nodes
-  Nodes *nodes = UastFilter(ctx, root, "//*");
+  Nodes *nodes = UastFilter(ctx, NodeHandle(root), "//*");
   CU_ASSERT_FATAL(nodes != NULL);
   CU_ASSERT_FATAL(NodesSize(nodes) == 14);
   NodesFree(nodes);
 
   // Total number of Modules
-  nodes = UastFilter(ctx, root, "//Module");
-  Nodes *nodes2 = UastFilter(ctx, root, "//*[@roleFile]");
+  nodes = UastFilter(ctx, NodeHandle(root), "//Module");
+  Nodes *nodes2 = UastFilter(ctx, NodeHandle(root), "//*[@roleFile]");
   CU_ASSERT_FATAL(nodes != NULL);
   CU_ASSERT_FATAL(nodes2 != NULL);
   CU_ASSERT_FATAL(NodesSize(nodes) == 1);
-  CU_ASSERT_FATAL(NodeAt(nodes, 0) == root);
+  CU_ASSERT_FATAL(NodeAt(nodes, 0) == NodeHandle(root));
   CU_ASSERT_FATAL(EqualNodes(nodes, nodes2));
   NodesFree(nodes);
   NodesFree(nodes2);
 
   // Total number of assigns
-  nodes = UastFilter(ctx, root, "//Assign");
-  nodes2 = UastFilter(ctx, root, "//*[@roleAssignment]");
+  nodes = UastFilter(ctx, NodeHandle(root), "//Assign");
+  nodes2 = UastFilter(ctx, NodeHandle(root), "//*[@roleAssignment]");
   CU_ASSERT_FATAL(nodes != NULL);
   CU_ASSERT_FATAL(nodes2 != NULL);
   CU_ASSERT_FATAL(NodesSize(nodes) == 3);
@@ -95,8 +95,8 @@ void TestUastFilterCount() {
   NodesFree(nodes2);
 
   // Total number of identifiers
-  nodes = UastFilter(ctx, root, "//Identifier");
-  nodes2 = UastFilter(ctx, root, "//*[@roleIdentifier]");
+  nodes = UastFilter(ctx, NodeHandle(root), "//Identifier");
+  nodes2 = UastFilter(ctx, NodeHandle(root), "//*[@roleIdentifier]");
   CU_ASSERT_FATAL(nodes != NULL);
   CU_ASSERT_FATAL(nodes2 != NULL);
   CU_ASSERT_FATAL(NodesSize(nodes) == 6);
@@ -112,7 +112,7 @@ void TestUastFilterToken() {
 
   Node *root = TreeMock();
 
-  Nodes *nodes = UastFilter(ctx, root, "/Module//*[@token='1']");
+  Nodes *nodes = UastFilter(ctx, NodeHandle(root), "/Module//*[@token='1']");
   CU_ASSERT_FATAL(nodes != NULL);
   CU_ASSERT_FATAL(NodesSize(nodes) == 1);
   Node *node = (Node *)NodeAt(nodes, 0);
@@ -126,7 +126,7 @@ void TestUastFilterToken() {
 void TestUastFilterProperties() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
-  Nodes *nodes = UastFilter(ctx, root, "//*[@level='0']");
+  Nodes *nodes = UastFilter(ctx, NodeHandle(root), "//*[@level='0']");
   CU_ASSERT_FATAL(nodes != NULL);
   CU_ASSERT_FATAL(NodesSize(nodes) == 6);
 
@@ -140,13 +140,13 @@ void TestUastFilterProperties() {
 void TestUastFilterStartOffset() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
-  Nodes *nodes = UastFilter(ctx, root, "//*[@startOffset='0']");
+  Nodes *nodes = UastFilter(ctx, NodeHandle(root), "//*[@startOffset='0']");
   CU_ASSERT_FATAL(nodes != NULL);
   CU_ASSERT_FATAL(NodesSize(nodes) == 1);
 
   Node *node = (Node *)NodeAt(nodes, 0);
   CU_ASSERT_FATAL(node->internal_type == "Module");
-  CU_ASSERT_FATAL(HasStartOffset(node));
+  CU_ASSERT_FATAL(HasStartOffset(NodeHandle(node)));
 
   NodesFree(nodes);
   UastFree(ctx);
@@ -155,13 +155,13 @@ void TestUastFilterStartOffset() {
 void TestUastFilterStartLine() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
-  Nodes *nodes = UastFilter(ctx, root, "//*[@startLine='1']");
+  Nodes *nodes = UastFilter(ctx, NodeHandle(root), "//*[@startLine='1']");
   CU_ASSERT_FATAL(nodes != NULL);
   CU_ASSERT_FATAL(NodesSize(nodes) == 1);
 
   Node *node = (Node *)NodeAt(nodes, 0);
   CU_ASSERT_FATAL(node->internal_type == "Module");
-  CU_ASSERT_FATAL(HasStartLine(node));
+  CU_ASSERT_FATAL(HasStartLine(NodeHandle(node)));
 
   NodesFree(nodes);
   UastFree(ctx);
@@ -170,13 +170,13 @@ void TestUastFilterStartLine() {
 void TestUastFilterStartCol() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
-  Nodes *nodes = UastFilter(ctx, root, "//*[@startCol='1']");
+  Nodes *nodes = UastFilter(ctx, NodeHandle(root), "//*[@startCol='1']");
   CU_ASSERT_FATAL(nodes != NULL);
   CU_ASSERT_FATAL(NodesSize(nodes) == 1);
 
   Node *node = (Node *)NodeAt(nodes, 0);
   CU_ASSERT_FATAL(node->internal_type == "Module");
-  CU_ASSERT_FATAL(HasStartCol(node));
+  CU_ASSERT_FATAL(HasStartCol(NodeHandle(node)));
 
   NodesFree(nodes);
   UastFree(ctx);
@@ -185,13 +185,13 @@ void TestUastFilterStartCol() {
 void TestUastFilterEndOffset() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
-  Nodes *nodes = UastFilter(ctx, root, "//*[@endOffset='2813']");
+  Nodes *nodes = UastFilter(ctx, NodeHandle(root), "//*[@endOffset='2813']");
   CU_ASSERT_FATAL(nodes != NULL);
   CU_ASSERT_FATAL(NodesSize(nodes) == 1);
 
   Node *node = (Node *)NodeAt(nodes, 0);
   CU_ASSERT_FATAL(node->internal_type == "Module");
-  CU_ASSERT_FATAL(HasEndOffset(node));
+  CU_ASSERT_FATAL(HasEndOffset(NodeHandle(node)));
 
   NodesFree(nodes);
   UastFree(ctx);
@@ -200,13 +200,13 @@ void TestUastFilterEndOffset() {
 void TestUastFilterEndLine() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
-  Nodes *nodes = UastFilter(ctx, root, "//*[@endLine='10']");
+  Nodes *nodes = UastFilter(ctx, NodeHandle(root), "//*[@endLine='10']");
   CU_ASSERT_FATAL(nodes != NULL);
   CU_ASSERT_FATAL(NodesSize(nodes) == 1);
 
   Node *node = (Node *)NodeAt(nodes, 0);
   CU_ASSERT_FATAL(node->internal_type == "Module");
-  CU_ASSERT_FATAL(HasEndLine(node));
+  CU_ASSERT_FATAL(HasEndLine(NodeHandle(node)));
 
   NodesFree(nodes);
   UastFree(ctx);
@@ -215,13 +215,13 @@ void TestUastFilterEndLine() {
 void TestUastFilterEndCol() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
-  Nodes *nodes = UastFilter(ctx, root, "//*[@endCol='92']");
+  Nodes *nodes = UastFilter(ctx, NodeHandle(root), "//*[@endCol='92']");
   CU_ASSERT_FATAL(nodes != NULL);
   CU_ASSERT_FATAL(NodesSize(nodes) == 1);
 
   Node *node = (Node *)NodeAt(nodes, 0);
   CU_ASSERT_FATAL(node->internal_type == "Module");
-  CU_ASSERT_FATAL(HasEndCol(node));
+  CU_ASSERT_FATAL(HasEndCol(NodeHandle(node)));
 
   NodesFree(nodes);
   UastFree(ctx);
@@ -230,7 +230,7 @@ void TestUastFilterEndCol() {
 void TestUastFunctionLast() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
-  Nodes *nodes = UastFilter(ctx, root, "//*[last()=@startOffset or @endOffset]");
+  Nodes *nodes = UastFilter(ctx, NodeHandle(root), "//*[last()=@startOffset or @endOffset]");
   CU_ASSERT_FATAL(nodes != NULL);
   CU_ASSERT_FATAL(NodesSize(nodes) == 1);
 
@@ -242,7 +242,7 @@ void TestUastFunctionBoolTrue() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
   bool ok;
-  int res = UastFilterBool(ctx, root, "boolean(//*[@startOffset or @endOffset])", &ok);
+  int res = UastFilterBool(ctx, NodeHandle(root), "boolean(//*[@startOffset or @endOffset])", &ok);
   CU_ASSERT_FATAL(ok);
   CU_ASSERT_FATAL(res);
 
@@ -253,7 +253,7 @@ void TestUastFunctionBoolFalse() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
   bool ok;
-  int res = UastFilterBool(ctx, root, "boolean(//*[@blah])", &ok);
+  int res = UastFilterBool(ctx, NodeHandle(root), "boolean(//*[@blah])", &ok);
   CU_ASSERT_FATAL(ok);
   CU_ASSERT_FATAL(!res);
 
@@ -264,7 +264,7 @@ void TestUastFunctionBoolError() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
   bool ok;
-  int res = UastFilterBool(ctx, root, "//*", &ok);
+  int res = UastFilterBool(ctx, NodeHandle(root), "//*", &ok);
   CU_ASSERT_FATAL(!ok);
   CU_ASSERT_FATAL(strcmp(LastError(), ""));
 
@@ -275,7 +275,7 @@ void TestUastFunctionNumber() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
   bool ok;
-  double res = UastFilterNumber(ctx, root, "count(//*)", &ok);
+  double res = UastFilterNumber(ctx, NodeHandle(root), "count(//*)", &ok);
   CU_ASSERT_FATAL(ok);
   CU_ASSERT_FATAL(res == 14);
 
@@ -285,7 +285,7 @@ void TestUastFunctionNumberError() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
   bool ok;
-  double res = UastFilterNumber(ctx, root, "concat(//*)", &ok);
+  double res = UastFilterNumber(ctx, NodeHandle(root), "concat(//*)", &ok);
   CU_ASSERT_FATAL(!ok);
   CU_ASSERT_FATAL(strcmp(LastError(), ""));
 
@@ -295,7 +295,7 @@ void TestUastFunctionNumberError() {
 void TestUastFunctionString() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
-  const char *res = UastFilterString(ctx, root, "name(//*[1])");
+  const char *res = UastFilterString(ctx, NodeHandle(root), "name(//*[1])");
   CU_ASSERT_FATAL(res != NULL);
   CU_ASSERT_FATAL(!strcmp(res, "Module"));
 
@@ -306,7 +306,7 @@ void TestUastFunctionString() {
 void TestUastFilterBadQuery() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
-  Nodes *nodes = UastFilter(ctx, root, "//@roleModule");
+  Nodes *nodes = UastFilter(ctx, NodeHandle(root), "//@roleModule");
   CU_ASSERT_FATAL(nodes != NULL);
   CU_ASSERT_FATAL(NodesSize(nodes) == 0);
 
@@ -318,7 +318,7 @@ void TestUastFilterXPathFuncCeiling() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
   bool ok;
-  int res = static_cast<int>(UastFilterNumber(ctx, root,
+  int res = static_cast<int>(UastFilterNumber(ctx, NodeHandle(root),
                              "ceiling(//*[1]/@endOffset)", &ok));
   CU_ASSERT_FATAL(ok);
   CU_ASSERT_FATAL(res == 2813);
@@ -329,7 +329,7 @@ void TestUastFilterXPathFuncCeiling() {
 void TestUastFilterXPathFuncConcat() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
-  const char *res = UastFilterString(ctx, root, "concat('a', 'b', 'c')");
+  const char *res = UastFilterString(ctx, NodeHandle(root), "concat('a', 'b', 'c')");
   CU_ASSERT_FATAL(res != NULL);
   CU_ASSERT_FATAL(!strcmp(res, "abc"));
 
@@ -340,7 +340,7 @@ void TestUastFilterXPathFuncConcat() {
 void TestUastFilterXPathFuncPosition() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
-  Nodes *nodes = UastFilter(ctx, root, "//*[position()=1]");
+  Nodes *nodes = UastFilter(ctx, NodeHandle(root), "//*[position()=1]");
   CU_ASSERT_FATAL(NodesSize(nodes) == 7);
 
   NodesFree(nodes);
@@ -350,7 +350,7 @@ void TestUastFilterXPathFuncPosition() {
 void TestUastFilterXPathFuncLocalName() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
-  const char *localName = UastFilterString(ctx, root, "local-name(//*[1])");
+  const char *localName = UastFilterString(ctx, NodeHandle(root), "local-name(//*[1])");
 
   CU_ASSERT_FATAL(!strcmp(localName, "Module"));
 
@@ -361,7 +361,7 @@ void TestUastFilterXPathFuncLocalName() {
 void TestUastFilterXPathFuncString() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
-  const char *countStr = UastFilterString(ctx, root, "string(count(//*))");
+  const char *countStr = UastFilterString(ctx, NodeHandle(root), "string(count(//*))");
 
   CU_ASSERT_FATAL(!strcmp(countStr, "14"));
   UastFree(ctx);
@@ -371,7 +371,7 @@ void TestUastFilterXPathFuncString() {
 void TestUastFilterXPathFuncSubstring() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
-  const char *res = UastFilterString(ctx, root, "substring(local-name(//*[1]), 1, 3)");
+  const char *res = UastFilterString(ctx, NodeHandle(root), "substring(local-name(//*[1]), 1, 3)");
 
   CU_ASSERT_FATAL(!strcmp(res, "Mod"));
   UastFree(ctx);
@@ -381,7 +381,7 @@ void TestUastFilterXPathFuncSubstring() {
 void TestUastFilterXPathFuncSubstringBefore() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
-  const char *res = UastFilterString(ctx, root, "substring-before(local-name(//*[1]), 'ule')");
+  const char *res = UastFilterString(ctx, NodeHandle(root), "substring-before(local-name(//*[1]), 'ule')");
 
   CU_ASSERT_FATAL(!strcmp(res, "Mod"));
   UastFree(ctx);
@@ -391,7 +391,7 @@ void TestUastFilterXPathFuncSubstringBefore() {
 void TestUastFilterXPathFuncSubstringAfter() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
-  const char *res = UastFilterString(ctx, root, "substring-after(local-name(//*[1]), 'Mod')");
+  const char *res = UastFilterString(ctx, NodeHandle(root), "substring-after(local-name(//*[1]), 'Mod')");
 
   CU_ASSERT_FATAL(!strcmp(res, "ule"));
   UastFree(ctx);
@@ -402,7 +402,7 @@ void TestUastFilterXPathFuncStringLength() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
   bool ok;
-  double res = UastFilterNumber(ctx, root, "string-length(string(count(//*)))", &ok);
+  double res = UastFilterNumber(ctx, NodeHandle(root), "string-length(string(count(//*)))", &ok);
 
   CU_ASSERT_FATAL(ok);
   CU_ASSERT_FATAL(res == 2);
@@ -413,7 +413,7 @@ void TestUastFilterXPathFuncStartsWith() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
   bool ok;
-  bool res = UastFilterBool(ctx, root, "starts-with(local-name(//*[1]), Mod)", &ok);
+  bool res = UastFilterBool(ctx, NodeHandle(root), "starts-with(local-name(//*[1]), Mod)", &ok);
 
   CU_ASSERT_FATAL(ok);
   CU_ASSERT_FATAL(res);
@@ -423,7 +423,7 @@ void TestUastFilterXPathFuncStartsWith() {
 void TestUastFilterXPathFuncNormalizeSpace() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
-  const char *res = UastFilterString(ctx, root, "normalize-space(' something ')");
+  const char *res = UastFilterString(ctx, NodeHandle(root), "normalize-space(' something ')");
 
   CU_ASSERT_FATAL(!strcmp(res, "something"));
   UastFree(ctx);
@@ -433,7 +433,7 @@ void TestUastFilterXPathFuncNormalizeSpace() {
 void TestUastFilterXPathFuncTranslate() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
-  const char *res = UastFilterString(ctx, root, "translate(local-name(//*[1]), 'Mod', 'Pax')");
+  const char *res = UastFilterString(ctx, NodeHandle(root), "translate(local-name(//*[1]), 'Mod', 'Pax')");
 
   CU_ASSERT_FATAL(!strcmp(res, "Paxule"));
   UastFree(ctx);
@@ -444,7 +444,7 @@ void TestUastFilterXPathFuncNot() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
   bool ok;
-  bool res = UastFilterBool(ctx, root, "not(starts-with(local-name(//*[1]), Mod))",
+  bool res = UastFilterBool(ctx, NodeHandle(root), "not(starts-with(local-name(//*[1]), Mod))",
                             &ok);
 
   CU_ASSERT_FATAL(ok);
@@ -456,7 +456,7 @@ void TestUastFilterXPathFuncNumber() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
   bool ok;
-  double res = UastFilterNumber(ctx, root, "number(string(count(//*)))", &ok);
+  double res = UastFilterNumber(ctx, NodeHandle(root), "number(string(count(//*)))", &ok);
 
   CU_ASSERT_FATAL(ok);
   CU_ASSERT_FATAL(res == 14);
@@ -467,7 +467,7 @@ void TestUastFilterXPathFuncSum() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
   bool ok;
-  double res = UastFilterNumber(ctx, root, "sum(//*[@startCol]/@startCol)", &ok);
+  double res = UastFilterNumber(ctx, NodeHandle(root), "sum(//*[@startCol]/@startCol)", &ok);
 
   CU_ASSERT_FATAL(ok);
   // ModuleMock(startCol = 1) + 3 * (IdentifierMock(startCol = 20))
@@ -479,7 +479,7 @@ void TestUastFilterXPathFuncFloor() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
   bool ok;
-  double res = UastFilterNumber(ctx, root, "floor(3.14)", &ok);
+  double res = UastFilterNumber(ctx, NodeHandle(root), "floor(3.14)", &ok);
   CU_ASSERT_FATAL(ok);
   CU_ASSERT_FATAL(res == 3);
 
@@ -490,7 +490,7 @@ void TestUastFilterXPathFuncRound() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
   bool ok;
-  double res = UastFilterNumber(ctx, root, "round(3.14)", &ok);
+  double res = UastFilterNumber(ctx, NodeHandle(root), "round(3.14)", &ok);
   CU_ASSERT_FATAL(ok);
   CU_ASSERT_FATAL(res == 3);
 
@@ -501,7 +501,7 @@ void TestUastFilterXPathFuncTrue() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
   bool ok;
-  bool res = UastFilterBool(ctx, root, "true()", &ok);
+  bool res = UastFilterBool(ctx, NodeHandle(root), "true()", &ok);
   CU_ASSERT_FATAL(ok);
   CU_ASSERT_FATAL(res);
 
@@ -512,7 +512,7 @@ void TestUastFilterXPathFuncFalse() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
   bool ok;
-  bool res = UastFilterBool(ctx, root, "false()", &ok);
+  bool res = UastFilterBool(ctx, NodeHandle(root), "false()", &ok);
   CU_ASSERT_FATAL(ok);
   CU_ASSERT_FATAL(!res);
 
@@ -523,11 +523,11 @@ void TestUastFilterXPathFuncContains() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
   bool ok;
-  bool res = UastFilterBool(ctx, root, "contains('abc', 'b')", &ok);
+  bool res = UastFilterBool(ctx, NodeHandle(root), "contains('abc', 'b')", &ok);
   CU_ASSERT_FATAL(ok);
   CU_ASSERT_FATAL(res);
 
-  res = UastFilterBool(ctx, root, "contains('abc', 'x')", &ok);
+  res = UastFilterBool(ctx, NodeHandle(root), "contains('abc', 'x')", &ok);
   CU_ASSERT_FATAL(ok);
   CU_ASSERT_FATAL(!res);
 
@@ -536,7 +536,7 @@ void TestUastFilterXPathFuncContains() {
 
 static int calls = 0;
 
-void* transformTest(void *node) {
+NodeHandle transformTest(NodeHandle node) {
   ++calls;
   return node;
 }
@@ -545,7 +545,7 @@ void TestUastIteratorTransformFunc() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
 
-  UastIterator *iter = UastIteratorNewWithTransformer(ctx, root, PRE_ORDER, transformTest);
+  UastIterator *iter = UastIteratorNewWithTransformer(ctx, NodeHandle(root), PRE_ORDER, transformTest);
   CU_ASSERT_FATAL(iter != NULL);
   CU_ASSERT_FATAL(calls == 1);
   UastIteratorNext(iter);
@@ -553,7 +553,7 @@ void TestUastIteratorTransformFunc() {
   UastIteratorFree(iter);
 
   calls = 0;
-  iter = UastIteratorNewWithTransformer(ctx, root, POST_ORDER, transformTest);
+  iter = UastIteratorNewWithTransformer(ctx, NodeHandle(root), POST_ORDER, transformTest);
   CU_ASSERT_FATAL(iter != NULL);
   CU_ASSERT_FATAL(calls == 1);
   UastIteratorNext(iter);
@@ -561,7 +561,7 @@ void TestUastIteratorTransformFunc() {
   UastIteratorFree(iter);
 
   calls = 0;
-  iter = UastIteratorNewWithTransformer(ctx, root, LEVEL_ORDER, transformTest);
+  iter = UastIteratorNewWithTransformer(ctx, NodeHandle(root), LEVEL_ORDER, transformTest);
   CU_ASSERT_FATAL(iter != NULL);
   CU_ASSERT_FATAL(calls == 1);
   UastIteratorNext(iter);
@@ -576,7 +576,7 @@ void TestUastIteratorPreOrder() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
 
-  UastIterator *iter = UastIteratorNew(ctx, root, PRE_ORDER);
+  UastIterator *iter = UastIteratorNew(ctx, NodeHandle(root), PRE_ORDER);
   CU_ASSERT_FATAL(iter != NULL);
 
   Node *node = (Node *)UastIteratorNext(iter);
@@ -651,7 +651,7 @@ void TestUastIteratorLevelOrder() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
 
-  UastIterator *iter = UastIteratorNew(ctx, root, LEVEL_ORDER);
+  UastIterator *iter = UastIteratorNew(ctx, NodeHandle(root), LEVEL_ORDER);
   CU_ASSERT_FATAL(iter != NULL);
 
   Node *node = (Node *)UastIteratorNext(iter);
@@ -726,7 +726,7 @@ void TestUastIteratorPostOrder() {
   Uast *ctx = UastNew(IfaceMock());
   Node *root = TreeMock();
 
-  UastIterator *iter = UastIteratorNew(ctx, root, POST_ORDER);
+  UastIterator *iter = UastIteratorNew(ctx, NodeHandle(root), POST_ORDER);
   CU_ASSERT_FATAL(iter != NULL);
 
   Node *node = (Node *)UastIteratorNext(iter);
@@ -820,7 +820,7 @@ void TestUastIteratorPositionOrderByOffset() {
   module->AddChild(sum);
   module->AddChild(mult);
 
-  UastIterator *iter = UastIteratorNew(ctx, module, POSITION_ORDER);
+  UastIterator *iter = UastIteratorNew(ctx, NodeHandle(module), POSITION_ORDER);
   CU_ASSERT_FATAL(iter != NULL);
 
   Node *node = (Node *)UastIteratorNext(iter);
@@ -873,7 +873,7 @@ void TestUastIteratorPositionOrderByLineCol() {
   module->AddChild(sum);
   module->AddChild(mult);
 
-  UastIterator *iter = UastIteratorNew(ctx, module, POSITION_ORDER);
+  UastIterator *iter = UastIteratorNew(ctx, NodeHandle(module), POSITION_ORDER);
   CU_ASSERT_FATAL(iter != NULL);
 
   Node *node = (Node *)UastIteratorNext(iter);
@@ -905,7 +905,7 @@ void TestXpath() {
   Uast *ctx = UastNew(iface);
   Node module = Node("Module");
 
-  CU_ASSERT_FATAL(UastFilter(ctx, &module, "/Module/") == NULL);
+  CU_ASSERT_FATAL(UastFilter(ctx, NodeHandle(&module), "/Module/") == NULL);
   char* error = LastError();
   CU_ASSERT_FATAL(!strcmp(error, "Invalid expression\n"));
 
@@ -920,7 +920,7 @@ void TestNodeFindError() {
   Node child = Node("Child");
   module.AddChild(&child);
 
-  CU_ASSERT_FATAL(UastFilter(ctx, &module, "/Module") == NULL);
+  CU_ASSERT_FATAL(UastFilter(ctx, NodeHandle(&module), "/Module") == NULL);
 
   UastFree(ctx);
 }
@@ -930,7 +930,7 @@ void TestEmptyResult() {
   Uast *ctx = UastNew(iface);
   Node module = Node("Module");
 
-  CU_ASSERT_FATAL(UastFilter(ctx, &module,
+  CU_ASSERT_FATAL(UastFilter(ctx, NodeHandle(&module),
                              "//Import[@roleImport]//alias") == NULL);
   UastFree(ctx);
 }

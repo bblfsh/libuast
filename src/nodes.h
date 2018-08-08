@@ -2,6 +2,7 @@
 #define LIBUAST_NODES_H_
 
 #include "export.h"
+#include "node_iface.h"
 
 typedef struct Nodes Nodes;
 
@@ -9,7 +10,7 @@ typedef struct Nodes Nodes;
 EXPORT int NodesSize(const Nodes *nodes);
 
 // Returns the node at the given index.
-EXPORT void *NodeAt(const Nodes *nodes, int index);
+EXPORT NodeHandle NodeAt(const Nodes *nodes, int index);
 
 // Releases the resources associated with nodes
 EXPORT void NodesFree(Nodes *nodes);

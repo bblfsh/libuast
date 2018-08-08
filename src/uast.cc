@@ -31,14 +31,14 @@ struct Uast {
 struct UastIterator {
   const Uast *ctx;
   TreeOrder order;
-  std::deque<void *> pending;
-  std::set<void *> visited;
-  void* (*nodeTransform)(void*);
+  std::deque<NodeHandle> pending;
+  std::set<NodeHandle> visited;
+  NodeHandle (*nodeTransform)(NodeHandle);
   bool preloaded;
 };
 
 struct Nodes {
-  std::vector<void *> results;
+  std::vector<NodeHandle> results;
   int len;
   int cap;
 };
@@ -56,22 +56,22 @@ const std::vector<const char *> Type2Str = {
   "XSLT_TREE"
 };
 
-static xmlDocPtr CreateDocument(const Uast *ctx, void *node);
-static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node, xmlNodePtr parent);
+static xmlDocPtr CreateDocument(const Uast *ctx, NodeHandle node);
+static xmlNodePtr CreateXmlNode(const Uast *ctx, NodeHandle node, xmlNodePtr parent);
 void Error(void *ctx, const char *msg, ...);
 // Adds the children of the node to the iterator queue and returns
 // if the node was already checked, which will happen with leaf nodes
 // or nodes which childs already processed. Used for the POST_ORDER
 // iterative traversal algorithm.
-static bool Visited(UastIterator *iter, void *node);
+static bool Visited(UastIterator *iter, NodeHandle node);
 // Get the next element in pre-order traversal mode.
-static void *PreOrderNext(UastIterator *iter);
+static NodeHandle PreOrderNext(UastIterator *iter);
 // Get the next element in level-order traversal mode.
-static void *LevelOrderNext(UastIterator *iter);
+static NodeHandle LevelOrderNext(UastIterator *iter);
 // Get the next element in post-order traversal mode.
-static void *PostOrderNext(UastIterator *iter);
+static NodeHandle PostOrderNext(UastIterator *iter);
 // Get the next element in position-order traversal mode.
-static void *PositionOrderNext(UastIterator *iter);
+static NodeHandle PositionOrderNext(UastIterator *iter);
 
 class QueryResult {
   xmlXPathContextPtr xpathCtx;
@@ -80,7 +80,7 @@ class QueryResult {
   public:
   xmlXPathObjectPtr xpathObj;
 
-  QueryResult(const Uast *ctx, void *node, const char *query,
+  QueryResult(const Uast *ctx, NodeHandle node, const char *query,
               xmlXPathObjectType expected) {
 
     assert(ctx);
@@ -136,7 +136,7 @@ class CreateXMLNodeException: public std::runtime_error {
   CreateXMLNodeException(): std::runtime_error("") {}
 };
 
-static UastIterator *UastIteratorNewBase(const Uast *ctx, void *node, TreeOrder order) {
+static UastIterator *UastIteratorNewBase(const Uast *ctx, NodeHandle node, TreeOrder order) {
   assert(ctx);
   assert(node);
 
@@ -172,13 +172,13 @@ int NodesSize(const Nodes *nodes) {
   return nodes->len;
 }
 
-void *NodeAt(const Nodes *nodes, int index) {
+NodeHandle NodeAt(const Nodes *nodes, int index) {
   assert(nodes);
 
   if (index < nodes->len) {
     return nodes->results[index];
   }
-  return nullptr;
+  return 0;
 }
 
 Uast *UastNew(NodeIface iface) {
@@ -209,7 +209,7 @@ void UastFree(Uast *ctx) {
   xmlCleanupParser();
 }
 
-UastIterator *UastIteratorNew(const Uast *ctx, void *node, TreeOrder order) {
+UastIterator *UastIteratorNew(const Uast *ctx, NodeHandle node, TreeOrder order) {
   assert(ctx);
   assert(node);
 
@@ -226,8 +226,8 @@ void UastIteratorFree(UastIterator *iter) {
   }
 }
 
-UastIterator *UastIteratorNewWithTransformer(const Uast *ctx, void *node,
-                                             TreeOrder order, void*(*transform)(void*)) {
+UastIterator *UastIteratorNewWithTransformer(const Uast *ctx, NodeHandle node,
+                                             TreeOrder order, NodeHandle(*transform)(NodeHandle)) {
 
   assert(ctx);
   assert(node);
@@ -239,11 +239,11 @@ UastIterator *UastIteratorNewWithTransformer(const Uast *ctx, void *node,
   return iter;
 }
 
-void *UastIteratorNext(UastIterator *iter) {
+NodeHandle UastIteratorNext(UastIterator *iter) {
   assert(iter);
 
   if (iter == nullptr || iter->pending.empty()) {
-    return nullptr;
+    return 0;
   }
 
   switch(iter->order) {
@@ -263,7 +263,7 @@ NodeIface UastGetIface(const Uast *ctx) {
   return ctx->iface;
 }
 
-Nodes *UastFilter(const Uast *ctx, void *node, const char *query) {
+Nodes *UastFilter(const Uast *ctx, NodeHandle node, const char *query) {
   assert(ctx);
   assert(node);
   assert(query);
@@ -304,7 +304,7 @@ Nodes *UastFilter(const Uast *ctx, void *node, const char *query) {
     size_t nodeIdx = 0;
     for (int i = 0; i < size; i++) {
       if (results[i] != nullptr && results[i]->_private != nullptr) {
-        nodes->results[nodeIdx++] = results[i]->_private;
+        nodes->results[nodeIdx++] = (NodeHandle)(results[i]->_private);
       }
     }
 
@@ -316,7 +316,7 @@ Nodes *UastFilter(const Uast *ctx, void *node, const char *query) {
   return nullptr;
 }
 
-bool UastFilterBool(const Uast *ctx, void *node, const char *query,
+bool UastFilterBool(const Uast *ctx, NodeHandle node, const char *query,
                     bool *ok) {
   assert(ctx);
   assert(node);
@@ -332,7 +332,7 @@ bool UastFilterBool(const Uast *ctx, void *node, const char *query,
   return false;
 }
 
-double UastFilterNumber(const Uast *ctx, void *node, const char *query,
+double UastFilterNumber(const Uast *ctx, NodeHandle node, const char *query,
                         bool *ok) {
   assert(ctx);
   assert(node);
@@ -348,7 +348,7 @@ double UastFilterNumber(const Uast *ctx, void *node, const char *query,
   return 0;
 }
 
-const char *UastFilterString(const Uast *ctx, void *node, const char *query) {
+const char *UastFilterString(const Uast *ctx, NodeHandle node, const char *query) {
   assert(ctx);
   assert(node);
   assert(query);
@@ -393,7 +393,7 @@ int NodesCap(const Nodes *nodes) {
   return nodes->cap;
 }
 
-static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
+static xmlNodePtr CreateXmlNode(const Uast *ctx, NodeHandle node,
                                 xmlNodePtr parent) {
   assert(ctx);
   assert(node);
@@ -411,7 +411,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
       throw CreateXMLNodeException();
     }
 
-    xmlNode->_private = node;
+    xmlNode->_private = (void*)node;
     if (parent) {
       if (!xmlAddChild(parent, xmlNode)) {
         throw CreateXMLNodeException();
@@ -507,7 +507,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
     // Recursivelly visit all children
     children_size = ctx->iface.ChildrenSize(node);
     for (int i = 0; i < children_size; i++) {
-      void *child = ctx->iface.ChildAt(node, i);
+      NodeHandle child = ctx->iface.ChildAt(node, i);
       if (!CreateXmlNode(ctx, child, xmlNode)) {
         throw CreateXMLNodeException();
       }
@@ -520,7 +520,7 @@ static xmlNodePtr CreateXmlNode(const Uast *ctx, void *node,
   return nullptr;
 }
 
-static xmlDocPtr CreateDocument(const Uast *ctx, void *node) {
+static xmlDocPtr CreateDocument(const Uast *ctx, NodeHandle node) {
   assert(ctx);
   assert(node);
 
@@ -545,7 +545,7 @@ void Error(void *ctx, const char *msg, ...) {
   va_end(arg_ptr);
 }
 
-static void *transformChildAt(UastIterator *iter, void *parent, size_t pos) {
+static NodeHandle transformChildAt(UastIterator *iter, NodeHandle parent, size_t pos) {
   assert(iter);
   assert(parent);
 
@@ -553,7 +553,7 @@ static void *transformChildAt(UastIterator *iter, void *parent, size_t pos) {
   return iter->nodeTransform ? iter->nodeTransform(child): child;
 }
 
-static bool Visited(UastIterator *iter, void *node) {
+static bool Visited(UastIterator *iter, NodeHandle node) {
   assert(iter);
   assert(node);
 
@@ -570,14 +570,14 @@ static bool Visited(UastIterator *iter, void *node) {
   return visited;
 }
 
-static void *PreOrderNext(UastIterator *iter) {
+static NodeHandle PreOrderNext(UastIterator *iter) {
   assert(iter);
 
-  void *retNode = iter->pending.front();
+  NodeHandle retNode = iter->pending.front();
   iter->pending.pop_front();
 
-  if (retNode == nullptr) {
-    return nullptr;
+  if (retNode == 0) {
+    return 0;
   }
 
   int children_size = iter->ctx->iface.ChildrenSize(retNode);
@@ -588,13 +588,13 @@ static void *PreOrderNext(UastIterator *iter) {
   return retNode;
 }
 
-static void *LevelOrderNext(UastIterator *iter) {
+static NodeHandle LevelOrderNext(UastIterator *iter) {
   assert(iter);
 
-  void *retNode = iter->pending.front();
+  NodeHandle retNode = iter->pending.front();
 
-  if (retNode == nullptr) {
-    return nullptr;
+  if (retNode == 0) {
+    return 0;
   }
 
   int children_size = iter->ctx->iface.ChildrenSize(retNode);
@@ -606,12 +606,12 @@ static void *LevelOrderNext(UastIterator *iter) {
   return retNode;
 }
 
-static void *PostOrderNext(UastIterator *iter) {
+static NodeHandle PostOrderNext(UastIterator *iter) {
   assert(iter);
 
-  void *curNode = iter->pending.front();
-  if (curNode == nullptr) {
-    return nullptr;
+  NodeHandle curNode = iter->pending.front();
+  if (curNode == 0) {
+    return 0;
   }
 
   while(!Visited(iter, curNode)) {
@@ -628,13 +628,13 @@ static void sortPendingByPosition(UastIterator *iter) {
     iter->pending.pop_front();
 
     UastIterator *subiter = UastIteratorNew(iter->ctx, root, PRE_ORDER);
-    void *curNode = nullptr;
-    while ((curNode = UastIteratorNext(subiter)) != nullptr) {
+    NodeHandle curNode = 0;
+    while ((curNode = UastIteratorNext(subiter)) != 0) {
       iter->pending.push_back(curNode);
     }
     UastIteratorFree(subiter);
 
-    std::sort(iter->pending.begin(), iter->pending.end(), [&iter](void *i, void *j) {
+    std::sort(iter->pending.begin(), iter->pending.end(), [&iter](NodeHandle i, NodeHandle j) {
       auto ic = iter->ctx->iface;
       if (ic.HasStartOffset(i) && ic.HasStartOffset(j)) {
         return ic.StartOffset(i) < ic.StartOffset(j);
@@ -654,7 +654,7 @@ static void sortPendingByPosition(UastIterator *iter) {
     });
 }
 
-static void *PositionOrderNext(UastIterator *iter) {
+static NodeHandle PositionOrderNext(UastIterator *iter) {
   assert(iter);
 
   if (!iter->preloaded) {
@@ -663,9 +663,9 @@ static void *PositionOrderNext(UastIterator *iter) {
     iter->preloaded = true;
   }
 
-  void *retNode = iter->pending.front();
-  if (retNode == nullptr) {
-    return nullptr;
+  NodeHandle retNode = iter->pending.front();
+  if (retNode == 0) {
+    return 0;
   }
 
   iter->pending.pop_front();
