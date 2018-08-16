@@ -929,10 +929,9 @@ void TestEmptyResult() {
   NodeIface iface = IfaceMock();
   Uast *ctx = UastNew(iface);
   Node module = Node("Module");
-
-  CU_ASSERT_FATAL(UastFilter(ctx, &module,
-                             "//Import[@roleImport]//alias") == NULL);
-  UastFree(ctx);
+  auto nodes = UastFilter(ctx, &module, "//Import[@roleImport]//alias");
+  CU_ASSERT_FATAL(nodes != NULL);
+  CU_ASSERT_FATAL(NodesSize(nodes) == 0);
 }
 
 void TestXmlNewDoc() {
