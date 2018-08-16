@@ -929,9 +929,11 @@ void TestEmptyResult() {
   NodeIface iface = IfaceMock();
   Uast *ctx = UastNew(iface);
   Node module = Node("Module");
+  auto nodes = UastFilter(ctx, NodeHandle(&module), "//Import[@roleImport]//alias");
+  CU_ASSERT_FATAL(nodes != NULL);
+  CU_ASSERT_FATAL(NodesSize(nodes) == 0);
 
-  CU_ASSERT_FATAL(UastFilter(ctx, NodeHandle(&module),
-                             "//Import[@roleImport]//alias") == NULL);
+  NodesFree(nodes);
   UastFree(ctx);
 }
 
