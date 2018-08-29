@@ -1,0 +1,11 @@
+# Refer to https://golang.github.io/dep/docs/Gopkg.toml.html
+# for detailed Gopkg.toml documentation.
+
+[[constraint]]
+  name = "gopkg.in/bblfsh/sdk.v2"
+  source = "github.com/bblfsh/sdk"
+  branch = "v2_xpath"
+
+[prune]
+  go-tests = true
+  unused-packages = true

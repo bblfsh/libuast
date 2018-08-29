@@ -1,4 +1,8 @@
-language: c
+language: go
+
+go:
+  - '1.10'
+
 compiler:
   - clang
   - gcc
@@ -7,40 +11,35 @@ os:
   - osx
 
 before_install:
-  - if [[ $TRAVIS_OS_NAME = linux ]]; then sudo apt-get update -qq && sudo apt-get install -qq libcunit1 libcunit1-doc libcunit1-dev lcov ; fi
+  - if [[ $TRAVIS_OS_NAME = linux ]]; then sudo apt-get update -qq && sudo apt-get install -qq libcunit1 libcunit1-doc libcunit1-dev lcov gcc-mingw-w64-x86-64; fi
   - if [[ $TRAVIS_OS_NAME = osx ]]; then brew install cunit lcov ; fi
+  - mkdir -p $GOPATH/bin && curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 script:
-  - mkdir -p ../libuast-build
-  - cd ../libuast-build
-  - cmake -DCMAKE_BUILD_TYPE=Debug ../libuast
-  - make
+  - dep ensure --vendor-only
+  - if [[ $TRAVIS_OS_NAME = linux ]]; then make package-all; fi
+  - if [[ $TRAVIS_OS_NAME = osx ]]; then make package-osx; fi
   - make test
-  - cmake -DCMAKE_BUILD_TYPE=Release ../libuast
-  - make clean
-  - make
-  - cd $TRAVIS_BUILD_DIR
 
-after_success:
-  - cd $TRAVIS_BUILD_DIR/../libuast-build
-  - lcov --directory . --capture --output-file coverage.info
-  - lcov --remove coverage.info '/usr/*' --output-file coverage.info
-  - lcov --list coverage.info
-  - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
-
-before_deploy:
-  - cd $TRAVIS_BUILD_DIR/../libuast-build
-  - sh scripts/update-version.sh
-  - git archive --prefix "libuast-${TRAVIS_TAG}/" --output "libuast-${TRAVIS_TAG}.tar.gz" `git stash create`
+#after_success:
+#  - cd $TRAVIS_BUILD_DIR/../libuast-build
+#  - lcov --directory . --capture --output-file coverage.info
+#  - lcov --remove coverage.info '/usr/*' --output-file coverage.info
+#  - lcov --list coverage.info
+#  - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
+#
+#before_deploy:
+#  - cd $TRAVIS_BUILD_DIR/../libuast-build
+#  - sh scripts/update-version.sh
+#  - git archive --prefix "libuast-${TRAVIS_TAG}/" --output "libuast-${TRAVIS_TAG}.tar.gz" `git stash create`
 
 deploy:
   provider: releases
   api_key:
     secure: $GITHUB_TOKEN
-  file: libuast-*.tar.gz
+  file: ./build/libuast-*.tar.gz
   file_glob: true
   skip_cleanup: true
   on:
     branch: master
     tags: true
-    condition: $TRAVIS_OS_NAME = linux
