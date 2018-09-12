@@ -226,6 +226,9 @@ func (c *Context) toNode(n nodes.External) Node {
 	} else if nd, ok := n.(Node); ok {
 		return nd
 	}
+	if nd, ok := c.impl.(*cNodes); ok {
+		return nd.NewValue(n.(nodes.Value))
+	}
 	// TODO: find a better way to convert these nodes
 	return c.impl.(*goNodes).toNode(n.(nodes.Node))
 }

@@ -5,7 +5,7 @@
   branch = "master"
   name = "github.com/antchfx/xpath"
   packages = ["."]
-  revision = "077bca4d2caaf391ee780136adae00f59153dcd2"
+  revision = "3de91f3991a1af6e495d49c9218318b5544b20e3"
 
 [[projects]]
   name = "github.com/gogo/protobuf"
@@ -42,7 +42,6 @@
   version = "v1.16.1"
 
 [[projects]]
-  branch = "v2_xpath"
   name = "gopkg.in/bblfsh/sdk.v2"
   packages = [
     "uast",
@@ -54,8 +53,8 @@
     "uast/role",
     "uast/yaml"
   ]
-  revision = "0b7b9b1ea3d0ea02937ed9ec6c6598376e5b7fff"
-  source = "github.com/bblfsh/sdk"
+  revision = "801385dfdc5c955c410e52c4b02f8622c64a7d85"
+  version = "v2.2.2"
 
 [[projects]]
   name = "gopkg.in/src-d/go-errors.v1"
@@ -72,6 +71,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "da9a8bd1682654e5e4d5ffb686fdf06179d9b76322593bfdcf2c0cc52c2fdf76"
+  inputs-digest = "1d639e238f389e27ecf33850009668181d808c5e84c4e04738f2cbf4b2b14568"
   solver-name = "gps-cdcl"
   solver-version = 1

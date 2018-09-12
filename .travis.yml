@@ -1,37 +1,23 @@
 language: go
 
 go:
-  - '1.10'
+  - '1.11'
 
 compiler:
-  - clang
   - gcc
 os:
   - linux
   - osx
 
 before_install:
-  - if [[ $TRAVIS_OS_NAME = linux ]]; then sudo apt-get update -qq && sudo apt-get install -qq libcunit1 libcunit1-doc libcunit1-dev lcov gcc-mingw-w64-x86-64; fi
+  - if [[ $TRAVIS_OS_NAME = linux ]]; then sudo apt-get update -qq && sudo apt-get install -qq libcunit1 libcunit1-doc libcunit1-dev gcc-mingw-w64-x86-64; fi
   - if [[ $TRAVIS_OS_NAME = osx ]]; then brew install cunit lcov ; fi
   - mkdir -p $GOPATH/bin && curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 script:
-  - dep ensure --vendor-only
-  - if [[ $TRAVIS_OS_NAME = linux ]]; then make package-all; fi
-  - if [[ $TRAVIS_OS_NAME = osx ]]; then make package-osx; fi
+  - make vendor
+  - make package-all
   - make test
-
-#after_success:
-#  - cd $TRAVIS_BUILD_DIR/../libuast-build
-#  - lcov --directory . --capture --output-file coverage.info
-#  - lcov --remove coverage.info '/usr/*' --output-file coverage.info
-#  - lcov --list coverage.info
-#  - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
-#
-#before_deploy:
-#  - cd $TRAVIS_BUILD_DIR/../libuast-build
-#  - sh scripts/update-version.sh
-#  - git archive --prefix "libuast-${TRAVIS_TAG}/" --output "libuast-${TRAVIS_TAG}.tar.gz" `git stash create`
 
 deploy:
   provider: releases

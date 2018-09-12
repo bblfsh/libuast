@@ -10,14 +10,19 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"reflect"
 	"unsafe"
 
+	"gopkg.in/bblfsh/sdk.v2/uast"
 	"gopkg.in/bblfsh/sdk.v2/uast/nodes"
 	"gopkg.in/bblfsh/sdk.v2/uast/nodes/nodesproto"
 	"gopkg.in/bblfsh/sdk.v2/uast/query"
 	"gopkg.in/bblfsh/sdk.v2/uast/role"
 	"gopkg.in/bblfsh/sdk.v2/uast/yaml"
 )
+
+// static check to make sure UAST_HASH_SIZE constant is synchronized with SDK
+var _ [nodes.HashSize]byte = [C.UAST_HASH_SIZE]byte{}
 
 func main() {}
 
@@ -51,6 +56,16 @@ func UastNew(iface *C.NodeIface, ctx C.UastHandle) *C.Uast {
 	return u
 }
 
+// cBytes is similar to C.GoBytes, but doesn't make a copy of the data.
+func cBytes(p unsafe.Pointer, sz C.size_t) []byte {
+	h := &reflect.SliceHeader{
+		Data: uintptr(p),
+		Len:  int(sz),
+		Cap:  int(sz),
+	}
+	return *(*[]byte)(unsafe.Pointer(h))
+}
+
 //export UastDecode
 // UastDecode accepts a pointer to a buffer with a specified size and decodes the content into
 // a new UAST structure.
@@ -65,7 +80,7 @@ func UastDecode(p unsafe.Pointer, sz C.size_t, format C.UastFormat) *C.Uast {
 	if format == 0 {
 		format = C.UAST_BINARY
 	}
-	data := C.GoBytes(p, C.int(sz))
+	data := cBytes(p, sz)
 
 	nd := &goNodes{}
 
@@ -299,6 +314,26 @@ func UastEqual(ctx1 *C.Uast, node1 C.NodeHandle, ctx2 *C.Uast, node2 C.NodeHandl
 
 	eq := nodes.Equal(n1, n2)
 	return C.bool(eq)
+}
+
+//export UastHash
+// UastHash computes s hash of a given node and stores it to dst.
+// Allocated buffer should be at least UAST_HASH_SIZE long.
+func UastHash(ctx *C.Uast, node C.NodeHandle, dst unsafe.Pointer, flags C.HashFlags) {
+	buf := cBytes(dst, nodes.HashSize)
+
+	c := getContextFrom(ctx)
+	if c == nil {
+		return
+	}
+	n := c.asNode(Handle(node))
+
+	var hasher = nodes.HashOf
+	if flags&C.HASH_NO_POS != 0 {
+		hasher = uast.HashNoPos
+	}
+	h := hasher(n)
+	copy(buf, h[:])
 }
 
 //export RoleNameForId

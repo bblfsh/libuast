@@ -27,16 +27,8 @@ int main() {
 
   // add the tests to the suite
   ADD_TEST(suite, "test of RoleNameForId()", TestRoleNameForId);
-  ADD_TEST(suite, "test of UastNew()", TestUastNew);
   ADD_TEST(suite, "test of UastFilter() pointers", TestUastFilterPointers);
-  ADD_TEST(suite, "test iterator transform func", TestUastIteratorTransformFunc);
   ADD_TEST(suite, "test iteration (preorder)", TestUastIteratorPreOrder);
-  ADD_TEST(suite, "test iteration (level-order)", TestUastIteratorLevelOrder);
-  ADD_TEST(suite, "test iteration (position-order by offset)",
-      TestUastIteratorPositionOrderByOffset);
-  ADD_TEST(suite, "test iteration (position-order by line and col)",
-      TestUastIteratorPositionOrderByLineCol);
-  ADD_TEST(suite, "test iteration (post-order)", TestUastIteratorPostOrder);
   ADD_TEST(suite, "test of UastFilter() counting", TestUastFilterCount);
   ADD_TEST(suite, "test of UastFilter() with tokens", TestUastFilterToken);
   ADD_TEST(suite, "test of UastFilter() with properties",
@@ -102,11 +94,6 @@ int main() {
            TestUastFilterXPathFuncFalse);
   ADD_TEST(suite, "test of UastFilter() with bad query", TestUastFilterBadQuery);
   ADD_TEST(suite, "test failing UastFilter() (bad Xpath)", TestXpath);
-  ADD_TEST(suite, "test failing UastFilter() (bad xmlNewDoc)", TestXmlNewDoc);
-  ADD_TEST(suite, "test failing UastFilter() (bad xmlNewNode)", TestXmlNewNode);
-  ADD_TEST(suite, "test failing UastFilter() (bad xmlNewProc)", TestXmlNewProc);
-  ADD_TEST(suite, "test failing UastFilter() (bad xmlAddChild)", TestXmlAddChild);
-  ADD_TEST(suite, "test failing UastFilter() (bad xmlNewContext)", TestXmlNewContext);
   ADD_TEST(suite, "test empty UastFilter() result", TestEmptyResult);
 
   // run all tests using the CUnit Basic interface

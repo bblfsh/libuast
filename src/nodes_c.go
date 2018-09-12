@@ -222,6 +222,14 @@ func (n *cObject) ValueAt(key string) (nodes.External, bool) {
 	return nil, false
 }
 
+func (n *cObject) SameAs(n2 nodes.External) bool {
+	cn, ok := n2.(*cObject)
+	if !ok {
+		return false
+	}
+	return n.c == cn.c && n.h == cn.h
+}
+
 var _ Array = (*cArray)(nil)
 
 type cArray struct {
@@ -258,6 +266,14 @@ func (n *cArray) valueAt(i int) Node {
 
 func (n *cArray) ValueAt(i int) nodes.External {
 	return n.valueAt(i)
+}
+
+func (n *cArray) SameAs(n2 nodes.External) bool {
+	cn, ok := n2.(*cArray)
+	if !ok {
+		return false
+	}
+	return n.c == cn.c && n.h == cn.h
 }
 
 var _ Node = (*cValue)(nil)
@@ -303,6 +319,14 @@ func (n *cValue) Value() nodes.Value {
 		return nil
 	}
 	return n.val
+}
+
+func (n *cValue) SameAs(n2 nodes.External) bool {
+	cn, ok := n2.(*cValue)
+	if !ok {
+		return false
+	}
+	return n.c == cn.c && n.h == cn.h
 }
 
 type cTmpNode struct {

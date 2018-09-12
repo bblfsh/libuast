@@ -1,29 +1,40 @@
 # libuast [![Build Status](https://travis-ci.org/bblfsh/libuast.svg?branch=master)](https://travis-ci.org/bblfsh/libuast) [![Build status](https://ci.appveyor.com/api/projects/status/hq2o0qcw81q9eys7?svg=true)](https://ci.appveyor.com/project/mcuadros/libuast) [![codecov](https://codecov.io/gh/bblfsh/libuast/branch/master/graph/badge.svg)](https://codecov.io/gh/bblfsh/libuast)
 
-Libuast is a C library that implements different algorithms that consume the babelfish's UAST in order to query, inspect and process it.
+Libuast is a Go library exposed as a C (shared) library and implements different algorithms that consume the Babelfish's UAST in order to query, inspect and process it.
 
-Libuast is decoupled from the UAST data structures. This means that the UAST itself can be stored in any native object of the host language. In order to connect the C uast library with the data structure an implementation of the interface must be provided by the bindings.
+Libuast is decoupled from the UAST data structures. This means that the UAST itself can be stored in any native object of the host language.
+In order to connect the C uast library with the data structure an implementation of the interface must be provided by the bindings.
 
 ## Features
 
-Currently only xpath querying is implemented, it allows to filter branches of the UAST tree that satisfy the xpath query string.
-
-More features may be implemented in the future, like UAST iterators.
+* XPath queries of UAST
+* UAST iterators
+* Encoding and decoding of UAST
 
 Supports Linux, Darwin and Windows.
 
 ## Installation
 
+Check [releases](https://github.com/bblfsh/libuast/releases) for precompiled binaries.
+
 ### Dependencies
 
-- cmake
-- libxml2
+**Dependencies:**
+- Go >= 1.11
+- gcc (for cgo)
 - libcunit1 (optional, for tests)
 
 #### Ubuntu instructions
 
 ```
-sudo apt install build-essential cmake libxml2 libxml2-dev libcunit1 libcunit1-dev
+sudo snap install --classic go
+sudo apt install build-essential libcunit1 libcunit1-dev
+```
+
+For cross-compilation to Windows:
+
+```
+sudo apt install gcc-mingw-w64-x86-64
 ```
 
 ### Windows instructions
@@ -33,9 +44,7 @@ sudo apt install build-essential cmake libxml2 libxml2-dev libcunit1 libcunit1-d
 ### Build/Install C API
 
 ```
-cmake .
 make
-make install
 ```
 
 ### Run the tests
@@ -46,82 +55,75 @@ make test
 
 ## Query language
 
-Any of the [node](https://godoc.org/github.com/bblfsh/sdk/uast#Node) fields can be used for querying, which are mapped in the following way:
+Any of the [node](https://godoc.org/github.com/bblfsh/sdk/uast/nodes#Object) fields can be used for querying, which are mapped in the following way:
 
-* `InternalType` is converted to the element name
-* `Token`, if available, is converted to an attribute with `token` as keyword and the actual token as value
-* Every `Role` is converted to an attribute concatenating a `role` prefix and the role name in CamelCase.
-* Every `Property` is converted to an attribute with the property keyword as keyword and the property value as value
-* `StartPosition`, if available, is mapped to three attributes:
-  * A `startOffset` attribute, with the offset as value
-  * A `startLine` attribute, with the line as value
-  * A `startCol` attribute, with the column as value
-* `EndPosition`, if available, is mapped to three attributes:
-  * A `endOffset` attribute, with the offset as value
-  * A `endLine` attribute, with the line as value
-  * A `endCol` attribute, with the column as value
+* `@type` is converted to the element name
+* `@token`, if available, is converted to an attribute with `token` as keyword and the actual token as value. It is also mapped to the `text()` of the node.
+* Every item of the `@role` field is converted to a `role` attribute with a role name in CamelCase as a value.
+* Every field that stores a value is converted to an attribute.
+* `@pos` fields are mapped to a set of attributes with a `<pos-name>-<pos-field>` name, for example:
+  * `start-offset` - an offset of the `start` position (same for the `end` position)
+  * `start-line` - a line of the `start` position
+  * `start-col` - a column of the `start` position
+* Every field that stores a node or an array of nodes is mapped to a separate element
+  with a field name as an element name and a set of nodes mapped to children of that node.
 
 which are mapped in to XML in the following way:
 
 ```xml
-<{{InternalType}}
-    token='{{Token}}'
-	{{for role in Roles}}
-	role{{role}}
-	{{for key, value in Properties}}
-	{{key}}='{{value}}'
-	startOffset={{StartPosition.Offset}}
-	startLine={{StartPosition.Line}}
-	startCol={{StartPosition.Col}}
-	endOffset={{EndPosition.Offset}}
-	endLine={{EndPosition.Line}}
-	endCol={{EndPosition.Col}}>
-	{{Children}}
-</{{InternalType}}>
+<uast:Identifier
+    token='A'
+    role='Identifier' role='Name'
+    Name='A'
+	start-offset='7' start-line='3' start-col='1'
+	end-offset='8' end-line='3' end-col='2'
+>
+A
+</uast:Identifier>
 ```
 
-This means that both language specific queries (`InternalType`, `Properties`)
-and language agnostic queries (`Roles`) can be done.  Check [the official
-documentation](https://doc.bblf.sh/user/uast-querying.html) for example queries.
+or for nested nodes:
+
+```xml
+<uast:Alias
+	start-offset='7' start-line='3' start-col='1'
+	end-offset='13' end-line='4' end-col='1'
+>
+    <Name>
+        <uast:Identifier role='Identifier' role='Name' Name='A'></uast:Identifier>
+    </Name>
+    <Node>
+        <uast:String role='String' role='Literal' Value='B'></uast:String>
+    </Node>
+</uast:Alias>
+```
+
+<!-- TODO: update link and query docs -->
+Check [the official documentation](https://doc.bblf.sh/user/uast-querying.html)
+for example queries.
 
 ## Implementing the node interface
 
-`libuast` is built to be easily bindable,
-and to allow a native data structure for a [`Node`](https://godoc.org/github.com/bblfsh/sdk/uast#Node) in every language,
-as provided by the protobuf generator.
+`libuast` is built to be easily bindable, and to allow a native data structures (like arrays and maps) for a
+[`Node`](https://godoc.org/github.com/bblfsh/sdk/uast/nodes#Node) in every language.
 
 That's why the library provides an interface to this `Node` data structure that must be implemented.
 Concretely `NodeIface`, that is used to initialize the `Uast` struct:
 
 ```c
-Uast *ctx = Node((NodeIface){
-    .InternalType = InternalType,
-    .Token = Token,
-    .ChildrenSize = ChildrenSize,
-    .ChildAt = ChildAt,
-    .RolesSize = RolesSize,
-    .RoleAt = RoleAt,
-    .PropertiesSize = PropertiesSize,
-    .PropertyKeyAt = PropertyKeyAt,
-    .PropertyValueAt = PropertyValueAt,
-    .HasStartOffset = HasStartOffset,
-    .StartOffset = StartOffset,
-    .HasStartLine = HasStartLine,
-    .StartLine = StartLine,
-    .HasStartCol = HasStartCol,
-    .StartCol = StartCol,
-    .HasEndOffset = HasEndOffset,
-    .EndOffset = EndOffset,
-    .HasEndLine = HasEndLine,
-    .EndLine = EndLine,
-    .HasEndCol = HasEndCol,
-    .EndCol = EndCol,
-});
+
+NodeIface iface;
+iface.Kind = Kind;
+iface.Size = Size;
+// ...
+
+Uast *ctx = UastNew(&iface, 0);
 ```
 
-`NodeIface` holds the functions that need the be executed when the library needs to access some of the properties of the node, such as `internal_type`, `token`, `children`, ...
+`NodeIface` holds the functions that need the be executed when the library needs to access object fields, array items or individual values.
 
 Here you can see several examples of the `Uast`:
+<!-- TODO: update links once clients are updated -->
 - [C++ node](https://github.com/bblfsh/libuast/blob/master/tests/mock_node.h)
 - [Python node](https://github.com/bblfsh/client-python/blob/master/bblfsh/pyuast.c)
 - [Go node](https://github.com/bblfsh/client-go/blob/master/tools/bindings.h)
@@ -136,7 +138,7 @@ Uast *ctx = CreateContextFromIface();
 NodeHandle node = (NodeHandle)pointerToNativeNode;
 
 // consume the Uast API (xpath in this case)
-Nodes *nodes = UastFilter(ctx, node, "//NumLiteral")
+UastIterator *iter = UastFilter(ctx, node, "//NumLiteral");
 ```
 
 ### Running an xpath query
@@ -145,43 +147,45 @@ At this point, you might have already created your very first binding of libuast
 
 #### XPath querying
 
-XPath allows to filter the whole UAST using the [xpath syntax](https://www.w3.org/TR/xpath/). It can be really useful to extract features from the code and thanks to the annotation system implemented by babelfish, it can be done in an universal fashion.
+XPath allows to filter the whole UAST using the [xpath syntax](https://www.w3.org/TR/xpath/).
+It can be really useful to extract features from the code and thanks to
+the annotation system implemented by Babelfish, it can be done in an universal fashion.
 
 
-In libuast, xpath querying is performed by the `UastFilter` function. This function takes a pointer to the `Uast` context, a pointer to the root node, and the xpath query string.
-The function returns a list of matching nodes.
+In libuast, xpath querying is performed by the `UastFilter` function.
+This function takes a pointer to the `Uast` context, a handle to the root node
+(a pointer in the simplest case), and the xpath query string.
+The function returns an iterator of matching nodes.
 
 Here's a complete example:
 ```c
-const char *query = "//*[@roleImport and @roleDeclaration]";
+const char *query = "//*[@role='Import' and @role='Declaration']";
 
 // run the xpath query and check return value
-Nodes *nodes = UastFilter(ctx, node, query);
-if (nodes) {
-  // iterate over the results and print the nodes
-  for (int i = 0; i < NodesSize(nodes); i++) {
-    NodeHandle node = NodeAt(nodes, i);
+UastIterator *iter = UastFilter(ctx, node, query);
+
+NodeHandle node = 0;
+while((node = UastIteratorNext(iter)) != 0) {
     print_node(node);
-  }
 }
 
-// do not forget to free the nodes afterwards.
-NodesFree(nodes);
+// do not forget to free the iterator afterwards.
+UastIteratorFree(iter);
 ```
 
 #### UAST Iterators
 
-The API provides a UASTIterator type that can iterate over the UAST in
+The API provides a `UastIterator` type that can iterate over the UAST in
 pre-order, post-order, level-order and position-order (the last one is by the 
-node `StartOffset/StartLine/StartLine`).
+node `start-offset/start-line/start-col`).
 
 Example:
 
 ```c
 UastIterator *iter = UastIteratorNew(ctx, node, PRE_ORDER);
 
-NodeHandle curNode = 0;
-while((curNode = UastIteratorNext(iter)) != 0) {
+NodeHandle node = 0;
+while((node = UastIteratorNext(iter)) != 0) {
   // ... do something with the node
 }
 

@@ -2,7 +2,7 @@
 
 LIBUAST="$1"
 SED="sed -i"
-if [[ "$OSTYPE" == "darwin"* ]]; then
+if [[ "$OSTYPE" = "darwin"* ]]; then
     SED='sed -i ""'
 fi
 

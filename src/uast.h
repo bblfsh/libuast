@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#define UAST_HASH_SIZE 32
+
 // NodeHandle is an opaque node handle that client should use to track nodes passed to libuast.
 // A handle can either be a real pointer to the node, or an ID value that client assigns to the node.
 typedef uintptr_t NodeHandle;
@@ -86,6 +88,10 @@ typedef struct UastIterator {
 } UastIterator;
 
 typedef enum { UAST_BINARY = 0, UAST_YAML = 1 } UastFormat;
+
+typedef enum {
+    HASH_NO_POS = 0x1,
+} HashFlags;
 
 // UastLoad copies the node from a source context into the destination.
 //

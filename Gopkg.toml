@@ -3,8 +3,7 @@
 
 [[constraint]]
   name = "gopkg.in/bblfsh/sdk.v2"
-  source = "github.com/bblfsh/sdk"
-  branch = "v2_xpath"
+  version = "2.2.x"
 
 [prune]
   go-tests = true

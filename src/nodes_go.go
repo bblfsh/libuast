@@ -446,6 +446,14 @@ func (n *goObject) ValueAt(key string) (nodes.External, bool) {
 	return n.obj.ValueAt(key)
 }
 
+func (n *goObject) SameAs(n2 nodes.External) bool {
+	gn, ok := n2.(*goObject)
+	if !ok {
+		return false
+	}
+	return nodes.Same(n.obj, gn.obj)
+}
+
 var (
 	_ Native = (*goArray)(nil)
 	_ Array  = (*goArray)(nil)
@@ -481,6 +489,14 @@ func (n *goArray) ValueAt(i int) nodes.External {
 	return n.arr.ValueAt(i)
 }
 
+func (n *goArray) SameAs(n2 nodes.External) bool {
+	gn, ok := n2.(*goArray)
+	if !ok {
+		return false
+	}
+	return nodes.Same(n.arr, gn.arr)
+}
+
 var _ Native = (*goValue)(nil)
 
 type goValue struct {
@@ -509,6 +525,14 @@ func (n *goValue) Kind() nodes.Kind {
 
 func (n *goValue) Value() nodes.Value {
 	return n.val
+}
+
+func (n *goValue) SameAs(n2 nodes.External) bool {
+	gn, ok := n2.(*goValue)
+	if !ok {
+		return false
+	}
+	return nodes.Same(n.val, gn.val)
 }
 
 var _ TmpNode = (*goTmpNode)(nil)

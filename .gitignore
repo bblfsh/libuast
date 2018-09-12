@@ -45,3 +45,4 @@ CTestTestfile.cmake
 testing_exec
 example1
 build/
+tests/Makefile
