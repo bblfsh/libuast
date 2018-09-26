@@ -9,6 +9,6 @@ find_package(Uast)
 
 include_directories(. ../src/ ${CHECK_INCLUDE_DIRS}  ${UAST_INCLUDE_DIRS})
 
-add_executable(example example.cc ${libsrc})
+add_executable(example example.cpp ${libsrc})
 target_link_libraries(example ${UAST_LIBRARIES})
 target_link_libraries(example ${libshared})
