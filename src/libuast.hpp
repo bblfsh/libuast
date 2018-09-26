@@ -7,6 +7,39 @@
 #include <iostream>
 
 namespace uast {
+    // Role of UAST node.
+    class Role {
+    private:
+        int id;
+    public:
+        Role(int v){
+            id = v;
+        }
+        Role(const char* name){
+            id = RoleIdForName((char*)name);
+        }
+        int ID() { return id; }
+        char* Name() {
+            return RoleNameForId(id);
+        }
+    };
+
+    // Iterator is a common interface implemented by all UAST iterators.
+    template<class T> class Iterator {
+    public:
+        virtual bool next() = 0;
+        virtual T node() = 0;
+    };
+
+    // Context is a common interface implemented by all UAST contexts.
+    template<class T> class Context {
+    public:
+        // TODO: replace it with throw
+        virtual char* Error() = 0;
+
+        virtual Iterator<T>* Filter(T root, const char* query) = 0;
+        virtual Iterator<T>* Iterate(T root, TreeOrder order) = 0;
+    };
 
     // NodeCreator is an interface that creates new UAST nodes.
     template<class T> class NodeCreator {
@@ -61,101 +94,38 @@ namespace uast {
         virtual void SetKeyValue(const char* key, T val) = 0;
     };
 
-    // PtrInterface is an implementation of NodeRawInterface that casts NodeHandles directly to native node pointer T.
-    template<class T> class PtrInterface : public NodeRawInterface {
+    // RawIterator is an UAST node iterator of the lowest abstraction level.
+    class RawIterator : public Iterator<NodeHandle> {
     private:
-        // TODO: handle node deallocation
-        NodeCreator<T>* impl;
+        UastIterator* iter;
+        NodeHandle cur;
+        bool done;
     public:
-        PtrInterface(NodeCreator<T>* creator){
-            impl = creator;
+        RawIterator(UastIterator* it) {
+            iter = it;
+            cur = 0;
+            done = false;
         }
-
-        NodeKind Kind(NodeHandle node) {
-            Node<T>* n = (T)node;
-            return n->Kind();
+        ~RawIterator(){
+            done = true;
+            cur = 0;
+            UastIteratorFree(iter);
+            iter = NULL;
         }
-
-        const char* AsString(NodeHandle node) {
-            Node<T>* n = (T)node;
-            return n->AsString();
+        bool next() {
+            if (done) return false;
+            cur = UastIteratorNext(iter);
+            done = cur == 0;
+            return !done;
         }
-        int64_t AsInt(NodeHandle node) {
-            Node<T>* n = (T)node;
-            return n->AsInt();
-        }
-        uint64_t AsUint(NodeHandle node) {
-            Node<T>* n = (T)node;
-            return n->AsUint();
-        }
-        double AsFloat(NodeHandle node) {
-            Node<T>* n = (T)node;
-            return n->AsFloat();
-        }
-        bool AsBool(NodeHandle node) {
-            Node<T>* n = (T)node;
-            return n->AsBool();
-        }
-
-        size_t Size(NodeHandle node) {
-            Node<T>* n = (T)node;
-            return n->Size();
-        }
-
-        const char* KeyAt(NodeHandle node, size_t i) {
-            Node<T>* n = (T)node;
-            return n->KeyAt(i);
-        }
-        NodeHandle ValueAt(NodeHandle node, size_t i) {
-            Node<T>* n = (T)node;
-            T val = n->ValueAt(i);
-            return (NodeHandle)(val);
-        }
-
-        NodeHandle NewObject(size_t size) {
-            T node = impl->NewObject(size);
-            return (NodeHandle)node;
-        }
-        NodeHandle NewArray(size_t size) {
-            T node = impl->NewArray(size);
-            return (NodeHandle)node;
-        }
-        NodeHandle NewString(const char* str) {
-            T node = impl->NewString(str);
-            return (NodeHandle)node;
-        }
-        NodeHandle NewInt(int64_t val) {
-            T node = impl->NewInt(val);
-            return (NodeHandle)node;
-        }
-        NodeHandle NewUint(uint64_t val) {
-            T node = impl->NewUint(val);
-            return (NodeHandle)node;
-        }
-        NodeHandle NewFloat(double val) {
-            T node = impl->NewFloat(val);
-            return (NodeHandle)node;
-        }
-        NodeHandle NewBool(bool val) {
-            T node = impl->NewBool(val);
-            return (NodeHandle)node;
-        }
-
-        void SetValue(NodeHandle node, size_t i, NodeHandle v) {
-            Node<T>* n = (T)node;
-            T val = (T)v;
-            n->SetValue(i, val);
-        }
-        void SetKeyValue(NodeHandle node, const char* key, NodeHandle v) {
-            Node<T>* n = (T)node;
-            T val = (T)v;
-            n->SetKeyValue(key, val);
+        NodeHandle node() {
+            return cur;
         }
     };
 
     // RawContext is an UAST context at the lowest abstraction level.
     // It binds to a specific node implementation represented by NodeRawInterface.
-    class RawContext {
+    class RawContext : public Context<NodeHandle> {
     private:
         Uast* ctx;
         UastHandle handle;
@@ -273,11 +243,164 @@ namespace uast {
         }
 
         char* Error() {
-            // TODO: replace it with throw
             return LastError(ctx);
         }
-        UastIterator* Filter(NodeHandle root, const char * query) {
-            return UastFilter(ctx, root, (char*)query);
+        Iterator<NodeHandle>* Filter(NodeHandle root, const char * query) {
+            auto it = UastFilter(ctx, root, (char*)query);
+            return new RawIterator(it);
+        }
+        Iterator<NodeHandle>* Iterate(NodeHandle root, TreeOrder order) {
+            auto it = UastIteratorNew(ctx, root, order);
+            return new RawIterator(it);
+        }
+    };
+
+    // PtrIterator is an iterator that casts NodeHandle directly to pointer type T.
+    template<class T> class PtrIterator : public Iterator<T> {
+    private:
+         Iterator<NodeHandle>* iter;
+         bool owner;
+    public:
+        PtrIterator(Iterator<NodeHandle>* it, bool own = false) {
+            iter = it;
+            owner = own;
+        }
+        ~PtrIterator(){
+            if(owner) delete(iter);
+            iter = NULL;
+        }
+        bool next() {
+            return iter->next();
+        }
+        T node() {
+            return (T)(iter->node());
+        }
+    };
+
+    template<class T> class PtrInterface;
+
+    // PtrContext is a Context implementation that casts NodeHandle directly to pointer type T.
+    template<class T> class PtrContext : public Context<T> {
+    private:
+        RawContext* ctx;
+    public:
+        PtrContext(PtrInterface<T>* iface) {
+            ctx = new RawContext(iface);
+        }
+        ~PtrContext(){
+            delete(ctx);
+            ctx = NULL;
+        }
+        Iterator<T>* Filter(T root, const char* query) {
+            auto raw = ctx->Filter((NodeHandle)(root), query);
+            auto it = new PtrIterator<T>(raw, true);
+            return it;
+        }
+        Iterator<T>* Iterate(T root, TreeOrder order) {
+            auto raw = ctx->Iterate((NodeHandle)(root), order);
+            auto it = new PtrIterator<T>(raw, true);
+            return it;
+        }
+        char* Error(){
+            return ctx->Error();
+        }
+    };
+
+    // PtrInterface is an implementation of NodeRawInterface that casts NodeHandles directly to native node pointer T.
+    template<class T> class PtrInterface : public NodeRawInterface {
+    private:
+        NodeCreator<T>* impl;
+    public:
+        PtrInterface(NodeCreator<T>* creator){
+            impl = creator;
+        }
+        ~PtrInterface(){
+            // TODO: track nodes and handle node deallocation
+        }
+        Context<T>* NewContext() {
+            auto ctx = new PtrContext<T>(this);
+            return ctx;
+        }
+
+        NodeKind Kind(NodeHandle node) {
+            Node<T>* n = (T)node;
+            return n->Kind();
+        }
+
+        const char* AsString(NodeHandle node) {
+            Node<T>* n = (T)node;
+            return n->AsString();
+        }
+        int64_t AsInt(NodeHandle node) {
+            Node<T>* n = (T)node;
+            return n->AsInt();
+        }
+        uint64_t AsUint(NodeHandle node) {
+            Node<T>* n = (T)node;
+            return n->AsUint();
+        }
+        double AsFloat(NodeHandle node) {
+            Node<T>* n = (T)node;
+            return n->AsFloat();
+        }
+        bool AsBool(NodeHandle node) {
+            Node<T>* n = (T)node;
+            return n->AsBool();
+        }
+
+        size_t Size(NodeHandle node) {
+            Node<T>* n = (T)node;
+            return n->Size();
+        }
+
+        const char* KeyAt(NodeHandle node, size_t i) {
+            Node<T>* n = (T)node;
+            return n->KeyAt(i);
+        }
+        NodeHandle ValueAt(NodeHandle node, size_t i) {
+            Node<T>* n = (T)node;
+            T val = n->ValueAt(i);
+            return (NodeHandle)(val);
+        }
+
+        NodeHandle NewObject(size_t size) {
+            T node = impl->NewObject(size);
+            return (NodeHandle)node;
+        }
+        NodeHandle NewArray(size_t size) {
+            T node = impl->NewArray(size);
+            return (NodeHandle)node;
+        }
+        NodeHandle NewString(const char* str) {
+            T node = impl->NewString(str);
+            return (NodeHandle)node;
+        }
+        NodeHandle NewInt(int64_t val) {
+            T node = impl->NewInt(val);
+            return (NodeHandle)node;
+        }
+        NodeHandle NewUint(uint64_t val) {
+            T node = impl->NewUint(val);
+            return (NodeHandle)node;
+        }
+        NodeHandle NewFloat(double val) {
+            T node = impl->NewFloat(val);
+            return (NodeHandle)node;
+        }
+        NodeHandle NewBool(bool val) {
+            T node = impl->NewBool(val);
+            return (NodeHandle)node;
+        }
+
+        void SetValue(NodeHandle node, size_t i, NodeHandle v) {
+            Node<T>* n = (T)node;
+            T val = (T)v;
+            n->SetValue(i, val);
+        }
+        void SetKeyValue(NodeHandle node, const char* key, NodeHandle v) {
+            Node<T>* n = (T)node;
+            T val = (T)v;
+            n->SetKeyValue(key, val);
         }
     };
 

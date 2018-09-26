@@ -201,16 +201,19 @@ Node* newObject(std::string typ) {
 }
 
 int main() {
+  // create a class that makes new UAST nodes
   auto creator = new Creator();
+  // create an implementation that will handle UAST node operations
   auto impl = new uast::PtrInterface<Node*>(creator);
-  auto ctx = new uast::RawContext(impl);
+  // create a new UAST context based on this implementation
+  auto ctx = impl->NewContext();
 
   Node* root = newObject("compilation_unit");
-  root->AddRole(2);
+  root->AddRole(uast::Role("File").ID());
 
   Node* node1 = newObject("class");
   Node* node2 = newObject("identifier");
-  node2->AddRole(1);
+  node2->AddRole(uast::Role("Identifier").ID());
 
   Node* node3 = newObject("block");
   Node* node4 = newObject("method");
@@ -234,7 +237,7 @@ int main() {
   // block { loop }
   node6->AddChild(node8);
 
-  auto it = ctx->Filter(NodeHandle(root), "//compilation_unit//identifier");
+  auto it = ctx->Filter(root, "//compilation_unit//identifier");
   if (!it) {
     char *error = ctx->Error();
     std::cerr << "libuast.filter() failed: " << error;
@@ -243,8 +246,8 @@ int main() {
   }
 
   // Iterate over results and print them to stdout
-  Node* node;
-  while ((node = (Node *)UastIteratorNext(it)) != NULL) {
+  while (it->next()) {
+    Node* node = it->node();
     if (node->kind == NODE_OBJECT) {
         std::cout << node << ": " << node->obj[keyType]->val_string << std::endl;
     } else {
@@ -252,7 +255,7 @@ int main() {
     }
   }
 
-  UastIteratorFree(it);
+  delete(it);
   delete(ctx);
   delete(impl);
   delete(creator);
