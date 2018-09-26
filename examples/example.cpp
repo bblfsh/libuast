@@ -25,7 +25,7 @@ struct position {
 
 const position NO_POSITION = {0, 0, 0};
 
-class Node {
+class Node : public uast::Node<Node*> {
  public:
   NodeKind kind;
 
@@ -115,108 +115,82 @@ class Node {
   }
   void SetStartPosition(position p) { SetPosition("start", p); }
   void SetEndPosition(position p) { SetPosition("end", p); }
+
+
+  NodeKind Kind() { return kind; }
+
+  const char* AsString() { return val_string.data(); }
+  int64_t     AsInt()    { return val_int; }
+  uint64_t    AsUint()   { return val_uint; }
+  double      AsFloat()  { return val_float; }
+  bool        AsBool()   { return val_bool; }
+
+  size_t Size() {
+    if (kind == NODE_ARRAY) {
+      return arr.size();
+    }
+    return obj.size();
+  }
+
+  const char* KeyAt(size_t index) {
+    size_t i = 0;
+    for (auto it = obj.begin(); it != obj.end(); ++it, ++i) {
+      if (i == index) return it->first.data();
+    }
+    return NULL;
+  }
+
+  Node* ValueAt(size_t index) {
+    if (kind == NODE_ARRAY) {
+      if (index >= arr.size()) return 0;
+      return arr[index];
+    }
+    size_t i = 0;
+    for (auto it = obj.begin(); it != obj.end(); ++it, ++i) {
+      if (i == index) return it->second;
+    }
+    return NULL;
+  }
+
+  void SetValue(size_t i, Node* v) {
+    arr[i] = v;
+  }
+
+  void SetKeyValue(const char * k, Node* v) {
+    obj[k] = v;
+  }
 };
 
-class Iface : public NodeInterface {
+class Creator : public uast::NodeCreator<Node*> {
 public:
-    NodeKind Kind(NodeHandle node) {
-      return ((Node *)node)->kind;
+    Node* NewObject(size_t size) {
+      return new Node(NODE_OBJECT);
     }
 
-    const char *AsString(NodeHandle node) {
-      return ((Node *)node)->val_string.data();
-    }
-
-    int64_t AsInt(NodeHandle node) {
-      return ((Node *)node)->val_int;
-    }
-
-    uint64_t AsUint(NodeHandle node) {
-      return ((Node *)node)->val_uint;
-    }
-
-    double AsFloat(NodeHandle node) {
-      return ((Node *)node)->val_float;
-    }
-
-    bool AsBool(NodeHandle node) {
-      return ((Node *)node)->val_bool;
-    }
-
-    size_t Size(NodeHandle node) {
-      auto n = (Node *)node;
-      if (n->kind == NODE_ARRAY) {
-        return n->arr.size();
-      }
-      return n->obj.size();
-    }
-
-    const char* KeyAt(NodeHandle node, size_t index) {
-      auto n = (Node *)node;
-      size_t i = 0;
-      for (auto it = n->obj.begin(); it != n->obj.end(); ++it, ++i) {
-        if (i == index) return it->first.data();
-      }
-      return NULL;
-    }
-
-    NodeHandle ValueAt(NodeHandle node, size_t index) {
-      auto n = (Node *)node;
-      if (n->kind == NODE_ARRAY) {
-        if (index >= n->arr.size()) return 0;
-        return (NodeHandle)n->arr[index];
-      }
-      size_t i = 0;
-      for (auto it = n->obj.begin(); it != n->obj.end(); ++it, ++i) {
-        if (i == index) return (NodeHandle)it->second;
-      }
-      return 0;
-    }
-
-    NodeHandle NewObject(size_t size) {
-      auto n = new Node(NODE_OBJECT);
-      return (NodeHandle)(n);
-    }
-
-    NodeHandle NewArray(size_t size) {
+    Node* NewArray(size_t size) {
       auto n = new Node(NODE_ARRAY);
       n->arr.resize(size);
-      return (NodeHandle)(n);
+      return n;
     }
 
-    NodeHandle NewString(const char * v) {
-      auto n = new Node(std::string(v));
-      return (NodeHandle)(n);
+    Node* NewString(const char * v) {
+      return new Node(std::string(v));
     }
 
-    NodeHandle NewInt(int64_t v) {
-      auto n = new Node(v);
-      return (NodeHandle)(n);
+    Node* NewInt(int64_t v) {
+      return new Node(v);
     }
 
-    NodeHandle NewUint(uint64_t v) {
-      auto n = new Node(v);
-      return (NodeHandle)(n);
+    Node* NewUint(uint64_t v) {
+      return new Node(v);
     }
 
-    NodeHandle NewFloat(double v) {
-      auto n = new Node(v);
-      return (NodeHandle)(n);
+    Node* NewFloat(double v) {
+      return new Node(v);
     }
 
-    NodeHandle NewBool(bool v) {
-      auto n = new Node(v);
-      return (NodeHandle)(n);
-    }
-
-    void SetValue(NodeHandle node, size_t i, NodeHandle v) {
-      auto n = (Node*)node;
-      n->arr[i] = (Node*)v;
-    }
-
-    void SetKeyValue(NodeHandle node, const char * k, NodeHandle v) {
-      auto n = (Node*)node;
-      n->obj[k] = (Node*)v;
+    Node* NewBool(bool v) {
+      return new Node(v);
     }
 };
 
@@ -227,8 +201,9 @@ Node* newObject(std::string typ) {
 }
 
 int main() {
-  auto impl = new Iface();
-  auto ctx = new Context(impl);
+  auto creator = new Creator();
+  auto impl = new uast::PtrInterface<Node*>(creator);
+  auto ctx = new uast::RawContext(impl);
 
   Node* root = newObject("compilation_unit");
   root->AddRole(2);
@@ -279,6 +254,8 @@ int main() {
 
   UastIteratorFree(it);
   delete(ctx);
+  delete(impl);
+  delete(creator);
 
   return 0;
 }
