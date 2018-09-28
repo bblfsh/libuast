@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <stdlib.h>
 
 #define UAST_HASH_SIZE 32
 
@@ -141,5 +142,7 @@ static NodeHandle UastLoad(const Uast *src, NodeHandle n, const Uast *dst) {
       }
       return 0;
 }
+
+/*GO-HEADER*/
 
 #endif // UAST_H_

@@ -2,20 +2,14 @@ HOSTOS:=$(shell go env GOHOSTOS)
 
 SRC_DIR=./src
 DEPS_C = $(SRC_DIR)/*.h $(SRC_DIR)/*.c
-DEPS_GO = $(SRC_DIR)/*.go vendor
+DEPS_GO = $(SRC_DIR)/*.go gen_header.go vendor
 
 BUILD_MODE=-buildmode=c-shared
 GO_BUILD=go build
 CC_WIN64=x86_64-w64-mingw32-gcc
 CC_WIN32=i686-w64-mingw32-gcc
 
-ifeq ("$(HOSTOS)", 'windows')
-CP_HEADERS=copy $(SRC_DIR)/uast.h
-
-else
-CP_HEADERS=cp $(SRC_DIR)/uast.h
-
-endif
+GEN_HEADER=go run gen_header.go -o
 
 OUT_NAME=libuast
 OUT_HEADER=$(OUT_NAME).h
@@ -51,34 +45,30 @@ vendor: Gopkg.*
 
 build: build-$(HOSTOS)
 
-build-linux: $(DEPS_C) $(DEPS_GO) cut.sh
+build-linux: $(DEPS_C) $(DEPS_GO)
 	mkdir -p $(OUT_LINUX) && \
 	GOOS=linux GOARCH=amd64 $(GO_BUILD) $(BUILD_MODE) -o=$(OUT_LINUX)/$(OUT_NAME).so $(SRC_DIR)/ && \
-	./cut.sh $(OUT_LINUX)/$(OUT_HEADER) && \
-	$(CP_HEADERS) $(OUT_LINUX)/
+	$(GEN_HEADER) $(OUT_LINUX)/$(OUT_HEADER)
 
-build-darwin: $(DEPS_C) $(DEPS_GO) cut.sh
+build-darwin: $(DEPS_C) $(DEPS_GO)
 	mkdir -p $(OUT_OSX) && \
 	GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 $(GO_BUILD) $(BUILD_MODE) -o=$(OUT_OSX)/$(OUT_NAME).so $(SRC_DIR)/ && \
-	./cut.sh $(OUT_OSX)/$(OUT_HEADER) && \
-	$(CP_HEADERS) $(OUT_OSX)/
+	$(GEN_HEADER) $(OUT_OSX)/$(OUT_HEADER)
 
 
 ifneq ("$(HOSTOS)", "windows")
-build-windows: $(DEPS_C) $(DEPS_GO) cut.sh
+build-windows: $(DEPS_C) $(DEPS_GO)
 	mkdir -p $(OUT_WINDOWS)
 	GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=$(CC_WIN64) $(GO_BUILD) $(BUILD_MODE) -o=$(OUT_WINDOWS)/$(OUT_NAME).dll $(SRC_DIR)/
-	./cut.sh $(OUT_WINDOWS)/$(OUT_HEADER)
-	$(CP_HEADERS) $(OUT_WINDOWS)/
+	$(GEN_HEADER) $(OUT_WINDOWS)/$(OUT_HEADER)
 
 else
-build-windows: $(DEPS_C) $(DEPS_GO) cut.sh
+build-windows: $(DEPS_C) $(DEPS_GO)
 	mkdir -p $(OUT_WINDOWS)
 	set GOOS=windows
 	set GOARCH=amd64
 	$(GO_BUILD) $(BUILD_MODE) -o=$(OUT_WINDOWS)\\$(OUT_NAME).dll $(SRC_DIR)/
-	bash cut.sh $(OUT_WINDOWS)\\$(OUT_HEADER)
-	$(CP_HEADERS) $(OUT_WINDOWS)\\
+	$(GEN_HEADER) $(OUT_WINDOWS)\\$(OUT_HEADER)
 
 endif
 

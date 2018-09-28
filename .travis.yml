@@ -17,6 +17,7 @@ before_install:
 script:
   - make vendor
   - make package-all
+  - ls -l ./build
   - make test
 
 deploy:
