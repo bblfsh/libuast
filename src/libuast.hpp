@@ -34,8 +34,7 @@ namespace uast {
     // Context is a common interface implemented by all UAST contexts.
     template<class T> class Context {
     public:
-        // TODO: replace it with throw
-        virtual char* Error() = 0;
+        virtual void CheckError() = 0;
 
         virtual Iterator<T>* Filter(T root, const char* query) = 0;
         virtual Iterator<T>* Iterate(T root, TreeOrder order) = 0;
@@ -233,6 +232,7 @@ namespace uast {
             impl = iface;
             ctx = UastNew(cppIface(), handle);
             // TODO: check if pointer is valid
+            CheckError();
         }
         ~RawContext() {
             UastFree(ctx);
@@ -242,15 +242,19 @@ namespace uast {
             impl = NULL;
         }
 
-        char* Error() {
-            return LastError(ctx);
+        void CheckError() {
+            char* err = LastError(ctx);
+            if (err) throw std::runtime_error(err);
         }
+
         Iterator<NodeHandle>* Filter(NodeHandle root, const char * query) {
             auto it = UastFilter(ctx, root, (char*)query);
+            CheckError();
             return new RawIterator(it);
         }
         Iterator<NodeHandle>* Iterate(NodeHandle root, TreeOrder order) {
             auto it = UastIteratorNew(ctx, root, order);
+            CheckError();
             return new RawIterator(it);
         }
     };
@@ -301,8 +305,8 @@ namespace uast {
             auto it = new PtrIterator<T>(raw, true);
             return it;
         }
-        char* Error(){
-            return ctx->Error();
+        void CheckError(){
+            return ctx->CheckError();
         }
     };
 
@@ -315,7 +319,6 @@ namespace uast {
             impl = creator;
         }
         ~PtrInterface(){
-            // TODO: track nodes and handle node deallocation
         }
         Context<T>* NewContext() {
             auto ctx = new PtrContext<T>(this);

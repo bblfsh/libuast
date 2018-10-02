@@ -239,9 +239,7 @@ int main() {
 
   auto it = ctx->Filter(root, "//compilation_unit//identifier");
   if (!it) {
-    char *error = ctx->Error();
-    std::cerr << "libuast.filter() failed: " << error;
-    free(error);
+    ctx->CheckError();
     return -1;
   }
 
