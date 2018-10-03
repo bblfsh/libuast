@@ -38,6 +38,9 @@ namespace uast {
     // Context is a common interface implemented by all UAST contexts.
     template<class T> class Context {
     public:
+        virtual Uast* rawPointer() = 0;
+        virtual T ToNode(NodeHandle h) = 0;
+
         virtual void CheckError() = 0;
         virtual T RootNode() = 0;
 
@@ -77,6 +80,12 @@ namespace uast {
 
         virtual void SetValue(NodeHandle node, size_t i, NodeHandle val) = 0;
         virtual void SetKeyValue(NodeHandle node, const char* key, NodeHandle val) = 0;
+    };
+
+
+    class BaseNode {
+    public:
+        virtual NodeHandle Handle() = 0;
     };
 
     // Node is a high-level interface for UAST nodes.
@@ -249,6 +258,8 @@ namespace uast {
             impl = NULL;
         }
 
+        Uast* rawPointer() { return ctx; }
+
         NodeHandle RootNode() {
             return ctx->root;
         }
@@ -257,6 +268,8 @@ namespace uast {
             char* err = LastError(ctx);
             if (err) throw std::runtime_error(err);
         }
+
+        NodeHandle ToNode(NodeHandle node) { return node; }
 
         Buffer Encode(NodeHandle node, UastFormat format) {
             if (node == 0) node = RootNode();
@@ -275,6 +288,16 @@ namespace uast {
             auto it = UastIteratorNew(ctx, root, order);
             CheckError();
             return new RawIterator(it);
+        }
+    };
+
+    template<class T> class PtrNode : public BaseNode {
+    private:
+        T ptr;
+    public:
+        PtrNode(T node) : ptr(node) {}
+        NodeHandle Handle() {
+            return (NodeHandle)(ptr);
         }
     };
 
@@ -314,21 +337,25 @@ namespace uast {
             delete(ctx);
             ctx = NULL;
         }
+        Uast* rawPointer() { return ctx->rawPointer(); }
         T RootNode() {
             auto raw = ctx->RootNode();
-            return (T)raw;
+            return ToNode(raw);
+        }
+        T ToNode(NodeHandle node) {
+            return (T)node;
         }
         Buffer Encode(T node, UastFormat format) {
             if (!node) node = RootNode();
             return ctx->Encode((NodeHandle)node, format);
         }
         Iterator<T>* Filter(T root, const char* query) {
-            auto raw = ctx->Filter((NodeHandle)(root), query);
+            auto raw = ctx->Filter(root->Handle(), query);
             auto it = new PtrIterator<T>(raw, true);
             return it;
         }
         Iterator<T>* Iterate(T root, TreeOrder order) {
-            auto raw = ctx->Iterate((NodeHandle)(root), order);
+            auto raw = ctx->Iterate(root->Handle(), order);
             auto it = new PtrIterator<T>(raw, true);
             return it;
         }
@@ -390,36 +417,36 @@ namespace uast {
         NodeHandle ValueAt(NodeHandle node, size_t i) {
             Node<T>* n = (T)node;
             T val = n->ValueAt(i);
-            return (NodeHandle)(val);
+            return val->Handle();
         }
 
         NodeHandle NewObject(size_t size) {
             T node = impl->NewObject(size);
-            return (NodeHandle)node;
+            return node->Handle();
         }
         NodeHandle NewArray(size_t size) {
             T node = impl->NewArray(size);
-            return (NodeHandle)node;
+            return node->Handle();
         }
         NodeHandle NewString(const char* str) {
             T node = impl->NewString(str);
-            return (NodeHandle)node;
+            return node->Handle();
         }
         NodeHandle NewInt(int64_t val) {
             T node = impl->NewInt(val);
-            return (NodeHandle)node;
+            return node->Handle();
         }
         NodeHandle NewUint(uint64_t val) {
             T node = impl->NewUint(val);
-            return (NodeHandle)node;
+            return node->Handle();
         }
         NodeHandle NewFloat(double val) {
             T node = impl->NewFloat(val);
-            return (NodeHandle)node;
+            return node->Handle();
         }
         NodeHandle NewBool(bool val) {
             T node = impl->NewBool(val);
-            return (NodeHandle)node;
+            return node->Handle();
         }
 
         void SetValue(NodeHandle node, size_t i, NodeHandle v) {
@@ -515,5 +542,15 @@ namespace uast {
         return new RawContext(impl);
     }
 
+    template<class T1, class T2> T2 Load(Context<T1>* src, T1 node, Context<T2>* dst) {
+        Uast* sctx = src->rawPointer();
+        Uast* dctx = dst->rawPointer();
+
+        NodeHandle n = node->Handle();
+
+        n = UastLoad(sctx, n, dctx);
+
+        return dst->ToNode(n);
+    }
 } // namespace uast
 #endif // UAST_HPP_

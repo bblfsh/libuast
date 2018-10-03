@@ -25,7 +25,7 @@ struct position {
 
 const position NO_POSITION = {0, 0, 0};
 
-class Node : public uast::Node<Node*> {
+class Node : public uast::Node<Node*>, public uast::PtrNode<Node*> {
  public:
   NodeKind kind;
 
@@ -38,13 +38,13 @@ class Node : public uast::Node<Node*> {
   std::vector<Node*> arr;
   std::map<std::string, Node*> obj;
 
-  Node(NodeKind k) : kind(k) {}
-  Node(const std::string &v) : kind(NODE_STRING), val_string(v) {}
-  Node(const char *v) : kind(NODE_STRING), val_string(v) {}
-  Node(int64_t v) : kind(NODE_INT), val_int(v) {}
-  Node(uint64_t v) : kind(NODE_UINT), val_uint(v) {}
-  Node(double v) : kind(NODE_FLOAT), val_float(v) {}
-  Node(bool v) : kind(NODE_BOOL), val_bool(v) {}
+  Node(NodeKind k) : PtrNode(this), kind(k) {}
+  Node(const std::string &v) : PtrNode(this), kind(NODE_STRING), val_string(v) {}
+  Node(const char *v) : PtrNode(this), kind(NODE_STRING), val_string(v) {}
+  Node(int64_t v) : PtrNode(this), kind(NODE_INT), val_int(v) {}
+  Node(uint64_t v) : PtrNode(this), kind(NODE_UINT), val_uint(v) {}
+  Node(double v) : PtrNode(this), kind(NODE_FLOAT), val_float(v) {}
+  Node(bool v) : PtrNode(this), kind(NODE_BOOL), val_bool(v) {}
 
   void Append(Node *node) { arr.push_back(node); }
 
