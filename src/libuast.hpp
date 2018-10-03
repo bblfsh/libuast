@@ -7,14 +7,18 @@
 #include <iostream>
 
 namespace uast {
+    struct Buffer {
+        Buffer(void*  p, size_t sz) : ptr(p), size(sz) {}
+        void*  ptr;
+        size_t size;
+    };
+
     // Role of UAST node.
     class Role {
     private:
         int id;
     public:
-        Role(int v){
-            id = v;
-        }
+        Role(int v) : id(v) {}
         Role(const char* name){
             id = RoleIdForName((char*)name);
         }
@@ -35,6 +39,9 @@ namespace uast {
     template<class T> class Context {
     public:
         virtual void CheckError() = 0;
+        virtual T RootNode() = 0;
+
+        virtual Buffer Encode(T node, UastFormat format) = 0;
 
         virtual Iterator<T>* Filter(T root, const char* query) = 0;
         virtual Iterator<T>* Iterate(T root, TreeOrder order) = 0;
@@ -242,9 +249,21 @@ namespace uast {
             impl = NULL;
         }
 
+        NodeHandle RootNode() {
+            return ctx->root;
+        }
+
         void CheckError() {
             char* err = LastError(ctx);
             if (err) throw std::runtime_error(err);
+        }
+
+        Buffer Encode(NodeHandle node, UastFormat format) {
+            if (node == 0) node = RootNode();
+            size_t sz = 0;
+            void* ptr = UastEncode(ctx, node, &sz, format);
+            CheckError();
+            return Buffer(ptr, sz);
         }
 
         Iterator<NodeHandle>* Filter(NodeHandle root, const char * query) {
@@ -294,6 +313,14 @@ namespace uast {
         ~PtrContext(){
             delete(ctx);
             ctx = NULL;
+        }
+        T RootNode() {
+            auto raw = ctx->RootNode();
+            return (T)raw;
+        }
+        Buffer Encode(T node, UastFormat format) {
+            if (!node) node = RootNode();
+            return ctx->Encode((NodeHandle)node, format);
         }
         Iterator<T>* Filter(T root, const char* query) {
             auto raw = ctx->Filter((NodeHandle)(root), query);
@@ -406,6 +433,87 @@ namespace uast {
             n->SetKeyValue(key, val);
         }
     };
+
+    // NativeInterface represents an implementation of UAST by libuast itself.
+    class NativeInterface : public NodeRawInterface {
+    private:
+        Uast *ctx;
+        NodeIface *iface;
+    public:
+        NativeInterface(Uast *c){
+            ctx = c;
+            iface = c->iface;
+        }
+        NodeKind Kind(NodeHandle node) {
+            return iface->Kind(ctx, node);
+        }
+
+        const char* AsString(NodeHandle node) {
+            return iface->AsString(ctx, node);
+        }
+        int64_t AsInt(NodeHandle node) {
+            return iface->AsInt(ctx, node);
+        }
+        uint64_t AsUint(NodeHandle node) {
+            return iface->AsUint(ctx, node);
+        }
+        double AsFloat(NodeHandle node) {
+            return iface->AsFloat(ctx, node);
+        }
+        bool AsBool(NodeHandle node) {
+            return iface->AsBool(ctx, node);
+        }
+
+        size_t Size(NodeHandle node) {
+            return iface->Size(ctx, node);
+        }
+
+        const char* KeyAt(NodeHandle node, size_t i) {
+            return iface->KeyAt(ctx, node, i);
+        }
+        NodeHandle ValueAt(NodeHandle node, size_t i) {
+            return iface->ValueAt(ctx, node, i);
+        }
+
+        NodeHandle NewObject(size_t size) {
+            return iface->NewObject(ctx, size);
+        }
+        NodeHandle NewArray(size_t size) {
+            return iface->NewArray(ctx, size);
+        }
+        NodeHandle NewString(const char* str) {
+            return iface->NewString(ctx, str);
+        }
+        NodeHandle NewInt(int64_t val) {
+            return iface->NewInt(ctx, val);
+        }
+        NodeHandle NewUint(uint64_t val) {
+            return iface->NewUint(ctx, val);
+        }
+        NodeHandle NewFloat(double val) {
+            return iface->NewFloat(ctx, val);
+        }
+        NodeHandle NewBool(bool val) {
+            return iface->NewBool(ctx, val);
+        }
+
+        void SetValue(NodeHandle node, size_t i, NodeHandle v) {
+            iface->SetValue(ctx, node, i, v);
+        }
+        void SetKeyValue(NodeHandle node, const char* k, NodeHandle v) {
+            iface->SetKeyValue(ctx, node, k, v);
+        }
+    };
+
+    Context<NodeHandle>* Decode(Buffer buf, UastFormat format = UAST_BINARY) {
+        Uast* ctx = UastDecode(buf.ptr, buf.size, format);
+
+        char* err = LastError(ctx);
+        if (err) throw std::runtime_error(err);
+
+        auto impl = new NativeInterface(ctx);
+        return new RawContext(impl);
+    }
 
 } // namespace uast
 #endif // UAST_HPP_
