@@ -31,6 +31,8 @@ namespace uast {
     // Iterator is a common interface implemented by all UAST iterators.
     template<class T> class Iterator {
     public:
+        virtual ~Iterator() {};
+
         virtual bool next() = 0;
         virtual T node() = 0;
     };
@@ -38,6 +40,8 @@ namespace uast {
     // Context is a common interface implemented by all UAST contexts.
     template<class T> class Context {
     public:
+        virtual ~Context() {};
+
         virtual Uast* rawPointer() = 0;
         virtual T ToNode(NodeHandle h) = 0;
         virtual NodeHandle ToHandle(T node) = 0;
@@ -54,6 +58,8 @@ namespace uast {
     // NodeCreator is an interface that creates new UAST nodes.
     template<class T> class NodeCreator {
     public:
+        virtual ~NodeCreator() {};
+
         virtual T NewObject(size_t size) = 0;
         virtual T NewArray(size_t size) = 0;
         virtual T NewString(const char* str) = 0;
@@ -87,6 +93,8 @@ namespace uast {
     // Template parameter should be set to a native UAST node pointer type.
     template<class T> class Node {
     public:
+        virtual ~Node() {};
+
         virtual NodeKind Kind() = 0;
 
         virtual const char* AsString() = 0;
