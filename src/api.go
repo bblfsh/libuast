@@ -179,9 +179,9 @@ func setContextError(h *C.Uast, err error) {
 	c.setError(err)
 }
 
-//export LastError
-// LastError return the last encountered error in this context, if any.
-func LastError(ctx *C.Uast) *C.char {
+//export UastLastError
+// UastLastError return the last encountered error in this context, if any.
+func UastLastError(ctx *C.Uast) *C.char {
 	c := getContextFrom(ctx)
 	if c == nil {
 		return nil
@@ -219,9 +219,9 @@ func UastFilter(ctx *C.Uast, node C.NodeHandle, query *C.char) *C.UastIterator {
 	return newIterator(ctx, res.Handle())
 }
 
-//export SetError
-// SetError sets an error state for this context. It can be used inside interface functions to indicate an error to the caller.
-func SetError(ctx *C.Uast, str *C.char) {
+//export UastSetError
+// UastSetError sets an error state for this context. It can be used inside interface functions to indicate an error to the caller.
+func UastSetError(ctx *C.Uast, str *C.char) {
 	c := getContextFrom(ctx)
 	if c == nil {
 		return

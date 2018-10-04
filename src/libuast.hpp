@@ -47,6 +47,7 @@ namespace uast {
         virtual NodeHandle ToHandle(T node) = 0;
 
         virtual void CheckError() = 0;
+        virtual void SetError(const char* err) = 0;
         virtual T RootNode() = 0;
 
         virtual Buffer Encode(T node, UastFormat format) = 0;
@@ -268,8 +269,12 @@ namespace uast {
         }
 
         void CheckError() {
-            char* err = LastError(ctx);
+            char* err = UastLastError(ctx);
             if (err) throw std::runtime_error(err);
+        }
+
+        void SetError(const char* err) {
+            UastSetError(ctx, (char *)(err));
         }
 
         NodeHandle ToNode(NodeHandle node) { return node; }
@@ -357,7 +362,10 @@ namespace uast {
             return it;
         }
         void CheckError(){
-            return ctx->CheckError();
+            ctx->CheckError();
+        }
+        void SetError(const char* err){
+            ctx->SetError(err);
         }
     };
 
@@ -532,7 +540,7 @@ namespace uast {
     Context<NodeHandle>* Decode(Buffer buf, UastFormat format = UAST_BINARY) {
         Uast* ctx = UastDecode(buf.ptr, buf.size, format);
 
-        char* err = LastError(ctx);
+        char* err = UastLastError(ctx);
         if (err) throw std::runtime_error(err);
 
         auto impl = new NativeInterface(ctx);
