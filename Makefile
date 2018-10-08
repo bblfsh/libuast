@@ -23,9 +23,9 @@ OUT_NAME=libuast
 OUT_HEADER=$(OUT_NAME).h
 OUT_DIR=build
 
-DIR_LINUX=linux_amd64
-DIR_OSX=darwin_amd64
-DIR_WINDOWS=windows_amd64
+DIR_LINUX=linux-amd64
+DIR_OSX=darwin-amd64
+DIR_WINDOWS=windows-amd64
 
 OUT_LINUX=$(OUT_DIR)/$(DIR_LINUX)
 OUT_OSX=$(OUT_DIR)/$(DIR_OSX)
@@ -99,15 +99,15 @@ endif
 
 package-linux: build-linux
 	cd $(OUT_DIR) && \
-	tar -czf linux_amd64.tar.gz $(DIR_LINUX)
+	tar -czf libuast-linux-amd64.tar.gz $(DIR_LINUX)
 
 package-darwin: build-darwin
 	cd $(OUT_DIR) && \
-	tar -czf darwin_amd64.tar.gz $(DIR_OSX)
+	tar -czf libuast-darwin-amd64.tar.gz $(DIR_OSX)
 
 package-windows: build-windows
 	cd $(OUT_DIR) && \
-	tar -czf windows_amd64.tar.gz $(DIR_WINDOWS)
+	tar -czf libuast-windows-amd64.tar.gz $(DIR_WINDOWS)
 
 .PHONY: gotest
 gotest: $(DEPS_GO)
