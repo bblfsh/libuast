@@ -119,7 +119,7 @@ class Node : public uast::Node<Node*> {
 
   NodeKind Kind() { return kind; }
 
-  const char* AsString() { return val_string.data(); }
+  std::string AsString() { return val_string; }
   int64_t     AsInt()    { return val_int; }
   uint64_t    AsUint()   { return val_uint; }
   double      AsFloat()  { return val_float; }
@@ -132,31 +132,33 @@ class Node : public uast::Node<Node*> {
     return obj.size();
   }
 
-  const char* KeyAt(size_t index) {
+  std::string KeyAt(size_t index) {
     size_t i = 0;
-    for (auto it = obj.begin(); it != obj.end(); ++it, ++i) {
-      if (i == index) return it->first.data();
+    for (auto it : obj) {
+      if (i == index) return it.first;
+      i++;
     }
-    return NULL;
+    return nullptr;
   }
 
   Node* ValueAt(size_t index) {
     if (kind == NODE_ARRAY) {
-      if (index >= arr.size()) return 0;
+      if (index >= arr.size()) return nullptr;
       return arr[index];
     }
     size_t i = 0;
-    for (auto it = obj.begin(); it != obj.end(); ++it, ++i) {
-      if (i == index) return it->second;
+    for (auto it : obj) {
+      if (i == index) return it.second;
+      i++;
     }
-    return NULL;
+    return nullptr;
   }
 
   void SetValue(size_t i, Node* v) {
     arr[i] = v;
   }
 
-  void SetKeyValue(const char * k, Node* v) {
+  void SetKeyValue(std::string k, Node* v) {
     obj[k] = v;
   }
 };
@@ -173,8 +175,8 @@ public:
       return n;
     }
 
-    Node* NewString(const char * v) {
-      return new Node(std::string(v));
+    Node* NewString(std::string v) {
+      return new Node(v);
     }
 
     Node* NewInt(int64_t v) {

@@ -19,11 +19,11 @@ namespace uast {
         int id;
     public:
         Role(int v) : id(v) {}
-        Role(const char* name){
-            id = RoleIdForName((char*)name);
+        Role(std::string name){
+            id = RoleIdForName((char*)name.data());
         }
         int ID() { return id; }
-        char* Name() {
+        std::string Name() {
             return RoleNameForId(id);
         }
     };
@@ -47,12 +47,12 @@ namespace uast {
         virtual NodeHandle ToHandle(T node) = 0;
 
         virtual void CheckError() = 0;
-        virtual void SetError(const char* err) = 0;
+        virtual void SetError(std::string err) = 0;
         virtual T RootNode() = 0;
 
         virtual Buffer Encode(T node, UastFormat format) = 0;
 
-        virtual Iterator<T>* Filter(T root, const char* query) = 0;
+        virtual Iterator<T>* Filter(T root, std::string query) = 0;
         virtual Iterator<T>* Iterate(T root, TreeOrder order) = 0;
     };
 
@@ -63,7 +63,7 @@ namespace uast {
 
         virtual T NewObject(size_t size) = 0;
         virtual T NewArray(size_t size) = 0;
-        virtual T NewString(const char* str) = 0;
+        virtual T NewString(std::string str) = 0;
         virtual T NewInt(int64_t val) = 0;
         virtual T NewUint(uint64_t val) = 0;
         virtual T NewFloat(double val) = 0;
@@ -75,7 +75,7 @@ namespace uast {
     public:
         virtual NodeKind Kind(NodeHandle node) = 0;
 
-        virtual const char* AsString(NodeHandle node) = 0;
+        virtual std::string AsString(NodeHandle node) = 0;
         virtual int64_t     AsInt(NodeHandle node) = 0;
         virtual uint64_t    AsUint(NodeHandle node) = 0;
         virtual double      AsFloat(NodeHandle node) = 0;
@@ -83,11 +83,11 @@ namespace uast {
 
         virtual size_t Size(NodeHandle node) = 0;
 
-        virtual const char* KeyAt(NodeHandle node, size_t i) = 0;
+        virtual std::string KeyAt(NodeHandle node, size_t i) = 0;
         virtual NodeHandle ValueAt(NodeHandle node, size_t i) = 0;
 
         virtual void SetValue(NodeHandle node, size_t i, NodeHandle val) = 0;
-        virtual void SetKeyValue(NodeHandle node, const char* key, NodeHandle val) = 0;
+        virtual void SetKeyValue(NodeHandle node, std::string key, NodeHandle val) = 0;
     };
 
     // Node is a high-level interface for UAST nodes.
@@ -98,7 +98,7 @@ namespace uast {
 
         virtual NodeKind Kind() = 0;
 
-        virtual const char* AsString() = 0;
+        virtual std::string AsString() = 0;
         virtual int64_t     AsInt() = 0;
         virtual uint64_t    AsUint() = 0;
         virtual double      AsFloat() = 0;
@@ -106,11 +106,11 @@ namespace uast {
 
         virtual size_t Size() = 0;
 
-        virtual const char* KeyAt(size_t i) = 0;
+        virtual std::string KeyAt(size_t i) = 0;
         virtual T ValueAt(size_t i) = 0;
 
         virtual void SetValue(size_t i, T val) = 0;
-        virtual void SetKeyValue(const char* key, T val) = 0;
+        virtual void SetKeyValue(std::string key, T val) = 0;
     };
 
     // RawIterator is an UAST node iterator of the lowest abstraction level.
@@ -129,7 +129,7 @@ namespace uast {
             done = true;
             cur = 0;
             UastIteratorFree(iter);
-            iter = NULL;
+            iter = nullptr;
         }
         bool next() {
             if (done) return false;
@@ -155,7 +155,7 @@ namespace uast {
         }
 
         static NodeIface*& cppIface() {
-            static NodeIface* n = NULL;
+            static NodeIface* n = nullptr;
             if (n) return n;
 
             n = new(NodeIface);
@@ -165,7 +165,7 @@ namespace uast {
             };
             n->AsString = [](const Uast* ctx, NodeHandle node) -> const char* {
                 auto context = getContext(ctx);
-                return context->impl->AsString(node);
+                return context->impl->AsString(node).data();
             };
             n->AsInt = [](const Uast* ctx, NodeHandle node) -> int64_t {
                 auto context = getContext(ctx);
@@ -191,7 +191,7 @@ namespace uast {
 
             n->KeyAt = [](const Uast* ctx, NodeHandle node, size_t sz) -> const char* {
                 auto context = getContext(ctx);
-                return context->impl->KeyAt(node, sz);
+                return context->impl->KeyAt(node, sz).data();
             };
             n->ValueAt = [](const Uast* ctx, NodeHandle node, size_t sz) -> NodeHandle {
                 auto context = getContext(ctx);
@@ -256,10 +256,10 @@ namespace uast {
         }
         ~RawContext() {
             UastFree(ctx);
-            ctx = NULL;
+            ctx = nullptr;
             contexts().erase(handle);
             handle = 0;
-            impl = NULL;
+            impl = nullptr;
         }
 
         Uast* rawPointer() { return ctx; }
@@ -273,8 +273,8 @@ namespace uast {
             if (err) throw std::runtime_error(err);
         }
 
-        void SetError(const char* err) {
-            UastSetError(ctx, (char *)(err));
+        void SetError(std::string err) {
+            UastSetError(ctx, (char *)(err.data()));
         }
 
         NodeHandle ToNode(NodeHandle node) { return node; }
@@ -288,8 +288,8 @@ namespace uast {
             return Buffer(ptr, sz);
         }
 
-        Iterator<NodeHandle>* Filter(NodeHandle root, const char * query) {
-            auto it = UastFilter(ctx, root, (char*)query);
+        Iterator<NodeHandle>* Filter(NodeHandle root, std::string query) {
+            auto it = UastFilter(ctx, root, (char*)query.data());
             CheckError();
             return new RawIterator(it);
         }
@@ -312,7 +312,7 @@ namespace uast {
         }
         ~PtrIterator(){
             if(owner) delete(iter);
-            iter = NULL;
+            iter = nullptr;
         }
         bool next() {
             return iter->next();
@@ -334,7 +334,7 @@ namespace uast {
         }
         ~PtrContext(){
             delete(ctx);
-            ctx = NULL;
+            ctx = nullptr;
         }
         Uast* rawPointer() { return ctx->rawPointer(); }
         T RootNode() {
@@ -351,7 +351,7 @@ namespace uast {
             if (!node) node = RootNode();
             return ctx->Encode((NodeHandle)node, format);
         }
-        Iterator<T>* Filter(T root, const char* query) {
+        Iterator<T>* Filter(T root, std::string query) {
             auto raw = ctx->Filter(ToHandle(root), query);
             auto it = new PtrIterator<T>(raw, true);
             return it;
@@ -364,7 +364,7 @@ namespace uast {
         void CheckError(){
             ctx->CheckError();
         }
-        void SetError(const char* err){
+        void SetError(std::string err){
             ctx->SetError(err);
         }
     };
@@ -389,7 +389,7 @@ namespace uast {
             return n->Kind();
         }
 
-        const char* AsString(NodeHandle node) {
+        std::string AsString(NodeHandle node) {
             Node<T>* n = (T)node;
             return n->AsString();
         }
@@ -415,7 +415,7 @@ namespace uast {
             return n->Size();
         }
 
-        const char* KeyAt(NodeHandle node, size_t i) {
+        std::string KeyAt(NodeHandle node, size_t i) {
             Node<T>* n = (T)node;
             return n->KeyAt(i);
         }
@@ -433,7 +433,7 @@ namespace uast {
             T node = impl->NewArray(size);
             return (NodeHandle)node;
         }
-        NodeHandle NewString(const char* str) {
+        NodeHandle NewString(std::string str) {
             T node = impl->NewString(str);
             return (NodeHandle)node;
         }
@@ -459,7 +459,7 @@ namespace uast {
             T val = (T)v;
             n->SetValue(i, val);
         }
-        void SetKeyValue(NodeHandle node, const char* key, NodeHandle v) {
+        void SetKeyValue(NodeHandle node, std::string key, NodeHandle v) {
             Node<T>* n = (T)node;
             T val = (T)v;
             n->SetKeyValue(key, val);
@@ -480,7 +480,7 @@ namespace uast {
             return iface->Kind(ctx, node);
         }
 
-        const char* AsString(NodeHandle node) {
+        std::string AsString(NodeHandle node) {
             return iface->AsString(ctx, node);
         }
         int64_t AsInt(NodeHandle node) {
@@ -500,7 +500,7 @@ namespace uast {
             return iface->Size(ctx, node);
         }
 
-        const char* KeyAt(NodeHandle node, size_t i) {
+        std::string KeyAt(NodeHandle node, size_t i) {
             return iface->KeyAt(ctx, node, i);
         }
         NodeHandle ValueAt(NodeHandle node, size_t i) {
@@ -513,8 +513,8 @@ namespace uast {
         NodeHandle NewArray(size_t size) {
             return iface->NewArray(ctx, size);
         }
-        NodeHandle NewString(const char* str) {
-            return iface->NewString(ctx, str);
+        NodeHandle NewString(std::string str) {
+            return iface->NewString(ctx, str.data());
         }
         NodeHandle NewInt(int64_t val) {
             return iface->NewInt(ctx, val);
@@ -532,8 +532,8 @@ namespace uast {
         void SetValue(NodeHandle node, size_t i, NodeHandle v) {
             iface->SetValue(ctx, node, i, v);
         }
-        void SetKeyValue(NodeHandle node, const char* k, NodeHandle v) {
-            iface->SetKeyValue(ctx, node, k, v);
+        void SetKeyValue(NodeHandle node, std::string k, NodeHandle v) {
+            iface->SetKeyValue(ctx, node, k.data(), v);
         }
     };
 
