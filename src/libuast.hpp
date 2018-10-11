@@ -246,11 +246,17 @@ namespace uast {
             return contexts()[ctx->ctx];
         }
     public:
-        RawContext(NodeRawInterface* iface) {
+        RawContext(NodeRawInterface* iface, Uast* c = nullptr) {
             handle = ++lastHandle();
+            if (c && handle != c->ctx) {
+                std::cerr << "TODO: wrong local handle" << std::endl;
+            }
             contexts()[handle] = this;
             impl = iface;
-            ctx = UastNew(cppIface(), handle);
+            ctx = c;
+            if (!ctx) {
+                ctx = UastNew(cppIface(), handle);
+            }
             // TODO: check if pointer is valid
             CheckError();
         }
@@ -544,7 +550,7 @@ namespace uast {
         if (err) throw std::runtime_error(err);
 
         auto impl = new NativeInterface(ctx);
-        return new RawContext(impl);
+        return new RawContext(impl, ctx);
     }
 
     template<class T1, class T2> T2 Load(Context<T1>* src, T1 node, Context<T2>* dst) {

@@ -100,7 +100,7 @@ func UastDecode(p unsafe.Pointer, sz C.size_t, format C.UastFormat) *C.Uast {
 		err = fmt.Errorf("unknown format: %v", format)
 	}
 	if err != nil {
-		c.last = err
+		c.setError(err)
 		return u
 	}
 	if n != nil {
