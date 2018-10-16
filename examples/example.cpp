@@ -119,7 +119,10 @@ class Node : public uast::Node<Node*> {
 
   NodeKind Kind() { return kind; }
 
-  std::string AsString() { return val_string; }
+  std::string* AsString() {
+    std::string* s = new std::string(val_string);
+    return s;
+  }
   int64_t     AsInt()    { return val_int; }
   uint64_t    AsUint()   { return val_uint; }
   double      AsFloat()  { return val_float; }
@@ -132,10 +135,13 @@ class Node : public uast::Node<Node*> {
     return obj.size();
   }
 
-  std::string KeyAt(size_t index) {
+  std::string* KeyAt(size_t index) {
     size_t i = 0;
     for (auto it : obj) {
-      if (i == index) return it.first;
+      if (i == index) {
+        std::string* s = new std::string(it.first);
+        return s;
+      }
       i++;
     }
     return nullptr;

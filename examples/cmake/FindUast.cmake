@@ -8,7 +8,7 @@ find_package(PkgConfig QUIET)
 pkg_check_modules(PC_UAST QUIET uast)
 
 find_path(UAST_INCLUDE_DIR
-  NAMES libuast.h uast.h
+  NAMES libuast.h libuast.hpp
   HINTS ../build/*
 )
 find_library(UAST_LIBRARY

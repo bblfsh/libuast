@@ -7,9 +7,9 @@ NodeKind _uastKind(const Uast* ctx, NodeHandle node) {
     return uastKind((Uast*)(ctx), node);
 }
 
-const char * _uastAsString(const Uast* ctx, NodeHandle node) {
+char * _uastAsString(const Uast* ctx, NodeHandle node) {
     char* s = uastAsString((Uast*)(ctx), node);
-    return (const char*)(s);
+    return s;
 }
 
 int64_t _uastAsInt(const Uast* ctx, NodeHandle node) {
@@ -32,9 +32,9 @@ size_t _uastSize(const Uast* ctx, NodeHandle node) {
     return uastSize((Uast*)(ctx), node);
 }
 
-const char * _uastKeyAt(const Uast* ctx, NodeHandle node, size_t i) {
+char * _uastKeyAt(const Uast* ctx, NodeHandle node, size_t i) {
     char* s = uastKeyAt((Uast*)(ctx), node, i);
-    return (const char*)(s);
+    return s;
 }
 
 NodeHandle _uastValueAt(const Uast* ctx, NodeHandle node, size_t i) {

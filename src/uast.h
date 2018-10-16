@@ -36,16 +36,16 @@ typedef struct Uast Uast;
 typedef struct NodeIface {
     NodeKind (*Kind)(const Uast*, NodeHandle);
 
-    const char * (*AsString)(const Uast*, NodeHandle);
-    int64_t      (*AsInt)   (const Uast*, NodeHandle);
-    uint64_t     (*AsUint)  (const Uast*, NodeHandle);
-    double       (*AsFloat) (const Uast*, NodeHandle);
-    bool         (*AsBool)  (const Uast*, NodeHandle);
+    char *   (*AsString)(const Uast*, NodeHandle);
+    int64_t  (*AsInt)   (const Uast*, NodeHandle);
+    uint64_t (*AsUint)  (const Uast*, NodeHandle);
+    double   (*AsFloat) (const Uast*, NodeHandle);
+    bool     (*AsBool)  (const Uast*, NodeHandle);
 
     size_t (*Size)(const Uast*, NodeHandle);
 
-    const char * (*KeyAt)  (const Uast*, NodeHandle, size_t);
-    NodeHandle   (*ValueAt)(const Uast*, NodeHandle, size_t);
+    char *     (*KeyAt)  (const Uast*, NodeHandle, size_t);
+    NodeHandle (*ValueAt)(const Uast*, NodeHandle, size_t);
 
 
     NodeHandle (*NewObject)(const Uast*, size_t size);

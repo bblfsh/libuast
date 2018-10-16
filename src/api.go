@@ -26,6 +26,10 @@ var _ [nodes.HashSize]byte = [C.UAST_HASH_SIZE]byte{}
 
 func main() {}
 
+func freeString(p *C.char) {
+	C.free(unsafe.Pointer(p))
+}
+
 func newUAST(iface *C.NodeIface, h Handle) *C.Uast {
 	sz := unsafe.Sizeof(C.Uast{})
 	u := (*C.Uast)(C.malloc(C.size_t(sz)))

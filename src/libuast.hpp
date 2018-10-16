@@ -5,6 +5,7 @@
 #include "libuast.h"
 #include <map>
 #include <iostream>
+#include <cstring>
 
 namespace uast {
     struct Buffer {
@@ -75,15 +76,15 @@ namespace uast {
     public:
         virtual NodeKind Kind(NodeHandle node) = 0;
 
-        virtual std::string AsString(NodeHandle node) = 0;
-        virtual int64_t     AsInt(NodeHandle node) = 0;
-        virtual uint64_t    AsUint(NodeHandle node) = 0;
-        virtual double      AsFloat(NodeHandle node) = 0;
-        virtual bool        AsBool(NodeHandle node) = 0;
+        virtual std::string* AsString(NodeHandle node) = 0;
+        virtual int64_t      AsInt(NodeHandle node) = 0;
+        virtual uint64_t     AsUint(NodeHandle node) = 0;
+        virtual double       AsFloat(NodeHandle node) = 0;
+        virtual bool         AsBool(NodeHandle node) = 0;
 
         virtual size_t Size(NodeHandle node) = 0;
 
-        virtual std::string KeyAt(NodeHandle node, size_t i) = 0;
+        virtual std::string* KeyAt(NodeHandle node, size_t i) = 0;
         virtual NodeHandle ValueAt(NodeHandle node, size_t i) = 0;
 
         virtual void SetValue(NodeHandle node, size_t i, NodeHandle val) = 0;
@@ -98,15 +99,15 @@ namespace uast {
 
         virtual NodeKind Kind() = 0;
 
-        virtual std::string AsString() = 0;
-        virtual int64_t     AsInt() = 0;
-        virtual uint64_t    AsUint() = 0;
-        virtual double      AsFloat() = 0;
-        virtual bool        AsBool() = 0;
+        virtual std::string* AsString() = 0;
+        virtual int64_t      AsInt() = 0;
+        virtual uint64_t     AsUint() = 0;
+        virtual double       AsFloat() = 0;
+        virtual bool         AsBool() = 0;
 
         virtual size_t Size() = 0;
 
-        virtual std::string KeyAt(size_t i) = 0;
+        virtual std::string* KeyAt(size_t i) = 0;
         virtual T ValueAt(size_t i) = 0;
 
         virtual void SetValue(size_t i, T val) = 0;
@@ -163,9 +164,15 @@ namespace uast {
                 auto context = getContext(ctx);
                 return context->impl->Kind(node);
             };
-            n->AsString = [](const Uast* ctx, NodeHandle node) -> const char* {
+            n->AsString = [](const Uast* ctx, NodeHandle node) -> char* {
                 auto context = getContext(ctx);
-                return context->impl->AsString(node).data();
+                std::string* str = context->impl->AsString(node);
+
+                char * cstr = new char [str->length()+1];
+                std::strcpy (cstr, str->c_str());
+                delete str;
+
+                return cstr;
             };
             n->AsInt = [](const Uast* ctx, NodeHandle node) -> int64_t {
                 auto context = getContext(ctx);
@@ -189,9 +196,15 @@ namespace uast {
                 return context->impl->Size(node);
             };
 
-            n->KeyAt = [](const Uast* ctx, NodeHandle node, size_t sz) -> const char* {
+            n->KeyAt = [](const Uast* ctx, NodeHandle node, size_t sz) -> char* {
                 auto context = getContext(ctx);
-                return context->impl->KeyAt(node, sz).data();
+                std::string* str = context->impl->KeyAt(node, sz);
+
+                char * cstr = new char [str->length()+1];
+                std::strcpy (cstr, str->c_str());
+                delete str;
+
+                return cstr;
             };
             n->ValueAt = [](const Uast* ctx, NodeHandle node, size_t sz) -> NodeHandle {
                 auto context = getContext(ctx);
@@ -395,7 +408,7 @@ namespace uast {
             return n->Kind();
         }
 
-        std::string AsString(NodeHandle node) {
+        std::string* AsString(NodeHandle node) {
             Node<T>* n = (T)node;
             return n->AsString();
         }
@@ -421,7 +434,7 @@ namespace uast {
             return n->Size();
         }
 
-        std::string KeyAt(NodeHandle node, size_t i) {
+        std::string* KeyAt(NodeHandle node, size_t i) {
             Node<T>* n = (T)node;
             return n->KeyAt(i);
         }
@@ -486,8 +499,12 @@ namespace uast {
             return iface->Kind(ctx, node);
         }
 
-        std::string AsString(NodeHandle node) {
-            return iface->AsString(ctx, node);
+        std::string* AsString(NodeHandle node) {
+            char* s = iface->AsString(ctx, node);
+            std::string* str = new std::string(s);
+            delete s;
+
+            return str;
         }
         int64_t AsInt(NodeHandle node) {
             return iface->AsInt(ctx, node);
@@ -506,8 +523,12 @@ namespace uast {
             return iface->Size(ctx, node);
         }
 
-        std::string KeyAt(NodeHandle node, size_t i) {
-            return iface->KeyAt(ctx, node, i);
+        std::string* KeyAt(NodeHandle node, size_t i) {
+            char* s = iface->KeyAt(ctx, node, i);
+            std::string* str = new std::string(s);
+            delete s;
+
+            return str;
         }
         NodeHandle ValueAt(NodeHandle node, size_t i) {
             return iface->ValueAt(ctx, node, i);
