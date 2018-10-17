@@ -255,28 +255,42 @@ namespace uast {
             static std::map<UastHandle,RawContext*> v; return v;
         }
 
+        static std::map<UastHandle,RawContext*>& nativeContexts() {
+            static std::map<UastHandle,RawContext*> v; return v;
+        }
+
         static RawContext* getContext(const Uast* ctx) {
-            return contexts()[ctx->ctx];
+            if (ctx->iface == cppIface()) {
+                return contexts()[ctx->ctx];
+            }
+            return nativeContexts()[ctx->ctx];
         }
     public:
         RawContext(NodeRawInterface* iface, Uast* c = nullptr) {
-            handle = ++lastHandle();
-            if (c && handle != c->ctx) {
-                std::cerr << "TODO: wrong local handle" << std::endl;
-            }
-            contexts()[handle] = this;
             impl = iface;
-            ctx = c;
-            if (!ctx) {
+            if (c != nullptr) {
+                // allocated natively, check the handle and use it (in a separate map)
+                if (c->ctx  == 0) throw std::runtime_error("zero handle on a native context");
+                nativeContexts()[c->ctx] = this;
+                ctx = c;
+            } else {
+                // allocate a new handle and the context
+                handle = ++lastHandle();
+                contexts()[handle] = this;
                 ctx = UastNew(cppIface(), handle);
+                // TODO: check if pointer is valid
             }
-            // TODO: check if pointer is valid
             CheckError();
         }
         ~RawContext() {
+            UastHandle nativeHandle = ctx->ctx;
             UastFree(ctx);
             ctx = nullptr;
-            contexts().erase(handle);
+            if (handle == 0) {
+                nativeContexts().erase(nativeHandle);
+            } else {
+                contexts().erase(handle);
+            }
             handle = 0;
             impl = nullptr;
         }
