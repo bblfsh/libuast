@@ -106,7 +106,9 @@ func (c *cNodes) NewValue(v nodes.Value) Node {
 	var n C.NodeHandle
 	switch v := v.(type) {
 	case nodes.String:
-		n = C.callNewString(c.impl, c.ctx, C.CString(string(v)))
+		cv := C.CString(string(v))
+		n = C.callNewString(c.impl, c.ctx, cv)
+		freeString(cv)
 	case nodes.Int:
 		n = C.callNewInt(c.impl, c.ctx, C.int64_t(v))
 	case nodes.Uint:
@@ -175,7 +177,7 @@ func (n *cObject) Size() int {
 func (n *cObject) keyAt(i int) string {
 	cstr := C.callKeyAt(n.c.impl, n.c.ctx, n.h, C.size_t(i))
 	s := C.GoString(cstr)
-	//C.free(unsafe.Pointer(cstr))
+	freeString(cstr)
 	return s
 }
 
@@ -301,7 +303,7 @@ func (n *cValue) Value() nodes.Value {
 	case nodes.KindString:
 		cstr := C.callAsString(n.c.impl, n.c.ctx, n.h)
 		s := C.GoString(cstr)
-		//C.free(unsafe.Pointer(cstr))
+		freeString(cstr)
 		n.val = nodes.String(s)
 	case nodes.KindInt:
 		v := C.callAsInt(n.c.impl, n.c.ctx, n.h)
@@ -347,7 +349,9 @@ func (n *cTmpNode) SetKeyValue(k string, v Node) {
 	if v != nil {
 		h = C.NodeHandle(v.Handle())
 	}
-	C.callSetKeyValue(n.c.impl, n.c.ctx, n.h, C.CString(k), h)
+	ck := C.CString(k)
+	C.callSetKeyValue(n.c.impl, n.c.ctx, n.h, ck, h)
+	freeString(ck)
 }
 
 func (n *cTmpNode) Build() Node {

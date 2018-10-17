@@ -26,6 +26,10 @@ var _ [nodes.HashSize]byte = [C.UAST_HASH_SIZE]byte{}
 
 func main() {}
 
+func freeString(p *C.char) {
+	C.free(unsafe.Pointer(p))
+}
+
 func newUAST(iface *C.NodeIface, h Handle) *C.Uast {
 	sz := unsafe.Sizeof(C.Uast{})
 	u := (*C.Uast)(C.malloc(C.size_t(sz)))
@@ -100,7 +104,7 @@ func UastDecode(p unsafe.Pointer, sz C.size_t, format C.UastFormat) *C.Uast {
 		err = fmt.Errorf("unknown format: %v", format)
 	}
 	if err != nil {
-		c.last = err
+		c.setError(err)
 		return u
 	}
 	if n != nil {
@@ -179,9 +183,9 @@ func setContextError(h *C.Uast, err error) {
 	c.setError(err)
 }
 
-//export LastError
-// LastError return the last encountered error in this context, if any.
-func LastError(ctx *C.Uast) *C.char {
+//export UastLastError
+// UastLastError return the last encountered error in this context, if any.
+func UastLastError(ctx *C.Uast) *C.char {
 	c := getContextFrom(ctx)
 	if c == nil {
 		return nil
@@ -219,9 +223,9 @@ func UastFilter(ctx *C.Uast, node C.NodeHandle, query *C.char) *C.UastIterator {
 	return newIterator(ctx, res.Handle())
 }
 
-//export SetError
-// SetError sets an error state for this context. It can be used inside interface functions to indicate an error to the caller.
-func SetError(ctx *C.Uast, str *C.char) {
+//export UastSetError
+// UastSetError sets an error state for this context. It can be used inside interface functions to indicate an error to the caller.
+func UastSetError(ctx *C.Uast, str *C.char) {
 	c := getContextFrom(ctx)
 	if c == nil {
 		return

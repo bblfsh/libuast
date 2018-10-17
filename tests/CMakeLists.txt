@@ -10,7 +10,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 find_package(CUnit)
 find_package(Uast)
 
-include_directories(. ../src/ ${CHECK_INCLUDE_DIRS} ${CUNIT_INCLUDE_DIRS} ${UAST_INCLUDE_DIRS})
+include_directories(. ${CHECK_INCLUDE_DIRS} ${CUNIT_INCLUDE_DIRS} ${UAST_INCLUDE_DIRS})
 
 add_definitions(-DTESTING)
 add_executable(testsuite main.cc ${libsrc})

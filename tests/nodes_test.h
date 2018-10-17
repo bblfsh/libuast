@@ -57,7 +57,7 @@ Node* IterOne(UastIterator* iter) {
 }
 
 bool IsError(Uast* ctx) {
-    char* err = LastError(ctx);
+    char* err = UastLastError(ctx);
     if (err) {
       printf("\nerror: %s\n", err);
       free(err);
@@ -76,7 +76,7 @@ bool UastFilterBool(Uast* ctx, NodeHandle node, char* query, bool* ok) {
 
   if (UAST_CALL(ctx, Kind, n) != NODE_BOOL) {
     *ok = false;
-    SetError(ctx, (char*)"value is not bool");
+    UastSetError(ctx, (char*)"value is not bool");
     return false;
   }
   bool v = UAST_CALL(ctx, AsBool, n);
@@ -313,7 +313,7 @@ void TestUastFunctionBoolError() {
   bool ok;
   int res = UastFilterBool(ctx, NodeHandle(root), (char*)"//*", &ok);
   CU_ASSERT_FATAL(!ok);
-  CU_ASSERT_FATAL(strcmp(LastError(ctx), ""));
+  CU_ASSERT_FATAL(strcmp(UastLastError(ctx), ""));
 
   UastFree(ctx);
 }
@@ -334,7 +334,7 @@ void TestUastFunctionNumberError() {
   bool ok;
   double res = UastFilterNumber(ctx, NodeHandle(root), (char*)"concat(//*)", &ok);
   CU_ASSERT_FATAL(!ok);
-  CU_ASSERT_FATAL(strcmp(LastError(ctx), ""));
+  CU_ASSERT_FATAL(strcmp(UastLastError(ctx), ""));
 
   UastFree(ctx);
 }
@@ -622,7 +622,7 @@ void TestXpath() {
   Node module = Node("Module");
 
   CU_ASSERT_FATAL(UastFilter(ctx, NodeHandle(&module), (char*)"/Module/") == NULL);
-  char* error = LastError(ctx);
+  char* error = UastLastError(ctx);
   CU_ASSERT_FATAL(error != NULL);
   // TODO: this should be fixed in XPath library
   // CU_ASSERT_FATAL(!strcmp(error, "Invalid expression\n"));

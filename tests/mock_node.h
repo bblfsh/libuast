@@ -129,8 +129,13 @@ static NodeKind nodeKind(const Uast* ctx, NodeHandle node) {
   return ((Node *)node)->kind;
 }
 
-static const char *nodeAsString(const Uast* ctx, NodeHandle node) {
-  return ((Node *)node)->val_string.data();
+static char *nodeAsString(const Uast* ctx, NodeHandle node) {
+  auto str = ((Node *)node)->val_string;
+
+  char * cstr = new char [str.length()+1];
+  std::strcpy (cstr, str.c_str());
+
+  return cstr;
 }
 
 static int64_t nodeAsInt(const Uast* ctx, NodeHandle node) {
@@ -157,11 +162,18 @@ static size_t nodeSize(const Uast* ctx, NodeHandle node) {
   return n->obj.size();
 }
 
-static const char * nodeKeyAt(const Uast* ctx, NodeHandle node, size_t index) {
+static char * nodeKeyAt(const Uast* ctx, NodeHandle node, size_t index) {
   auto n = (Node *)node;
   size_t i = 0;
   for (auto it = n->obj.begin(); it != n->obj.end(); ++it, ++i) {
-    if (i == index) return it->first.data();
+    if (i == index) {
+        auto str = it->first;
+
+         char * cstr = new char [str.length()+1];
+         std::strcpy (cstr, str.c_str());
+
+        return cstr;
+    }
   }
   return NULL;
 }
