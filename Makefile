@@ -35,6 +35,8 @@ ifeq ("$(HOSTOS)", "windows")
 OUT_WINDOWS=$(OUT_DIR)\\$(DIR_WINDOWS)
 endif
 
+build: build-$(HOSTOS)
+
 .PHONY: build-all
 ifeq ("$(HOSTOS)", "linux")
 build-all: build-linux build-windows
@@ -50,8 +52,6 @@ endif
 .PHONY: vendor
 vendor: Gopkg.*
 	dep ensure --vendor-only
-
-build: build-$(HOSTOS)
 
 build-linux: $(DEPS_C) $(DEPS_GO)
 	mkdir -p $(OUT_LINUX) && \
