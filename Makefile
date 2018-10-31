@@ -5,6 +5,7 @@ DEPS_C = $(SRC_DIR)/*.h $(SRC_DIR)/*.hpp $(SRC_DIR)/*.c
 DEPS_GO = $(SRC_DIR)/*.go gen_header.go vendor
 
 BUILD_MODE=-buildmode=c-shared
+BUILD_MODE_STATIC=-buildmode=c-archive
 GO_BUILD=go build
 CC_WIN64=x86_64-w64-mingw32-gcc
 CC_WIN32=i686-w64-mingw32-gcc
@@ -56,6 +57,7 @@ vendor: Gopkg.*
 build-linux: $(DEPS_C) $(DEPS_GO)
 	mkdir -p $(OUT_LINUX) && \
 	GOOS=linux GOARCH=amd64 $(GO_BUILD) $(BUILD_MODE) -o=$(OUT_LINUX)/$(OUT_NAME).so $(SRC_DIR)/ && \
+	GOOS=linux GOARCH=amd64 $(GO_BUILD) $(BUILD_MODE_STATIC) -o=$(OUT_LINUX)/$(OUT_NAME).a $(SRC_DIR)/ && \
 	$(GEN_HEADER) $(OUT_LINUX)/$(OUT_HEADER) && \
 	$(CP_HEADERS) $(OUT_LINUX)/
 
