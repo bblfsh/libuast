@@ -72,6 +72,7 @@ ifneq ("$(HOSTOS)", "windows")
 build-windows: $(DEPS_C) $(DEPS_GO)
 	mkdir -p $(OUT_WINDOWS)
 	GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=$(CC_WIN64) $(GO_BUILD) $(BUILD_MODE) -o=$(OUT_WINDOWS)/$(OUT_NAME).dll $(SRC_DIR)/
+	GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=$(CC_WIN64) $(GO_BUILD) $(BUILD_MODE_STATIC) -o=$(OUT_WINDOWS)/$(OUT_NAME).lib $(SRC_DIR)/
 	$(GEN_HEADER) $(OUT_WINDOWS)/$(OUT_HEADER)
 	$(CP_HEADERS) $(OUT_WINDOWS)/
 
