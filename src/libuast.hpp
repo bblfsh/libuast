@@ -14,7 +14,7 @@
 
     extern "C" FILE * __cdecl __iob_func(void)
     {
-        return _iob;
+        return &(_iob[0]);
     }
 #endif
 
