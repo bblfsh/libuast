@@ -7,6 +7,17 @@
 #include <iostream>
 #include <cstring>
 
+// Workaround for linking libs cross-compiled with gcc vs VS2015 libs
+// See: https://stackoverflow.com/questions/30412951/unresolved-external-symbol-imp-fprintf-and-imp-iob-func-sdl2
+#ifdef _WIN32
+    FILE _iob[] = {*stdin, *stdout, *stderr};
+
+    extern "C" FILE * __cdecl __iob_func(void)
+    {
+        return _iob;
+    }
+#endif
+
 namespace uast {
     struct Buffer {
         Buffer(void*  p, size_t sz) : ptr(p), size(sz) {}
