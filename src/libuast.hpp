@@ -27,6 +27,13 @@ namespace uast {
         size_t size;
     };
 
+    // MemStats returns current memory usage for libuast.
+    UastMemStats MemStats() {
+        UastMemStats st;
+        UastReadMemStats(&st);
+        return st;
+    }
+
     // Role of UAST node.
     class Role {
     private:

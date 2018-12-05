@@ -143,6 +143,12 @@ static NodeHandle UastLoad(const Uast *src, NodeHandle n, const Uast *dst) {
       return 0;
 }
 
+// UastMemStats holds memory statistics for libuast.
+typedef struct UastMemStats {
+ uint64_t allocated; // bytes allocated for live objects
+ uint64_t objects;   // number of live objects
+} UastMemStats;
+
 /*GO-HEADER*/
 
 #endif // UAST_H_

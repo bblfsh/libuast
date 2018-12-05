@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"runtime"
 	"unsafe"
 
 	"gopkg.in/bblfsh/sdk.v2/uast"
@@ -356,4 +357,15 @@ func RoleIdForName(name *C.char) C.int {
 	s := C.GoString(name)
 	r := role.FromString(s)
 	return C.int(r)
+}
+
+//export UastReadMemStats
+// UastReadMemStats fills in current memory statistics. This call may affect libuast performance.
+func UastReadMemStats(st *C.UastMemStats) {
+	var m runtime.MemStats
+	// this may cause stop-the-world, hence the comment about performance
+	runtime.ReadMemStats(&m)
+
+	st.allocated = C.uint64_t(m.Alloc)
+	st.objects = C.uint64_t(m.Mallocs - m.Frees)
 }
