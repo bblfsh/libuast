@@ -9,13 +9,15 @@
 
 // Workaround for linking libs cross-compiled with gcc vs VS2015 libs
 // See: https://stackoverflow.com/questions/30412951/unresolved-external-symbol-imp-fprintf-and-imp-iob-func-sdl2
-#ifdef _WIN32
-    FILE _iob[] = {*stdin, *stdout, *stderr};
+#ifdef _MSC_VER
+    #if _MSC_VER >= 1900
+        FILE _iob[] = {*stdin, *stdout, *stderr};
 
-    extern "C" FILE * __cdecl __iob_func(void)
-    {
-        return &(_iob[0]);
-    }
+        extern "C" FILE * __cdecl __iob_func(void)
+        {
+            return &(_iob[0]);
+        }
+    #endif
 #endif
 
 namespace uast {
