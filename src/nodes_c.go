@@ -35,7 +35,7 @@ import (
 	"fmt"
 	"sort"
 
-	"gopkg.in/bblfsh/sdk.v2/uast/nodes"
+	"github.com/bblfsh/sdk/v3/uast/nodes"
 )
 
 var _ NodeIface = (*cNodes)(nil)

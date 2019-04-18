@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"sync/atomic"
 
-	"gopkg.in/bblfsh/sdk.v2/uast/nodes"
+	"github.com/bblfsh/sdk/v3/uast/nodes"
 )
 
 var goImpl *C.NodeIface // a global pointer with C function pointers to Go implementation of the libuast interface

@@ -1,7 +1,10 @@
 package main
 
-import "gopkg.in/bblfsh/sdk.v1/uast"
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/bblfsh/sdk/v3/uast/role"
+)
 
 func main() {
 	fmt.Println(
@@ -17,12 +20,12 @@ static const char *id_to_roles[] = {`)
 
 	var lastRole int
 	for i := 0; ; i++ {
-		role := uast.Role(i).String()
-		if role == fmt.Sprintf("Role(%d)", i) {
+		r := role.Role(i).String()
+		if r == fmt.Sprintf("Role(%d)", i) {
 			break
 		}
 		lastRole = i
-		name := "role" + role
+		name := "role" + r
 		fmt.Printf("    \"%s\",\n", name)
 	}
 	fmt.Println("};")

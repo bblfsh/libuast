@@ -14,12 +14,12 @@ import (
 	"runtime"
 	"unsafe"
 
-	"gopkg.in/bblfsh/sdk.v2/uast"
-	"gopkg.in/bblfsh/sdk.v2/uast/nodes"
-	"gopkg.in/bblfsh/sdk.v2/uast/nodes/nodesproto"
-	"gopkg.in/bblfsh/sdk.v2/uast/query"
-	"gopkg.in/bblfsh/sdk.v2/uast/role"
-	"gopkg.in/bblfsh/sdk.v2/uast/yaml"
+	"github.com/bblfsh/sdk/v3/uast"
+	"github.com/bblfsh/sdk/v3/uast/nodes"
+	"github.com/bblfsh/sdk/v3/uast/nodes/nodesproto"
+	"github.com/bblfsh/sdk/v3/uast/query"
+	"github.com/bblfsh/sdk/v3/uast/role"
+	"github.com/bblfsh/sdk/v3/uast/yaml"
 )
 
 // static check to make sure UAST_HASH_SIZE constant is synchronized with SDK

@@ -5,10 +5,10 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"gopkg.in/bblfsh/sdk.v2/uast"
-	"gopkg.in/bblfsh/sdk.v2/uast/nodes"
-	"gopkg.in/bblfsh/sdk.v2/uast/query"
-	"gopkg.in/bblfsh/sdk.v2/uast/query/xpath"
+	"github.com/bblfsh/sdk/v3/uast"
+	"github.com/bblfsh/sdk/v3/uast/nodes"
+	"github.com/bblfsh/sdk/v3/uast/query"
+	"github.com/bblfsh/sdk/v3/uast/query/xpath"
 )
 
 // Handle is an opaque int handle used as a reference to other objects either on the Go side or on the client side.
