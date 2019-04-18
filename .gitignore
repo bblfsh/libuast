@@ -18,10 +18,6 @@
 *.dylib
 *.dll
 
-# Fortran module files
-*.mod
-*.smod
-
 # Compiled Static libraries
 *.lai
 *.la
@@ -46,3 +42,4 @@ testing_exec
 example1
 build/
 tests/Makefile
+vendor/

@@ -20,7 +20,7 @@ Check [releases](https://github.com/bblfsh/libuast/releases) for precompiled bin
 ### Dependencies
 
 **Dependencies:**
-- Go >= 1.11
+- Go 1.12+
 - gcc (for cgo)
 - libcunit1 (optional, for tests)
 

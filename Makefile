@@ -2,7 +2,7 @@ HOSTOS:=$(shell go env GOHOSTOS)
 
 SRC_DIR=./src
 DEPS_C = $(SRC_DIR)/*.h $(SRC_DIR)/*.hpp $(SRC_DIR)/*.c
-DEPS_GO = $(SRC_DIR)/*.go gen_header.go vendor
+DEPS_GO = $(SRC_DIR)/*.go gen_header.go go.mod go.sum
 
 BUILD_MODE=-buildmode=c-shared
 BUILD_MODE_STATIC=-buildmode=c-archive
@@ -49,10 +49,6 @@ else ifeq ("$(HOSTOS)", "darwin")
 build-all: build-darwin
 
 endif
-
-.PHONY: vendor
-vendor: Gopkg.*
-	dep ensure --vendor-only
 
 build-linux: $(DEPS_C) $(DEPS_GO)
 	mkdir -p $(OUT_LINUX) && \
