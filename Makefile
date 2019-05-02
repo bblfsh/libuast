@@ -60,6 +60,7 @@ build-linux: $(DEPS_C) $(DEPS_GO)
 build-darwin: $(DEPS_C) $(DEPS_GO)
 	mkdir -p $(OUT_OSX) && \
 	GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 $(GO_BUILD) $(BUILD_MODE) -o=$(OUT_OSX)/$(OUT_NAME).so $(SRC_DIR)/ && \
+	GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 $(GO_BUILD) $(BUILD_MODE_STATIC) -o=$(OUT_OSX)/$(OUT_NAME).a $(SRC_DIR)/ && \
 	$(GEN_HEADER) $(OUT_OSX)/$(OUT_HEADER) && \
 	$(CP_HEADERS) $(OUT_OSX)/
 
