@@ -149,6 +149,18 @@ typedef struct UastMemStats {
  uint64_t objects;   // number of live objects
 } UastMemStats;
 
+// UastSourceIndex represents a positional index for a source file.
+// It's initialized with UastSourceIndexNew and freed with UastSourceIndexFree.
+typedef struct UastSourceIndex {
+  uintptr_t handle;
+} UastSourceIndex;
+
+// UastLineCol is a one-based line-column position in a source file.
+typedef struct UastLineCol {
+  int line;
+  int col;
+} UastLineCol;
+
 /*GO-HEADER*/
 
 #endif // UAST_H_
