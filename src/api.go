@@ -19,7 +19,7 @@ import (
 	"github.com/bblfsh/sdk/v3/uast/nodes/nodesproto"
 	"github.com/bblfsh/sdk/v3/uast/query"
 	"github.com/bblfsh/sdk/v3/uast/role"
-	"github.com/bblfsh/sdk/v3/uast/yaml"
+	"github.com/bblfsh/sdk/v3/uast/uastyaml"
 )
 
 // static check to make sure UAST_HASH_SIZE constant is synchronized with SDK
@@ -100,7 +100,7 @@ func UastDecode(p unsafe.Pointer, sz C.size_t, format C.UastFormat) *C.Uast {
 	case C.UAST_BINARY:
 		n, err = nodesproto.ReadTree(bytes.NewReader(data))
 	case C.UAST_YAML:
-		n, err = uastyml.Unmarshal(data)
+		n, err = uastyaml.Unmarshal(data)
 	default:
 		err = fmt.Errorf("unknown format: %v", format)
 	}
@@ -143,7 +143,7 @@ func UastEncode(ctx *C.Uast, node C.NodeHandle, size *C.size_t, format C.UastFor
 	case C.UAST_BINARY:
 		err = nodesproto.WriteTo(buf, n)
 	case C.UAST_YAML:
-		err = uastyml.NewEncoder(buf).Encode(n)
+		err = uastyaml.NewEncoder(buf).Encode(n)
 	default:
 		err = fmt.Errorf("unknown format: %v", format)
 	}
