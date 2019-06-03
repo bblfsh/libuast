@@ -25,6 +25,11 @@ import (
 // static check to make sure UAST_HASH_SIZE constant is synchronized with SDK
 var _ [nodes.HashSize]byte = [C.UAST_HASH_SIZE]byte{}
 
+const (
+	sizeUast         = unsafe.Sizeof(C.Uast{})
+	sizeUastIterator = unsafe.Sizeof(C.UastIterator{})
+)
+
 func main() {}
 
 func freeString(p *C.char) {
@@ -32,8 +37,7 @@ func freeString(p *C.char) {
 }
 
 func newUAST(iface *C.NodeIface, h Handle) *C.Uast {
-	sz := unsafe.Sizeof(C.Uast{})
-	u := (*C.Uast)(C.malloc(C.size_t(sz)))
+	u := (*C.Uast)(C.malloc(C.size_t(sizeUast)))
 	u.iface = iface
 	u.handle = C.uintptr_t(h)
 	u.root = 0
@@ -243,8 +247,7 @@ var toOrder = map[C.TreeOrder]query.IterOrder{
 }
 
 func newIterator(ctx *C.Uast, h Handle) *C.UastIterator {
-	sz := unsafe.Sizeof(C.UastIterator{})
-	it := (*C.UastIterator)(C.malloc(C.size_t(sz)))
+	it := (*C.UastIterator)(C.malloc(C.size_t(sizeUastIterator)))
 	it.ctx = ctx
 	it.handle = C.uintptr_t(h)
 	return it

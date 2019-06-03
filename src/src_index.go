@@ -13,16 +13,21 @@ import (
 	"github.com/bblfsh/sdk/v3/uast/transformer/positioner"
 )
 
-var (
-	srcMu      sync.RWMutex
-	srcLast    Handle
-	srcIndexes = make(map[Handle]*positioner.Index)
+const (
+	sizeUastSourceIndex = unsafe.Sizeof(C.UastSourceIndex{})
 )
+
+var srcInd = struct {
+	sync.RWMutex
+	last     Handle
+	byHandle map[Handle]*positioner.Index
+}{
+	byHandle: make(map[Handle]*positioner.Index),
+}
 
 // newSourceIndex allocates and populates the UastSourceIndex structure for C code to use.
 func newSourceIndex(h Handle) *C.UastSourceIndex {
-	sz := unsafe.Sizeof(C.UastSourceIndex{})
-	v := (*C.UastSourceIndex)(C.malloc(C.size_t(sz)))
+	v := (*C.UastSourceIndex)(C.malloc(C.size_t(sizeUastSourceIndex)))
 	v.handle = C.uintptr_t(h)
 	return v
 }
@@ -34,11 +39,11 @@ func UastSourceIndexNew(source unsafe.Pointer, size C.size_t) *C.UastSourceIndex
 	index := positioner.NewIndex(cBytes(source, size), &positioner.IndexOptions{
 		Unicode: true,
 	})
-	srcMu.Lock()
-	srcLast++
-	h := srcLast
-	srcIndexes[h] = index
-	srcMu.Unlock()
+	srcInd.Lock()
+	srcInd.last++
+	h := srcInd.last
+	srcInd.byHandle[h] = index
+	srcInd.Unlock()
 	return newSourceIndex(h)
 }
 
@@ -53,16 +58,16 @@ func UastSourceIndexFree(idx *C.UastSourceIndex) {
 	if h == 0 {
 		return
 	}
-	srcMu.Lock()
-	delete(srcIndexes, Handle(h))
-	srcMu.Unlock()
+	srcInd.Lock()
+	delete(srcInd.byHandle, Handle(h))
+	srcInd.Unlock()
 }
 
 // getSourceIndex returns an index for a given handle. It returns nil if handle is invalid.
 func getSourceIndex(h Handle) *positioner.Index {
-	srcMu.RLock()
-	idx := srcIndexes[h]
-	srcMu.RUnlock()
+	srcInd.RLock()
+	idx := srcInd.byHandle[h]
+	srcInd.RUnlock()
 	return idx
 }
 

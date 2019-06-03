@@ -79,30 +79,32 @@ type TmpNode interface {
 	Build() Node
 }
 
-var (
-	ctxMu sync.RWMutex
-	last  Handle
-	ctxes = make(map[Handle]*Context)
-)
+var ctxes = struct {
+	sync.RWMutex
+	last     Handle
+	byHandle map[Handle]*Context
+}{
+	byHandle: make(map[Handle]*Context),
+}
 
 func newContext(impl NodeIface) *Context {
-	ctxMu.Lock()
-	defer ctxMu.Unlock()
+	ctxes.Lock()
+	defer ctxes.Unlock()
 
-	last++
-	h := last
+	ctxes.last++
+	h := ctxes.last
 
 	ctx := &Context{
 		h: h, impl: impl,
 	}
-	ctxes[h] = ctx
+	ctxes.byHandle[h] = ctx
 	return ctx
 }
 
 func getContext(h Handle) *Context {
-	ctxMu.RLock()
-	ctx := ctxes[h]
-	ctxMu.RUnlock()
+	ctxes.RLock()
+	ctx := ctxes.byHandle[h]
+	ctxes.RUnlock()
 	return ctx
 }
 
@@ -149,9 +151,9 @@ func (c *Context) free() {
 	if c == nil {
 		return
 	}
-	ctxMu.Lock()
-	delete(ctxes, c.h)
-	ctxMu.Unlock()
+	ctxes.Lock()
+	delete(ctxes.byHandle, c.h)
+	ctxes.Unlock()
 	c.impl.Free()
 	c.iters = nil
 }
