@@ -12,6 +12,8 @@ import (
 )
 
 // Handle is an opaque int handle used as a reference to other objects either on the Go side or on the client side.
+//
+// This is required for most Go-based objects since Go 1.6+ has a strict rule that C cannot store any Go pointers.
 type Handle uintptr
 
 // IsValue checks if a node is one of the value types.
