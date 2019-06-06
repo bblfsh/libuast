@@ -25,18 +25,22 @@ func main() {
 	}
 }
 
-func run() error {
-	buf := new(bytes.Buffer)
-	buf.WriteString(`
+const (
+	headerPrologue = `
 #ifdef __cplusplus
 extern "C" {
 #endif
-`)
-	defer buf.WriteString(`
+`
+	headerEpilogue = `
 #ifdef __cplusplus
 }
 #endif
-`)
+`
+)
+
+func run() error {
+	buf := new(bytes.Buffer)
+	buf.WriteString(headerPrologue)
 	for _, fname := range []string{
 		"api.go",
 		"src_index.go",
@@ -72,6 +76,7 @@ extern "C" {
 			}
 		}
 	}
+	buf.WriteString(headerEpilogue)
 	return writeHeader(buf.Bytes())
 }
 
