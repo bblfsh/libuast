@@ -20,9 +20,22 @@ const (
 var srcInd = struct {
 	sync.RWMutex
 	last     Handle
-	byHandle map[Handle]*positioner.Index
+	byHandle map[Handle]*sourceIndex
 }{
-	byHandle: make(map[Handle]*positioner.Index),
+	byHandle: make(map[Handle]*sourceIndex),
+}
+
+type sourceIndex struct {
+	idx *positioner.Index
+	err error
+}
+
+func (idx *sourceIndex) setError(err error) {
+	idx.err = err
+}
+
+func (idx *sourceIndex) lastError() error {
+	return idx.err
 }
 
 // newSourceIndex allocates and populates the UastSourceIndex structure for C code to use.
@@ -42,7 +55,7 @@ func UastSourceIndexNew(source unsafe.Pointer, size C.size_t) *C.UastSourceIndex
 	srcInd.Lock()
 	srcInd.last++
 	h := srcInd.last
-	srcInd.byHandle[h] = index
+	srcInd.byHandle[h] = &sourceIndex{idx: index}
 	srcInd.Unlock()
 	return newSourceIndex(h)
 }
@@ -63,8 +76,30 @@ func UastSourceIndexFree(idx *C.UastSourceIndex) {
 	srcInd.Unlock()
 }
 
+//export UastSourceIndexLastError
+// UastSourceIndexLastError returns the last error returned by index operations.
+func UastSourceIndexLastError(idx *C.UastSourceIndex) *C.char {
+	index := getSourceIndexFrom(idx)
+	if index == nil {
+		return nil
+	}
+	err := index.lastError()
+	if err == nil {
+		return nil
+	}
+	return C.CString(err.Error())
+}
+
+// getSourceIndexFrom returns an index for a given C.UastSourceIndex pointer. It returns nil if C structure is invalid.
+func getSourceIndexFrom(idx *C.UastSourceIndex) *sourceIndex {
+	if idx == nil || idx.handle == 0 {
+		return nil
+	}
+	return getSourceIndex(Handle(idx.handle))
+}
+
 // getSourceIndex returns an index for a given handle. It returns nil if handle is invalid.
-func getSourceIndex(h Handle) *positioner.Index {
+func getSourceIndex(h Handle) *sourceIndex {
 	srcInd.RLock()
 	idx := srcInd.byHandle[h]
 	srcInd.RUnlock()
@@ -74,17 +109,16 @@ func getSourceIndex(h Handle) *positioner.Index {
 // convertOffset is a helper to convert one offset to the other, given a conversion function.
 func convertOffset(fnc func(*positioner.Index, int) (int, error),
 	idx *C.UastSourceIndex, off C.int) C.int {
-	if idx == nil || idx.handle == 0 || off < 0 {
+	if off < 0 {
 		return -1
 	}
-	index := getSourceIndex(Handle(idx.handle))
+	index := getSourceIndexFrom(idx)
 	if index == nil {
 		return -1
 	}
-	roff, err := fnc(index, int(off))
+	roff, err := fnc(index.idx, int(off))
 	if err != nil {
-		// TODO: we should return this error somehow
-		//       previously we stored it in Context, but we don't have (nor need) it here
+		index.setError(err)
 		return -1
 	}
 	return C.int(roff)
@@ -93,17 +127,16 @@ func convertOffset(fnc func(*positioner.Index, int) (int, error),
 // convertToLineCol is a helper to convert one offset to the line-column pair, given a conversion function.
 func convertToLineCol(fnc func(*positioner.Index, int) (int, int, error),
 	idx *C.UastSourceIndex, off C.int) C.UastLineCol {
-	if idx == nil || idx.handle == 0 || off < 0 {
+	if off < 0 {
 		return C.UastLineCol{-1, -1}
 	}
-	index := getSourceIndex(Handle(idx.handle))
+	index := getSourceIndexFrom(idx)
 	if index == nil {
 		return C.UastLineCol{-1, -1}
 	}
-	line, col, err := fnc(index, int(off))
+	line, col, err := fnc(index.idx, int(off))
 	if err != nil {
-		// TODO: we should return this error somehow
-		//       previously we stored it in Context, but we don't have (nor need) it here
+		index.setError(err)
 		return C.UastLineCol{-1, -1}
 	}
 	var pos C.UastLineCol
@@ -116,17 +149,16 @@ func convertToLineCol(fnc func(*positioner.Index, int) (int, int, error),
 // UastSourceIndexFromLineCol converts one-based line-column pair (in bytes) in the indexed
 // source file to a zero-based byte offset. It return -1 in case of failure.
 func UastSourceIndexFromLineCol(idx *C.UastSourceIndex, line, col C.int) C.int {
-	if idx == nil || idx.handle == 0 || line < 0 || col < 0 {
+	if line < 0 || col < 0 {
 		return -1
 	}
-	index := getSourceIndex(Handle(idx.handle))
+	index := getSourceIndexFrom(idx)
 	if index == nil {
 		return -1
 	}
-	off, err := index.Offset(int(line), int(col))
+	off, err := index.idx.Offset(int(line), int(col))
 	if err != nil {
-		// TODO: we should return this error somehow
-		//       previously we stored it in Context, but we don't have (nor need) it here
+		index.setError(err)
 		return -1
 	}
 	return C.int(off)
