@@ -76,9 +76,9 @@ func UastSourceIndexFree(idx *C.UastSourceIndex) {
 	srcInd.Unlock()
 }
 
-//export UastSourceIndexLastError
-// UastSourceIndexLastError returns the last error returned by index operations.
-func UastSourceIndexLastError(idx *C.UastSourceIndex) *C.char {
+//export UastSourceIndex_LastError
+// UastSourceIndex_LastError returns the last error returned by index operations.
+func UastSourceIndex_LastError(idx *C.UastSourceIndex) *C.char {
 	index := getSourceIndexFrom(idx)
 	if index == nil {
 		return nil
@@ -145,10 +145,10 @@ func convertToLineCol(fnc func(*positioner.Index, int) (int, int, error),
 	return pos
 }
 
-//export UastSourceIndexFromLineCol
-// UastSourceIndexFromLineCol converts one-based line-column pair (in bytes) in the indexed
+//export UastSourceIndex_FromLineCol
+// UastSourceIndex_FromLineCol converts one-based line-column pair (in bytes) in the indexed
 // source file to a zero-based byte offset. It return -1 in case of failure.
-func UastSourceIndexFromLineCol(idx *C.UastSourceIndex, line, col C.int) C.int {
+func UastSourceIndex_FromLineCol(idx *C.UastSourceIndex, line, col C.int) C.int {
 	if line < 0 || col < 0 {
 		return -1
 	}
@@ -164,54 +164,54 @@ func UastSourceIndexFromLineCol(idx *C.UastSourceIndex, line, col C.int) C.int {
 	return C.int(off)
 }
 
-//export UastSourceIndexToLineCol
-// UastSourceIndexToLineCol converts zero-based byte offset in the indexed source
+//export UastSourceIndex_ToLineCol
+// UastSourceIndex_ToLineCol converts zero-based byte offset in the indexed source
 // file to a one-based line and one-based column pair (in bytes).
 // It return a UastLineCol with both elements set to -1 in case of failure.
-func UastSourceIndexToLineCol(idx *C.UastSourceIndex, off C.int) C.UastLineCol {
+func UastSourceIndex_ToLineCol(idx *C.UastSourceIndex, off C.int) C.UastLineCol {
 	return convertToLineCol((*positioner.Index).LineCol, idx, off)
 }
 
-//export UastSourceIndexFromUnicode
-// UastSourceIndexFromUnicode converts zero-based Unicode character offset in the indexed
+//export UastSourceIndex_FromUnicode
+// UastSourceIndex_FromUnicode converts zero-based Unicode character offset in the indexed
 // source file to a zero-based byte offset. It return -1 in case of failure.
-func UastSourceIndexFromUnicode(idx *C.UastSourceIndex, off C.int) C.int {
+func UastSourceIndex_FromUnicode(idx *C.UastSourceIndex, off C.int) C.int {
 	return convertOffset((*positioner.Index).FromRuneOffset, idx, off)
 }
 
-//export UastSourceIndexToUnicode
-// UastSourceIndexToUnicode converts zero-based byte offset in the indexed source file to
+//export UastSourceIndex_ToUnicode
+// UastSourceIndex_ToUnicode converts zero-based byte offset in the indexed source file to
 // a zero-based Unicode character offset. It return -1 in case of failure.
-func UastSourceIndexToUnicode(idx *C.UastSourceIndex, off C.int) C.int {
+func UastSourceIndex_ToUnicode(idx *C.UastSourceIndex, off C.int) C.int {
 	return convertOffset((*positioner.Index).ToRuneOffset, idx, off)
 }
 
-//export UastSourceIndexFromUTF16
-// UastSourceIndexFromUTF16 converts zero-based UTF-16 code point offset in the indexed
+//export UastSourceIndex_FromUTF16
+// UastSourceIndex_FromUTF16 converts zero-based UTF-16 code point offset in the indexed
 // source file to a zero-based byte offset. It return -1 in case of failure.
-func UastSourceIndexFromUTF16(idx *C.UastSourceIndex, off C.int) C.int {
+func UastSourceIndex_FromUTF16(idx *C.UastSourceIndex, off C.int) C.int {
 	return convertOffset((*positioner.Index).FromUTF16Offset, idx, off)
 }
 
-//export UastSourceIndexToUTF16
-// UastSourceIndexToUTF16 converts zero-based byte offset in the indexed source file to
+//export UastSourceIndex_ToUTF16
+// UastSourceIndex_ToUTF16 converts zero-based byte offset in the indexed source file to
 // a zero-based UTF-16 code point offset. It return -1 in case of failure.
-func UastSourceIndexToUTF16(idx *C.UastSourceIndex, off C.int) C.int {
+func UastSourceIndex_ToUTF16(idx *C.UastSourceIndex, off C.int) C.int {
 	return convertOffset((*positioner.Index).ToUTF16Offset, idx, off)
 }
 
-//export UastSourceIndexToUnicodeLineCol
-// UastSourceIndexToUnicodeLineCol converts zero-based byte offset in the indexed source
+//export UastSourceIndex_ToUnicodeLineCol
+// UastSourceIndex_ToUnicodeLineCol converts zero-based byte offset in the indexed source
 // file to a one-based line and one-based column pair (in Unicode characters).
 // It return a UastLineCol with both elements set to -1 in case of failure.
-func UastSourceIndexToUnicodeLineCol(idx *C.UastSourceIndex, off C.int) C.UastLineCol {
+func UastSourceIndex_ToUnicodeLineCol(idx *C.UastSourceIndex, off C.int) C.UastLineCol {
 	return convertToLineCol((*positioner.Index).ToUnicodeLineCol, idx, off)
 }
 
-//export UastSourceIndexToUTF16LineCol
-// UastSourceIndexToUTF16LineCol converts zero-based byte offset in the indexed source
+//export UastSourceIndex_ToUTF16LineCol
+// UastSourceIndex_ToUTF16LineCol converts zero-based byte offset in the indexed source
 // file to a one-based line and one-based column pair (in UTF-16 code units).
 // It return a UastLineCol with both elements set to -1 in case of failure.
-func UastSourceIndexToUTF16LineCol(idx *C.UastSourceIndex, off C.int) C.UastLineCol {
+func UastSourceIndex_ToUTF16LineCol(idx *C.UastSourceIndex, off C.int) C.UastLineCol {
 	return convertToLineCol((*positioner.Index).ToUTF16LineCol, idx, off)
 }
