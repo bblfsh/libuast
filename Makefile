@@ -122,9 +122,18 @@ test: gotest
 	cd tests && cmake . && make && CTEST_OUTPUT_ON_FAILURE=1 make test
 endif
 
+ifneq ("$(HOSTOS)", "darwin")
+examples:
+	cd examples && cmake . && make
+else
+examples:
+	ln -s ../$(OUT_OSX)/libuast.so ./examples/libuast.so && \
+	cd examples && cmake . && make
+endif
+
 all: build-all package-all
 
-.PHONY: clean build test install
+.PHONY: clean build test examples install
 
 clean:
 	rm -rf $(OUT_DIR)
