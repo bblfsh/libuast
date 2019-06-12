@@ -618,5 +618,81 @@ namespace uast {
 
         return dst->ToNode(n);
     }
+
+    // LineCol is a line-column pair.
+    struct LineCol {
+        int line; // 1-based
+        int col;  // 1-based
+        LineCol() : line(-1), col(-1) {}
+        LineCol(int l, int c) : line(l), col(c) {}
+    };
+
+    // SourceIndex represents a positional index for a source file.
+    class SourceIndex {
+    private:
+        UastSourceIndex *idx;
+    public:
+        SourceIndex(std::string src) {
+            idx = UastSourceIndexNew((void*)(src.data()), src.size());
+        }
+        SourceIndex(void* data, size_t size) {
+            idx = UastSourceIndexNew(data, size);
+        }
+        ~SourceIndex() {
+            UastSourceIndexFree(idx);
+            idx = nullptr;
+        }
+        // CheckError throws a last encountered error, if any.
+        void CheckError() {
+            char* err = UastSourceIndex_LastError(idx);
+            if (err) throw std::runtime_error(err);
+        }
+        // FromLineCol converts one-based line-column pair (in bytes) in the indexed
+        // source file to a zero-based byte offset. It return -1 in case of failure.
+        int FromLineCol(int line, int col) {
+            return UastSourceIndex_FromLineCol(idx, line, col);
+        }
+        // FromUnicode converts zero-based Unicode character offset in the indexed
+        // source file to a zero-based byte offset. It return -1 in case of failure.
+        int FromUnicode(int off) {
+            return UastSourceIndex_FromUnicode(idx, off);
+        }
+        // ToUnicode converts zero-based byte offset in the indexed source file to
+        // a zero-based Unicode character offset. It return -1 in case of failure.
+        int ToUnicode(int off) {
+            return UastSourceIndex_ToUnicode(idx, off);
+        }
+        // FromUTF16 converts zero-based UTF-16 code point offset in the indexed
+        // source file to a zero-based byte offset. It return -1 in case of failure.
+        int FromUTF16(int off) {
+            return UastSourceIndex_FromUTF16(idx, off);
+        }
+        // ToUTF16 converts zero-based byte offset in the indexed source file to
+        // a zero-based UTF-16 code point offset. It return -1 in case of failure.
+        int ToUTF16(int off) {
+            return UastSourceIndex_ToUTF16(idx, off);
+        }
+        // ToLineCol converts zero-based byte offset in the indexed source
+        // file to a one-based line and one-based column pair (in bytes).
+        // It return a LineCol with both elements set to -1 in case of failure.
+        LineCol ToLineCol(int off) {
+            UastLineCol pos = UastSourceIndex_ToLineCol(idx, off);
+            return LineCol(pos.line, pos.col);
+        }
+        // ToUnicodeLineCol converts zero-based byte offset in the indexed source
+        // file to a one-based line and one-based column pair (in Unicode characters).
+        // It return a LineCol with both elements set to -1 in case of failure.
+        LineCol ToUnicodeLineCol(int off) {
+            UastLineCol pos = UastSourceIndex_ToUnicodeLineCol(idx, off);
+            return LineCol(pos.line, pos.col);
+        }
+        // ToUTF16LineCol converts zero-based byte offset in the indexed source
+        // file to a one-based line and one-based column pair (in UTF-16 code units).
+        // It return a LineCol with both elements set to -1 in case of failure.
+        LineCol ToUTF16LineCol(int off) {
+            UastLineCol pos = UastSourceIndex_ToUTF16LineCol(idx, off);
+            return LineCol(pos.line, pos.col);
+        }
+    };
 } // namespace uast
 #endif // UAST_HPP_
