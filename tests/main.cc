@@ -5,6 +5,7 @@ extern "C" {
 
 #include "nodes_test.h"
 #include "roles_test.h"
+#include "src_index_test.h"
 
 #define ADD_TEST(__SUITE__, __MESSAGE__, __FUNC__)             \
   if (CU_add_test(__SUITE__, __MESSAGE__, __FUNC__) == NULL) { \
@@ -95,6 +96,7 @@ int main() {
   ADD_TEST(suite, "test of UastFilter() with bad query", TestUastFilterBadQuery);
   ADD_TEST(suite, "test failing UastFilter() (bad Xpath)", TestXpath);
   ADD_TEST(suite, "test empty UastFilter() result", TestEmptyResult);
+  ADD_TEST(suite, "test source index", TestSourceIndex);
 
   // run all tests using the CUnit Basic interface
   CU_basic_set_mode(CU_BRM_VERBOSE);

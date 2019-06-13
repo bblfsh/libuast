@@ -642,10 +642,13 @@ namespace uast {
             UastSourceIndexFree(idx);
             idx = nullptr;
         }
-        // CheckError throws a last encountered error, if any.
+        // CheckError throws a last encountered error, if any, and clear the error state of an index.
         void CheckError() {
             char* err = UastSourceIndex_LastError(idx);
-            if (err) throw std::runtime_error(err);
+            if (err) {
+                UastSourceIndex_ClearError(idx);
+                throw std::runtime_error(err);
+            }
         }
         // FromLineCol converts one-based line-column pair (in bytes) in the indexed
         // source file to a zero-based byte offset. It return -1 in case of failure.

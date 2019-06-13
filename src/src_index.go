@@ -90,6 +90,14 @@ func UastSourceIndex_LastError(idx *C.UastSourceIndex) *C.char {
 	return C.CString(err.Error())
 }
 
+//export UastSourceIndex_ClearError
+// UastSourceIndex_ClearError clears an error state.
+func UastSourceIndex_ClearError(idx *C.UastSourceIndex) {
+	if index := getSourceIndexFrom(idx); index != nil {
+		index.setError(nil)
+	}
+}
+
 // getSourceIndexFrom returns an index for a given C.UastSourceIndex pointer. It returns nil if C structure is invalid.
 func getSourceIndexFrom(idx *C.UastSourceIndex) *sourceIndex {
 	if idx == nil || idx.handle == 0 {
