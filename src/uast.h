@@ -61,7 +61,22 @@ typedef struct NodeIface {
 
 } NodeIface;
 
-typedef enum { PRE_ORDER, POST_ORDER, LEVEL_ORDER, POSITION_ORDER } TreeOrder;
+typedef enum {
+    // ANY_ORDER is a native iteration order of the tree. It's the fastest iteration order that lists all nodes in the tree.
+    // The iteration order is not guaranteed to be the same for consecutive iterations over the same tree.
+    // This order is more suitable for searching for nodes in the fastest way possible.
+    ANY_ORDER,
+    // PRE_ORDER is a pre-order depth-first search.
+    PRE_ORDER,
+    // POST_ORDER is a post-order depth-first search.
+    POST_ORDER,
+    // LEVEL_ORDER is a breadth-first search.
+    LEVEL_ORDER,
+    // CHILDREN_ORDER is similar to LEVEL_ORDER, but list only the first level.
+    CHILDREN_ORDER,
+    // POSITION_ORDER enumerates nodes all nodes sorted by the position in the source file.
+    POSITION_ORDER,
+} TreeOrder;
 
 #define UAST_CALL(u, name, ...) u->iface->name(u, __VA_ARGS__)
 

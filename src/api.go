@@ -240,9 +240,11 @@ func UastSetError(ctx *C.Uast, str *C.char) {
 }
 
 var toOrder = map[C.TreeOrder]query.IterOrder{
+	C.ANY_ORDER:      query.IterAny,
 	C.PRE_ORDER:      query.PreOrder,
 	C.POST_ORDER:     query.PostOrder,
 	C.LEVEL_ORDER:    query.LevelOrder,
+	C.CHILDREN_ORDER: query.ChildrenOrder,
 	C.POSITION_ORDER: query.PositionOrder,
 }
 
