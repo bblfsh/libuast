@@ -289,6 +289,7 @@ namespace uast {
         RawContext(NodeRawInterface* iface, Uast* c = nullptr) {
             impl = iface;
             if (c != nullptr) {
+                handle = 0;
                 // allocated natively, check the handle and use it (in a separate map)
                 if (c->ctx  == 0) throw std::runtime_error("zero handle on a native context");
                 nativeContexts()[c->ctx] = this;
@@ -311,7 +312,7 @@ namespace uast {
             } else {
                 contexts().erase(handle);
             }
-            handle = 0;
+
             delete(impl);
         }
 
