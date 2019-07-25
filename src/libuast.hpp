@@ -305,14 +305,14 @@ namespace uast {
         ~RawContext() {
             UastHandle nativeHandle = ctx->ctx;
             UastFree(ctx);
-            ctx = nullptr;
+
             if (handle == 0) {
                 nativeContexts().erase(nativeHandle);
             } else {
                 contexts().erase(handle);
             }
             handle = 0;
-            impl = nullptr;
+            delete(impl);
         }
 
         Uast* rawPointer() { return ctx; }
