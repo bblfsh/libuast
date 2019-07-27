@@ -3,7 +3,7 @@
 // C++ helpers to make it easier to implement NodeIface and work with Uast context.
 
 #include "libuast.h"
-#include <map>
+#include <unordered_map>
 #include <iostream>
 #include <cstring>
 
@@ -271,12 +271,12 @@ namespace uast {
             return n;
         }
 
-        static std::map<UastHandle,RawContext*>& contexts() {
-            static std::map<UastHandle,RawContext*> v; return v;
+        static std::unordered_map<UastHandle,RawContext*>& contexts() {
+            static std::unordered_map<UastHandle,RawContext*> v; return v;
         }
 
-        static std::map<UastHandle,RawContext*>& nativeContexts() {
-            static std::map<UastHandle,RawContext*> v; return v;
+        static std::unordered_map<UastHandle,RawContext*>& nativeContexts() {
+            static std::unordered_map<UastHandle,RawContext*> v; return v;
         }
 
         static RawContext* getContext(const Uast* ctx) {
@@ -306,14 +306,15 @@ namespace uast {
         ~RawContext() {
             UastHandle nativeHandle = ctx->ctx;
             UastFree(ctx);
-
+            ctx = nullptr;
             if (handle == 0) {
                 nativeContexts().erase(nativeHandle);
             } else {
                 contexts().erase(handle);
             }
-
+            handle = 0;
             delete(impl);
+            impl = nullptr;
         }
 
         Uast* rawPointer() { return ctx; }
