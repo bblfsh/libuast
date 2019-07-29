@@ -119,43 +119,51 @@ static NodeHandle UastLoad(const Uast *src, NodeHandle n, const Uast *dst) {
     if (kind == NODE_NULL) {
         return 0;
     } else if (kind == NODE_OBJECT) {
-        size_t sz = UAST_CALL(src, Size, n);
+      size_t sz = UAST_CALL(src, Size, n);
 
-        NodeHandle m = UAST_CALL(dst, NewObject, sz);
-        size_t i;
-        for (i = 0; i < sz; i++) {
-            const char * k = UAST_CALL(src, KeyAt, n, i);
-            if (!k) {
-                return 0;
-            }
-            NodeHandle v = UAST_CALL(src, ValueAt, n, i);
-            v = UastLoad(src, v, dst);
-            UAST_CALL(dst, SetKeyValue, m, k, v);
-        }
-        return m;
-      } else if (kind == NODE_ARRAY) {
-        size_t sz = UAST_CALL(src, Size, n);
+      NodeHandle m = UAST_CALL(dst, NewObject, sz);
+      size_t i;
 
-        NodeHandle m = UAST_CALL(dst, NewArray, sz);
-        size_t i;
-        for (i = 0; i < sz; i++) {
-            NodeHandle v = UAST_CALL(src, ValueAt, n, i);
-            v = UastLoad(src, v, dst);
-            UAST_CALL(dst, SetValue, m, i, v);
+      for (i = 0; i < sz; i++) {
+        char* k = UAST_CALL(src, KeyAt, n, i);
+
+        if (!k) {
+          return 0;
         }
-        return m;
-      } else if (kind == NODE_STRING) {
-        return UAST_CALL(dst, NewString, UAST_CALL(src, AsString, n));
-      } else if (kind == NODE_INT) {
-        return UAST_CALL(dst, NewInt, UAST_CALL(src, AsInt, n));
-      } else if (kind == NODE_UINT) {
-        return UAST_CALL(dst, NewUint, UAST_CALL(src, AsUint, n));
-      } else if (kind == NODE_FLOAT) {
-        return UAST_CALL(dst, NewFloat, UAST_CALL(src, AsFloat, n));
-      } else if (kind == NODE_BOOL) {
-        return UAST_CALL(dst, NewBool, UAST_CALL(src, AsBool, n));
+
+        NodeHandle v = UAST_CALL(src, ValueAt, n, i);
+        v = UastLoad(src, v, dst);
+        UAST_CALL(dst, SetKeyValue, m, k, v);
+        free(k);
       }
-      return 0;
+      return m;
+    } else if (kind == NODE_ARRAY) {
+      size_t sz = UAST_CALL(src, Size, n);
+
+      NodeHandle m = UAST_CALL(dst, NewArray, sz);
+      size_t i;
+      for (i = 0; i < sz; i++) {
+        NodeHandle v = UAST_CALL(src, ValueAt, n, i);
+        v = UastLoad(src, v, dst);
+        UAST_CALL(dst, SetValue, m, i, v);
+      }
+      return m;
+    } else if (kind == NODE_STRING) {
+      char *s = UAST_CALL(src, AsString, n);
+      NodeHandle m = UAST_CALL(dst, NewString, s);
+      free(s);
+      return m;
+    } else if (kind == NODE_INT) {
+      return UAST_CALL(dst, NewInt, UAST_CALL(src, AsInt, n));
+    } else if (kind == NODE_UINT) {
+      return UAST_CALL(dst, NewUint, UAST_CALL(src, AsUint, n));
+    } else if (kind == NODE_FLOAT) {
+      return UAST_CALL(dst, NewFloat, UAST_CALL(src, AsFloat, n));
+    } else if (kind == NODE_BOOL) {
+      return UAST_CALL(dst, NewBool, UAST_CALL(src, AsBool, n));
+    }
+
+    return 0;
 }
 
 // UastMemStats holds memory statistics for libuast.
