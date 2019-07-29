@@ -313,7 +313,6 @@ namespace uast {
                 contexts().erase(handle);
             }
             handle = 0;
-            delete(impl);
             impl = nullptr;
         }
 
