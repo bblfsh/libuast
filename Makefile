@@ -9,6 +9,9 @@ BUILD_MODE_STATIC=-buildmode=c-archive
 GO_BUILD=go build
 CC_WIN64=x86_64-w64-mingw32-gcc
 CC_WIN32=i686-w64-mingw32-gcc
+OSX_MIN_VERSION=10.7
+OSX_CGO_CFLAGS=-mmacosx-version-min=${OSX_MIN_VERSION}
+OSX_CGO_LDFLAGS=-mmacosx-version-min=${OSX_MIN_VERSION}
 
 GEN_HEADER=go run gen_header.go -o
 
@@ -59,8 +62,8 @@ build-linux: $(DEPS_C) $(DEPS_GO)
 
 build-darwin: $(DEPS_C) $(DEPS_GO)
 	mkdir -p $(OUT_OSX) && \
-	GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 $(GO_BUILD) $(BUILD_MODE) -o=$(OUT_OSX)/$(OUT_NAME).so $(SRC_DIR)/ && \
-	GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 $(GO_BUILD) $(BUILD_MODE_STATIC) -o=$(OUT_OSX)/$(OUT_NAME).a $(SRC_DIR)/ && \
+	GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 CGO_CFLAGS=$(OSX_CGO_CFLAGS) CGO_LDFLAGS=$(OSX_CGO_LDFLAGS) $(GO_BUILD) $(BUILD_MODE) -o=$(OUT_OSX)/$(OUT_NAME).so $(SRC_DIR)/ && \
+	GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 CGO_CFLAGS=$(OSX_CGO_CFLAGS) CGO_LDFLAGS=$(OSX_CGO_LDFLAGS) $(GO_BUILD) $(BUILD_MODE_STATIC) -o=$(OUT_OSX)/$(OUT_NAME).a $(SRC_DIR)/ && \
 	$(GEN_HEADER) $(OUT_OSX)/$(OUT_HEADER) && \
 	$(CP_HEADERS) $(OUT_OSX)/
 
